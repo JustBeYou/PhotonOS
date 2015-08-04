@@ -6,9 +6,15 @@
 #endif
 #include <stddef.h>
 #include <stdint.h>
+#include <sys/cdefs.h>
 #include <system.h>
 
 #define ASSERT(b) ((#b) ? (void)0 : panic("Assertion failed!", __LINE__, __FILE__))
+
+__attribute__((__noreturn__))
+void abort(void);
+__attribute__((__noreturn__))
+void exit(int);
 
 /**
   * Converts a integer to a string.
