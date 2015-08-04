@@ -1,36 +1,98 @@
-.PHONY: all clean install install-headers install-libs
+HOST?=$(shell ../default-host.sh)
+HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
 
-all: install install-headers libsys.a install-libs newos.elf
+CFLAGS?=-O2 -g
+CPPFLAGS?= 
+LDFLAGS?=
+LIBS?= -L../libc
 
-newos.elf: $(BOOT_OBJS) $(INIT_OBJS)
-	$(CC) $(LDFLAGS) $(BOOT_OBJS) $(INIT_OBJS) $(LIBS) -o newos.elf
+DESTDIR?=
+PREFIX?=/usr/local
+EXEC_PREFIX?=$(PREFIX)
+BOOTDIR?=$(EXEC_PREFIX)/boot
+INCLUDEDIR?=$(PREFIX)/include
 
-libsys.a: $(SYS_OBJS)
-	$(AR) rcs $@ $(SYS_OBJS) $(LIBK_OBJS)
+CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra
+CPPFLAGS:=$(CPPFLAGS) -D__is_photon_kernel -D_TEXTMODE -Iinclude -Iarch/i386/include -I../libc/include
+LDFLAGS:=$(LDFLAGS)
+LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
-%.o: %.asm
-	$(AS) $< -o $@ $(ASMFLAGS)
-	
+ARCHDIR:=arch/$(HOSTARCH)
+
+include $(ARCHDIR)/make.config
+
+CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
+CPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
+LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
+LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
+
+OBJS:=\
+init/icxxabi.o \
+init/kernel_class.o \
+$(KERNEL_ARCH_OBJS) \
+system/cpu.o \
+system/task.o \
+drivers/keyboard.o \
+drivers/io.o \
+drivers/vga.o \
+system/kheap.o \
+init/init.o \
+init/main.o \
+system/system.o \
+system/time.o \
+
+CRTI_OBJ:=$(ARCHDIR)/crti.o
+CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
+CRTEND_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtend.o)
+CRTN_OBJ:=$(ARCHDIR)/crtn.o
+
+ALL_OUR_OBJS:=\
+$(CRTI_OBJ) \
+$(OBJS) \
+$(CRTN_OBJ) \
+
+OBJ_LINK_LIST:=\
+$(CRTI_OBJ) \
+$(CRTBEGIN_OBJ) \
+$(OBJS) \
+$(CRTEND_OBJ) \
+$(CRTN_OBJ) \
+
+all: photon.elf
+
+.PHONY: all clean install install-headers install-kernel
+
+photon.elf: $(OBJ_LINK_LIST) $(ARCHDIR)/linker.ld
+	echo "Linking kernel..."
+	$(CPP) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(OBJ_LINK_LIST) $(LDFLAGS) $(LIBS)
+	echo "Kernel linked!"
+
 %.o: %.c
-	$(CC) $< -o $@ $(CFLAGS) $(INCLUDE)
+	$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+	
+%.o: %.cpp
+	i686-elf-g++ -c $< -o $@ -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -D__is_photon_kernel -Iinclude -Iarch/i386/include -I../libc/include
 
-install:
-	mkdir ../sysroot/usr
-	mkdir ../sysroot/boot
-	mkdir ../sysroot/boot/grub
-	touch ../sysroot/boot/grub/grub.cfg
-	echo "menuentry \"myos\" {\n\tmultiboot /boot/newos.elf\n}" > ../sysroot/boot/grub/grub.cfg
+%.o: %.S
+	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 	
-install-headers:
-	mkdir ../sysroot/usr/include
-	cp include/. ../sysroot/usr/include -R
-	cp ../libc/include/. ../sysroot/usr/include -R
-	
-install-libs:
-	mkdir ../sysroot/usr/lib
-	mv libsys.a ../sysroot/usr/lib
-	mv ../libc/libc.a ../sysroot/usr/lib
-	
+%.o: %.asm
+	$(NAS) -felf32 $< -o $@
+
 clean:
-	rm -f $(INIT_OBJS) $(BOOT_OBJS) $(SYS_OBJS)
-	rm -f newos.elf
+	rm -f photon.elf $(OBJS) $(ALL_OUR_OBJS) *.o */*.o */*/*.o
+
+install: install-headers install-kernel
+
+install-headers:
+	echo "Installing headers..."
+	mkdir -p $(DESTDIR)$(INCLUDEDIR)
+	cp -RTv include $(DESTDIR)$(INCLUDEDIR)
+	cp -RTv $(ARCHDIR)/include $(DESTDIR)$(INCLUDEDIR)
+	echo "Headers installed!"
+
+install-kernel: photon.elf
+	echo "Installing kernel..."
+	mkdir -p $(DESTDIR)$(BOOTDIR) 
+	cp photon.elf $(DESTDIR)$(BOOTDIR)
+	echo "Kernel installed!"
