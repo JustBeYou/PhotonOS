@@ -1,11 +1,11 @@
+#!/bin/sh
 set -e
-.	./configure.sh
+. ./config.sh
 
-rm -f -r sysroot
-cd kernel
-make clean
-cd ..
-cd libc
-make clean
-cd ..
-rm osdev.iso
+for PROJECT in $PROJECTS; do
+  $MAKE -C $PROJECT clean
+done
+
+rm -rfv sysroot
+rm -rfv isodir
+rm -rfv photon.iso

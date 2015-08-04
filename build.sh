@@ -1,13 +1,7 @@
+#!/bin/sh
 set -e
-.	./configure.sh
+. ./headers.sh
 
-mkdir sysroot
-
-cd libc
-make clean
-make
-
-cd ..
-cd kernel
-make clean
-make
+for PROJECT in $PROJECTS; do
+  DESTDIR="$PWD/sysroot" $MAKE -C $PROJECT install
+done
