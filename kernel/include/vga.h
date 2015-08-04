@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <system.h>
 
+extern uint16_t *vga_memory;
+
 enum vga_color
 {
 	COLOR_BLACK = 0,
@@ -37,6 +39,66 @@ uint8_t make_color(enum vga_color fg, enum vga_color bg);
   * Create a entry for vga buffer.
   */
 uint16_t make_vgaentry(char c, uint8_t color);
+
+/**
+  * Flush the vga memory from current tty buffer.
+  */
+void flush_vga();
+
+/**
+  * Initialize vga support and create a main tty.
+  */
+void init_vga();
+
+/**
+  * Clear monitor screen.
+  */
+void clear_vga();
+
+/**
+  * Scroll the terminal.
+  */
+int vga_scroll(size_t *row);
+
+/**
+  * Sets the foreground and background color of tty.
+  */
+void vga_setcolor(enum vga_color fg, enum vga_color bg);
+
+/**
+  * Create a char entry at 'x', 'y' coordonates with specified color.
+  */
+void vga_putentryat(char c, uint8_t color, size_t x, size_t y);
+
+/**
+  * Write a char in frame buffer.
+  */
+void vga_putchar(char c);
+
+/**
+  * Write a string on the screen.
+  */
+void vga_writestring(const char* data);
+
+/**
+  * Change size of a '\t' (tab) char.
+  */
+void vga_set_tab(int size);
+
+/**
+  * Move system cursor.
+  */
+void vga_move_cursor(int row, int column);
+
+/**
+  * Basic function for write colored char.
+  */
+void putchar_color(char c, enum vga_color fg);
+
+/**
+  * Basic function for write colored str.
+  */
+void wstr_color(const char* data, enum vga_color fg);
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;

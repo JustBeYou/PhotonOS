@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <isr.h>
+#include <handlers.h>
 #include <system.h>
                                            /* Defines. */
 void (*keyboard_handler)(uint8_t *buf, uint16_t size);                                         

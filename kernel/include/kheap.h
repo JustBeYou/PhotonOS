@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <ordered_array.h>
+#include <list.h>
 #include <system.h>
 
 #define KHEAP_START 0xC0000000
@@ -26,7 +26,7 @@ typedef struct {
 } footer_t;
 
 typedef struct {
-	ordered_array_t index;
+	list_t index;
 	uint32_t start_address;
 	uint32_t end_address;
 	uint32_t max_address;
@@ -95,5 +95,7 @@ size_t kmalloc_ap(size_t sz, size_t *phys);
   * Alloc a block of memory for kernel.
   */
 size_t kmalloc(size_t sz);
+
+void kfree(void *p);
 
 #endif

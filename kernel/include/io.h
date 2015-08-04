@@ -6,7 +6,7 @@
 #endif
 #include <stddef.h>
 #include <stdint.h>
-#include <isr.h>
+#include <handlers.h>
 #include <system.h>
 
 /* output byte */
@@ -30,9 +30,18 @@ uint32_t inl(uint32_t ad);
 /* print registers */
 void print_regs(registers_t *regs);
 
+/* write char to stdout */
+int write_char(const char c);
+
 /* write string to stdout */
 int write(const char *buf, size_t len);
 
-int printk(const char* restrict format, ...);
+/* formatted printing for kernel mode */
+int printk(const char* format, ...);
+
+/**
+  * Allow C code to call system.
+  */
+void call(int32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi);
 
 #endif
