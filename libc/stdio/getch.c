@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <pit.h>
-#include <tty.h>
+#include <vga.h>
 
 int getch()
 {

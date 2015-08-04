@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <pit.h>
-#include <tty.h>
 
 int getchar()
 {
