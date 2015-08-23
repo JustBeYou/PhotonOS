@@ -1,40 +1,34 @@
-[GLOBAL copy_page_physical]
-
-copy_page_physical:
-	push ebx
-	pushf
-	
-	cli
-	
-	mov ebx, [esp+12]
-	mov ecx, [esp+16]
-	
-	mov edx, cr0
-	and edx, 0x7fffffff
-	mov cr0, edx
-	
-	mov edx, 1024
-	
-	.loop:
-		mov eax, [ebx]
-		mov [ecx], eax
-		add ebx, 4
-		add ecx, 4
-		dec edx
-		jnz .loop
-	
-	mov edx, cr0
-	or edx, 0x80000000
-	mov cr0, edx
-	
-	popf
-	pop ebx
-	ret
-	
-[GLOBAL flush_tlb]
-
+[global flush_tlb]
 flush_tlb:
-	push ebx
-	mov cr3, ebx
-	mov ebx, cr3
-	pop ebx
+    push ebx
+    mov cr3, ebx
+    mov ebx, cr3
+    pop ebx
+    
+[global read_cr0]
+read_cr0:
+    mov eax, cr0
+    retn
+
+[global write_cr0]
+write_cr0:
+    push ebp
+    mov ebp, esp
+    mov eax, [ebp+8]
+    mov cr0,  eax
+    pop ebp
+    retn
+
+[global read_cr3]
+read_cr3:
+    mov eax, cr3
+    retn
+
+[global write_cr3]
+write_cr3:
+    push ebp
+    mov ebp, esp
+    mov eax, [ebp+8]
+    mov cr3, eax
+    pop ebp
+    retn
