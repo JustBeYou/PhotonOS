@@ -36,6 +36,7 @@ stdio/putchar.o \
 stdio/puts.o \
 stdlib/abort.o \
 stdlib/intlen.o \
+stdlib/atoi.o \
 stdlib/itoa.o \
 string/memcmp.o \
 string/memcpy.o \

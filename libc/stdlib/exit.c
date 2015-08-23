@@ -3,9 +3,9 @@
 
 void exit(int status)
 {
-	while ( true )
-	{
-		// TODO: Implement the exit system call.
-		(void) status;
-	}
+    while ( true )
+    {
+        // TODO: Implement the exit system call.
+        (void) status;
+    }
 }

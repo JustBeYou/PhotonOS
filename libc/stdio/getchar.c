@@ -3,8 +3,8 @@
 
 int getchar()
 {
-	int c = getch();
-	putchar(c);
-	
-	return c;
+    int c = getch();
+    putchar(c);
+    
+    return c;
 }

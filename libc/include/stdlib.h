@@ -17,7 +17,7 @@ __attribute__((__noreturn__))
 void exit(int);
 
 /**
-  * Converts a integer to a string.
+  * Converts an integer to a string.
   */
 void itoa(char *buf, unsigned long int n, int base);
 
@@ -25,5 +25,10 @@ void itoa(char *buf, unsigned long int n, int base);
   * Get length of a integer of any base.
   */
 int intlen(int n, int base);
+
+/**
+  * Converts a string to an integer.
+  */
+int atoi(char *str);
 
 #endif

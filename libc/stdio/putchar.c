@@ -3,6 +3,6 @@
 #include <io.h>
 
 void putchar(char c)
-{	
-	write_char(c);
+{    
+    write_char(c);
 }
