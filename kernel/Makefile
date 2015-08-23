@@ -31,15 +31,15 @@ init/icxxabi.o \
 init/kernel_class.o \
 $(KERNEL_ARCH_OBJS) \
 system/cpu.o \
-system/task.o \
 drivers/keyboard.o \
 drivers/io.o \
 drivers/vga.o \
-system/kheap.o \
 init/init.o \
 init/main.o \
 system/system.o \
 system/time.o \
+system/task.o \
+system/kheap.o \
 
 CRTI_OBJ:=$(ARCHDIR)/crti.o
 CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
