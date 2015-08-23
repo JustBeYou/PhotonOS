@@ -4,9 +4,9 @@
 #include <io.h>
 
 typedef struct task {
-	uint32_t pid;
-	t_regs_t regs;
-	struct task *next;
+    uint32_t pid;
+    t_regs_t regs;
+    struct task *next;
 } task_t;
 
 task_t *current_task;

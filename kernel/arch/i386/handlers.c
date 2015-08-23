@@ -41,31 +41,31 @@ void init_irq()
 
 void irq_handler(registers_t regs)
 {
-	cli();
-	// If interrupt involve the slave
-	if (regs.int_no >= 40) {
-		// Send reset signal.
-		outb(0xA0, 0x20);
-	}
+    cli();
+    // If interrupt involve the slave
+    if (regs.int_no >= 40) {
+        // Send reset signal.
+        outb(0xA0, 0x20);
+    }
 
-	// Reset signal to master.
-	outb(0x20, 0x20);
+    // Reset signal to master.
+    outb(0x20, 0x20);
 
-	if (interrupt_handlers[regs.int_no] != 0) {
-		isr_t handler = interrupt_handlers[regs.int_no];
-		handler(&regs);
-	}
-	sti();
+    if (interrupt_handlers[regs.int_no] != 0) {
+        isr_t handler = interrupt_handlers[regs.int_no];
+        handler(&regs);
+    }
+    sti();
 }
 
 static void zero_division_handler(__attribute__((unused)) registers_t *regs)
 {
-	panic("Division by 0!", __LINE__, __FILE__);
+    panic("Division by 0!", __LINE__, __FILE__);
 }
 
 void init_isr()
 {
-	idt_set_gate( 0, (uint32_t)isr0 , 0x08, 0x8E);
+    idt_set_gate( 0, (uint32_t)isr0 , 0x08, 0x8E);
     idt_set_gate( 1, (uint32_t)isr1 , 0x08, 0x8E);
     idt_set_gate( 2, (uint32_t)isr2 , 0x08, 0x8E);
     idt_set_gate( 3, (uint32_t)isr3 , 0x08, 0x8E);
@@ -106,13 +106,13 @@ void init_isr()
 // This gets called from our ASM interrupt handler stub.
 void isr_handler(registers_t regs)
 {
-	cli();
-	regs.int_no &= 0xFF;
-	interrupt_handlers[regs.int_no](&regs);
-	sti();
+    cli();
+    regs.int_no &= 0xFF;
+    interrupt_handlers[regs.int_no](&regs);
+    sti();
 }
 
 void register_interrupt_handler(uint8_t n, isr_t handler)
 {
-	interrupt_handlers[n] = handler;
+    interrupt_handlers[n] = handler;
 }

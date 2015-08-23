@@ -29,16 +29,16 @@ typedef struct registers
 
 typedef struct g_regs
 {
-	uint32_t edi;
-	uint32_t esi;
-	uint32_t edx;
-	uint32_t ecx;
-	uint32_t ebx;
-	uint32_t eax;
+    uint32_t edi;
+    uint32_t esi;
+    uint32_t edx;
+    uint32_t ecx;
+    uint32_t ebx;
+    uint32_t eax;
 } g_regs_t; // general registers for system calls
 
 typedef struct t_regs {
-	uint32_t eax, ebx, ecx, edx, esi, edi, esp, ebp, eip, eflags, cr3;
+    uint32_t eax, ebx, ecx, edx, esi, edi, esp, ebp, eip, eflags, cr3;
 } t_regs_t; // task registers
 
 typedef void (*isr_t)(registers_t*);
@@ -47,6 +47,8 @@ void register_interrupt_handler(uint8_t n, isr_t handler);
 typedef void* type_t;
 extern size_t kernel_end;
 extern size_t kernel_start;
+extern uint32_t stack_top;
+extern uint32_t stack_bottom;
 extern uint32_t init_esp;
 
 extern char user[20];

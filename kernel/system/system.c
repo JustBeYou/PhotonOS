@@ -13,11 +13,11 @@
 #include <string.h>
 #include <pit.h>
 #include <kheap.h>
-#include <paging.h>
+#include <vmm.h>
+#include <pmm.h>
 #include <io.h>
 #include <vga.h>
 
-extern uint32_t stack_top;
 uint32_t init_esp;
 
 char user[20];
@@ -39,10 +39,11 @@ static void testing_shell(char *str)
 			printk("Char: %d\nInt: %d\nFloat: %d\nSize_t: %d\n", sizeof(char), sizeof(int), sizeof(float), sizeof(size_t));
 			printk("Kernel:\n");
 			printk("Start: %x\nEnd: %x\n", (size_t)&kernel_start, (size_t)&kernel_end);
-			printk("RAM: %d MB\n", mem_size_mb);
+			//printk("RAM: %d MB\n", mem_size_mb);
 		} else if (!strcmp(str, "page-fault")) {
 			printk("Test fault...\n");
 			uint32_t *ptr = (uint32_t*)0xA123142300;
+			*ptr = 432;
 			printk("%d\n", *ptr);
 		} else if (!strcmp(str, "address")) {
 			printk("This is a test of memory manager. Warning! You are in kernel mode!\n");
@@ -51,13 +52,6 @@ static void testing_shell(char *str)
 			getch();
 			printk("stack_top: %x\n", stack_top);
 			printk("&stack_top: %x\n", &stack_top);
-			getch();
-			printk("placement_address: %x\n", placement_address);
-			printk("&placement_address: %x\n", &placement_address);
-			getch();
-			printk("kheap: %x\n", kheap);
-			printk("&kheap: %x\n", &kheap);
-			printk("*kheap: %x\n", *kheap);
 			getch();
 			
 			int *num = (int*) kmalloc(sizeof(int));
@@ -76,15 +70,6 @@ static void testing_shell(char *str)
 			getch();
 			printk("stack_top: %x\n", stack_top);
 			printk("&stack_top: %x\n", &stack_top);
-			getch();
-			
-			printk("placement_address: %x\n", placement_address);
-			printk("&placement_address: %x\n", &placement_address);
-			getch();
-			
-			printk("kheap: %x\n", kheap);
-			printk("&kheap: %x\n", &kheap);
-			printk("*kheap: %x\n", *kheap);
 			getch();
 			
 			kfree(num);
@@ -182,6 +167,10 @@ void shell(char *str) {
 		
 	} else if (!strcmp(str, "reboot")) {
 		reboot();
+		
+	} else if (!strcmp(str, "huge-alloc")) {
+		int *i = (void *) kmalloc(sizeof(int));
+		kfree(i);
 	} else if (!strcmp(str, "usermode")) {
 		printk("CPU will jump to usermode, this will stop shell, because it is running only in kernel mode.\n");
 		init_usermode();

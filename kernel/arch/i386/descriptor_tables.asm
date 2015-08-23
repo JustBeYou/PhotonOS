@@ -34,12 +34,12 @@ idt_flush:
    
 [GLOBAL tss_flush]
 tss_flush:
-	mov ax, 0x2B
-	ltr ax
-	ret
-	
+    mov ax, 0x2B
+    ltr ax
+    ret
+    
 [GLOBAL read_eip]
 
 read_eip:
-	pop eax
-	jmp eax
+    pop eax
+    jmp eax

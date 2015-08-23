@@ -15,7 +15,7 @@
 #include <keyboard.h>
 #include <time.h>
 #include <kheap.h>
-#include <paging.h>
+#include <pmm.h>
 #include <system.h>
 #include <multiboot.h>
 

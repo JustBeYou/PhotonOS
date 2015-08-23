@@ -57,107 +57,107 @@ uint32_t inl(uint32_t ad)
 
 void print_regs(registers_t *regs)
 {
-	printk("\nds: %d\tedi: %d\tesi: %d\n", regs->ds, regs->edi, regs->esi);
-	printk("ebp: %d\tesp: %d\tebx: %d\n", regs->ebp, regs->esp, regs->ebx);
-	printk("edx: %d\tecx: %d\teax: %d\n", regs->edx, regs->ecx, regs->eax);
-	printk("eip: %d\tcs: %d\teflags: %d\n", regs->eip, regs->cs, regs->eflags);
-	printk("useresp: %d\tss: %d\n", regs->useresp, regs->ss);
-	printk("int_no: %d\terr_code: %d\n\n", regs->int_no, regs->err_code);
+    printk("\nds: %d\tedi: %d\tesi: %d\n", regs->ds, regs->edi, regs->esi);
+    printk("ebp: %d\tesp: %d\tebx: %d\n", regs->ebp, regs->esp, regs->ebx);
+    printk("edx: %d\tecx: %d\teax: %d\n", regs->edx, regs->ecx, regs->eax);
+    printk("eip: %d\tcs: %d\teflags: %d\n", regs->eip, regs->cs, regs->eflags);
+    printk("useresp: %d\tss: %d\n", regs->useresp, regs->ss);
+    printk("int_no: %d\terr_code: %d\n\n", regs->int_no, regs->err_code);
 }
 
 int write_char(const char c)
 {
-	//((unsigned char*) stdout)[out_crs] = c;
-	//out_crs++;
-	vga_putchar(c);
-	return 0;
+    //((unsigned char*) stdout)[out_crs] = c;
+    //out_crs++;
+    vga_putchar(c);
+    return 0;
 }
 
 int write(const char *buf, size_t len)
 {
-	for ( size_t i = 0; i < len; i++ )
-		write_char((int) ((const char*) buf)[i]);
-	return 0;
+    for ( size_t i = 0; i < len; i++ )
+        write_char((int) ((const char*) buf)[i]);
+    return 0;
 }
 
 int printk(const char* format, ...)
 {
-	va_list parameters;
-	va_start(parameters, format);
+    va_list parameters;
+    va_start(parameters, format);
  
-	int written = 0;
-	size_t amount;
-	bool rejected_bad_specifier = false;
+    int written = 0;
+    size_t amount;
+    bool rejected_bad_specifier = false;
  
-	while ( *format != '\0' ) {
-		if ( *format != '%' ) {
-		print_c:
-			amount = 1;
-			while ( format[amount] && format[amount] != '%' )
-				amount++;
-			write(format, amount);
-			format += amount;
-			written += amount;
-			continue;
-		}
+    while ( *format != '\0' ) {
+        if ( *format != '%' ) {
+        print_c:
+            amount = 1;
+            while ( format[amount] && format[amount] != '%' )
+                amount++;
+            write(format, amount);
+            format += amount;
+            written += amount;
+            continue;
+        }
  
-		const char* format_begun_at = format;
+        const char* format_begun_at = format;
  
-		if ( *(++format) == '%' )
-			goto print_c;
+        if ( *(++format) == '%' )
+            goto print_c;
  
-		if ( rejected_bad_specifier ) {
-		incomprehensible_conversion:
-			rejected_bad_specifier = true;
-			format = format_begun_at;
-			goto print_c;
-		} 
-		if ( *format == 'c' ) {
-			format++;
-			char c = (char) va_arg(parameters, int /* char promotes to int */);
-			write(&c, sizeof(c));
-		} else if ( *format == 's' ) {
-			format++;
-			const char* s = va_arg(parameters, const char*);
-			write(s, strlen(s));
-		} else if ( *format == 'd' ) {
-			format++;
-			int n = va_arg(parameters, int);
-			if (n) {
-				char s[intlen(n, 10)];
-				itoa(s, n, 10);
-				write(s, strlen(s));
-			} else {
-				putchar('0');
-			}
-		} else if ( *format == 'x') {
-			format++;
-			int n = va_arg(parameters, int);
-			if (n) {
-				char s[intlen(n, 16)];
-				itoa(s, n, 16);
-				write(s, strlen(s));
-			} else {
-				printk("0x0");
-			}
-		} else {
-			goto incomprehensible_conversion;
-		}
-	}
+        if ( rejected_bad_specifier ) {
+        incomprehensible_conversion:
+            rejected_bad_specifier = true;
+            format = format_begun_at;
+            goto print_c;
+        } 
+        if ( *format == 'c' ) {
+            format++;
+            char c = (char) va_arg(parameters, int /* char promotes to int */);
+            write(&c, sizeof(c));
+        } else if ( *format == 's' ) {
+            format++;
+            const char* s = va_arg(parameters, const char*);
+            write(s, strlen(s));
+        } else if ( *format == 'd' ) {
+            format++;
+            int n = va_arg(parameters, int);
+            if (n) {
+                char s[intlen(n, 10)];
+                itoa(s, n, 10);
+                write(s, strlen(s));
+            } else {
+                putchar('0');
+            }
+        } else if ( *format == 'x') {
+            format++;
+            int n = va_arg(parameters, int);
+            if (n) {
+                char s[intlen(n, 16)];
+                itoa(s, n, 16);
+                write(s, strlen(s));
+            } else {
+                printk("0x0");
+            }
+        } else {
+            goto incomprehensible_conversion;
+        }
+    }
  
-	va_end(parameters);
-	return written;
+    va_end(parameters);
+    return written;
 }
 
 void call(int32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi)
 {
-	asm volatile (" \
-	movl %0, %%eax; \
-	movl %1, %%ebx; \
-	movl %2, %%ecx; \
-	movl %3, %%edx; \
-	movl %4, %%esi; \
-	movl %5, %%edi; \
-	int $0x80; \
-	" : : "r" (eax) , "r" (ebx) , "r" (ecx) , "r" (edx) , "r" (esi) , "r" (edi));
+    asm volatile (" \
+    movl %0, %%eax; \
+    movl %1, %%ebx; \
+    movl %2, %%ecx; \
+    movl %3, %%edx; \
+    movl %4, %%esi; \
+    movl %5, %%edi; \
+    int $0x80; \
+    " : : "r" (eax) , "r" (ebx) , "r" (ecx) , "r" (edx) , "r" (esi) , "r" (edi));
 }

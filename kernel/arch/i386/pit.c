@@ -23,11 +23,11 @@ int tick;
 
 void timer_callback(__attribute__ ((unused)) registers_t *regs)
 {
-	cli();
-	tick++;
-	update_time();
-	//preempt(); useless, because it crashes
-	sti();
+    cli();
+    tick++;
+    update_time();
+    //preempt(); useless, because it crashes
+    sti();
 }
 
 void init_timer(uint32_t frequency)
@@ -56,5 +56,5 @@ void init_timer(uint32_t frequency)
 
 int get_tick()
 {
-	return tick;
+    return tick;
 }

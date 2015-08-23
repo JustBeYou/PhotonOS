@@ -27,33 +27,34 @@ extern "C" {
 #include <keyboard.h>
 #include <time.h>
 #include <kheap.h>
-#include <paging.h>
+#include <pmm.h>
+#include <vmm.h>
 #include <init.h>
 #include <multiboot.h>
 #include <task.h>
 
 void kmain(multiboot *mboot_ptr, uint32_t init_stack) {
-	init(mboot_ptr, init_stack);
-	welcome();
-	login();
-	
-	/* C++ Test */
-	printk("\n");
-	
- 	KernelClass my_kernel;
-	my_kernel.setID(16072015);
-	my_kernel.setVersion("v0.0.1cpp");
-	int ID = my_kernel.getID();
-	char version[30];
-	memcpy(version, my_kernel.getVersion(), strlen(my_kernel.getVersion()) + 1);
-	
-	printk("KERNEL ID: %d\n", ID);
-	printk("KERNEL VERSION: %s\n", version);
-	
-	printk("\n");
-	
-	prompt();
-	panic("Shell exited!", __LINE__, __FILE__);
+    init(mboot_ptr, init_stack);
+    welcome();
+    login();
+    
+    /* C++ Test */
+    printk("\n");
+    
+    KernelClass my_kernel;
+    my_kernel.setID(16072015);
+    my_kernel.setVersion("v0.0.1cpp");
+    int ID = my_kernel.getID();
+    char version[30];
+    memcpy(version, my_kernel.getVersion(), strlen(my_kernel.getVersion()) + 1);
+    
+    printk("KERNEL ID: %d\n", ID);
+    printk("KERNEL VERSION: %s\n", version);
+    
+    printk("\n");
+    
+    prompt();
+    panic("Shell exited!", __LINE__, __FILE__);
 }
 
 #ifdef __cplusplus 

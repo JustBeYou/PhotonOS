@@ -36,57 +36,57 @@ KHOME, KUP, KPGUP, '-', KLEFT, '5', KRIGHT, '+', KEND, KDOWN, KPGDN, KINS, KDEL,
 
 void install_keyboard()
 {
-	in_size = 0;
-	
-	ascii_s = USasciiNonShift;
-	ascii_S = USasciiShift;
-	last = 0;
-	
-	keyboard_set_handler(&read_kb_buff);
-	register_interrupt_handler(IRQ1, &keyboard_interrupt_handler);
+    in_size = 0;
+    
+    ascii_s = USasciiNonShift;
+    ascii_S = USasciiShift;
+    last = 0;
+    
+    keyboard_set_handler(&read_kb_buff);
+    register_interrupt_handler(IRQ1, &keyboard_interrupt_handler);
 }
 
 void keyboard_set_handler(void (*callback)(uint8_t *buf, uint16_t size))
 {
-	keyboard_handler = callback;
+    keyboard_handler = callback;
 }
 
 void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
 {
-	uint8_t scancode = inb(0x60);
-	int special = 0;
-	
-	if (scancode & 0x80) {
-		scancode &= 0x7F;
-		if (scancode == KRLEFT_SHIFT || scancode == KRRIGHT_SHIFT) {
-			shift = 0;
-			special = 1;
-		}
-	} else {
-		if (scancode == KRLEFT_SHIFT || scancode == KRRIGHT_SHIFT) {
-			shift = 1;
-			special = 1;
-		}
-		
-		if (shift) {
-			kb_buffer[last++] = ascii_S[scancode];
-		} else {
-			kb_buffer[last++] = ascii_s[scancode];
-		}
-		
-		if (special != 1) {
-			cli();
-			keyboard_handler(kb_buffer, last);
-			sti();
-		}
-		
-		if (last == KEYBOARD_BUFFER_SIZE) {
-			last = 0;
-		}
-	}
+    uint8_t scancode = inb(0x60);
+    int special = 0;
+    
+    if (scancode & 0x80) {
+        scancode &= 0x7F;
+        if (scancode == KRLEFT_SHIFT || scancode == KRRIGHT_SHIFT) {
+            shift = 0;
+            special = 1;
+        }
+    } else {
+        if (scancode == KRLEFT_SHIFT || scancode == KRRIGHT_SHIFT) {
+            shift = 1;
+            special = 1;
+        }
+        
+        if (shift) {
+            kb_buffer[last++] = ascii_S[scancode];
+        } else {
+            kb_buffer[last++] = ascii_s[scancode];
+        }
+        
+        if (special != 1) {
+            cli();
+            keyboard_handler(kb_buffer, last);
+            sti();
+        }
+        
+        if (last == KEYBOARD_BUFFER_SIZE) {
+            last = 0;
+        }
+    }
 }
 
 void read_kb_buff(uint8_t *buf, uint16_t size) 
 {
-	((uint8_t*) stdin)[in_size] = buf[size - 1];
+    ((uint8_t*) stdin)[in_size] = buf[size - 1];
 }

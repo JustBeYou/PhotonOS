@@ -17,15 +17,17 @@ CHECKSUM    equ -(MAGIC + FLAGS)
  
 section .multiboot
 align 4
-	dd MAGIC
-	dd FLAGS
-	dd CHECKSUM
+    dd MAGIC
+    dd FLAGS
+    dd CHECKSUM
 
 ; reserve space for kernel stack
 section .bootstrap_stack
-align 4
+    align 4
+global stack_bottom
 stack_bottom:
-times 16384 db 0
+    times 16384 db 0
+    
 global stack_top
 stack_top:
  
@@ -33,13 +35,13 @@ stack_top:
 section .text
 global _start
 _start:
-	mov esp, stack_top ; set stack
-	push esp ; push stack pointer
- 	push ebx ; push multiboot structure
- 	cli
-	extern kmain
-	call kmain ; let's GO!!!
-	cli ; if kmain ends, disable interrupts and go to infinite loop
+    mov esp, stack_top ; set stack
+    push esp ; push stack pointer
+     push ebx ; push multiboot structure
+     cli
+    extern kmain
+    call kmain ; let's GO!!!
+    cli ; if kmain ends, disable interrupts and go to infinite loop
 .hang:
-	hlt ; if I am here, something went wrong :P
-	jmp .hang
+    hlt ; if I am here, something went wrong :P
+    jmp .hang

@@ -17,8 +17,8 @@
 
 static void unhandled_interrupt(__attribute__((unused)) registers_t *regs)
 {
-	print_regs(regs);
-	panic("Interrupt unhandled!", __LINE__, __FILE__);
+    print_regs(regs);
+    panic("Interrupt unhandled!", __LINE__, __FILE__);
 }
 
 void init_idt()
@@ -28,12 +28,12 @@ void init_idt()
 
     memset(&idt_entries, 0, sizeof(idt_entry_t)*256);
 
-	for (int n = 0; n < 256; n++) {
-    	register_interrupt_handler(n, &unhandled_interrupt);
-	}
+    for (int n = 0; n < 256; n++) {
+        register_interrupt_handler(n, &unhandled_interrupt);
+    }
 
-	init_isr();
-	init_irq();
+    init_isr();
+    init_irq();
 
     idt_flush((uint32_t)&idt_ptr);
 }
