@@ -8,6 +8,12 @@
 
 isr_t interrupt_handlers[256];
 
+void std_handler(registers_t *regs)
+{
+    print_regs(regs);
+    panic("Unsupported error occured.\n", __LINE__, __FILE__);
+}
+
 void init_irq()
 {
     outb(0x20, 0x11);
@@ -98,6 +104,10 @@ void init_isr()
     idt_set_gate(30, (uint32_t)isr30, 0x08, 0x8E);
     idt_set_gate(31, (uint32_t)isr31, 0x08, 0x8E);
     idt_set_gate(128, (uint32_t)isr128, 0x08, 0x8E);
+
+    for (int i = 0; i < 256; i++) {
+        register_interrupt_handler(i, &std_handler);
+    }
 
     register_interrupt_handler(0, &zero_division_handler);
     register_interrupt_handler(128, &syscall_handler);

@@ -19,7 +19,7 @@ typedef struct header
 
 void init_heap ();
 
-void *kmalloc (uint32_t l);
+void *kmalloc (size_t size, int align, uint32_t *phys);
 
 void kfree (void *p);
 

@@ -54,7 +54,8 @@ void kmain(multiboot *mboot_ptr, uint32_t init_stack) {
     printk("\n");
     
     prompt();
-    panic("Shell exited!", __LINE__, __FILE__);
+    cli();
+    keep_running();
 }
 
 #ifdef __cplusplus 

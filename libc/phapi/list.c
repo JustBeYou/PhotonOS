@@ -13,7 +13,7 @@ int8_t std_lessthan_pred(type_t a, type_t b)
 list_t create_list(uint32_t max_size, lessthan_pred_t lessthan)
 {
     list_t ret;
-    ret.array = (void*) kmalloc(max_size * sizeof(type_t));
+    ret.array = (void*) kmalloc(max_size * sizeof(type_t), 0, 0);
     memset(ret.array, 0, max_size * sizeof(type_t));
     ret.size = 0;
     ret.max_size = max_size;

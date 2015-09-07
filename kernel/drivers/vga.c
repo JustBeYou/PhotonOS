@@ -79,7 +79,7 @@ int vga_scroll(size_t *row)
         memsetw ((uint16_t*) vga_memory + (25 - temp) * 80, blank, 80);
         *row = 24;
     }
-    vga_move_cursor(row, col);
+    vga_move_cursor(*row, col);
     return 0;
     #endif
 }

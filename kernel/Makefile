@@ -1,7 +1,7 @@
 HOST?=$(shell ../default-host.sh)
 HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
 
-CFLAGS?=-O2 -g
+CFLAGS?=-O0 -g
 CPPFLAGS?= 
 LDFLAGS?=
 LIBS?= -L../libc

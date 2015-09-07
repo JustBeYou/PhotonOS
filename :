@@ -98,6 +98,7 @@ void init(multiboot *mboot_ptr, uint32_t init_stack) {
     init_vmm(mboot_ptr->mem_lower + mboot_ptr->mem_upper);
     wstr_color("[OK]\n", COLOR_GREEN);
     debug_mem_mngr();
+    keep_running();
 
     printk("Memory info:\n");
     printk("\tKernel starts at: %x\n", (size_t)&kernel_start);

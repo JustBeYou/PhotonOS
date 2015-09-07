@@ -54,7 +54,7 @@ static void testing_shell(char *str)
 			printk("&stack_top: %x\n", &stack_top);
 			getch();
 			
-			int *num = (int*) kmalloc(sizeof(int));
+			int *num = (int*) kmalloc(sizeof(int), 0, 0);
 			*num = 0x123ABC;
 			printk("num: %x\n", num);
 			printk("&num: %x\n", &num);
@@ -75,18 +75,18 @@ static void testing_shell(char *str)
 			kfree(num);
 		} else if (!strcmp(str, "alloc")) {
 			printk("SIZE OF INT: %d\n", sizeof(int));
-			int *a = (int *)kmalloc(sizeof(int));
+			int *a = (int *)kmalloc(sizeof(int), 0, 0);
 			*a = 6;
 			printk("a: %x\n", a);
 			printk("a: %x\n", *a);
 			
-			int *b = (int *)kmalloc(sizeof(int));
+			int *b = (int *)kmalloc(sizeof(int), 0, 0);
 			*b = 5;
 			printk("b: %x\n", b);
 			printk("b: %x\n", *b);
 			kfree(b);
 			
-			int *c = (int *)kmalloc(sizeof(int));
+			int *c = (int *)kmalloc(sizeof(int), 0, 0);
 			*c = 8;
 			printk("c: %x\n", c);
 			printk("c: %x\n", *c);
@@ -95,14 +95,14 @@ static void testing_shell(char *str)
 			kfree(b);
 			kfree(c);
 			//-------------------------------------------------------
-			char *stmp = (char *)kmalloc(sizeof(char) * 11);
+			char *stmp = (char *)kmalloc(sizeof(char) * 11, 0, 0);
 			memcpy(stmp, "This is.\0", 9);
 			printk(stmp);
 			printk("\n&stmp[0]: %x &stmp[9]: %x\n", stmp, stmp + sizeof(char) * 11);
 			
 			kfree(stmp);
 			
-			char *tmp = (char *)kmalloc(sizeof(char) * 10);
+			char *tmp = (char *)kmalloc(sizeof(char) * 10, 0, 0);
 			memcpy(tmp, "THIS WAS.\0", 10);
 			printk(tmp);
 			printk("\n&tmp[0]: %x &tmp[9]: %x\n", tmp, tmp + sizeof(char) * 11);
@@ -158,7 +158,7 @@ void shell(char *str) {
 		seconds = 0;
 		
 	} else if (!strcmp(str, "write")) {
-		char *to_write = (char*) kmalloc(sizeof(char) * 30);
+		char *to_write = (char*) kmalloc(sizeof(char) * 30, 0, 0);
 		size_t len = strlen("\nLet's write this...\n");
 		
 		memcpy(to_write, "Let's write this...\n\0", len + 1);
@@ -169,11 +169,11 @@ void shell(char *str) {
 		reboot();
 		
 	} else if (!strcmp(str, "huge-alloc")) {
-		int *i = (void *) kmalloc(sizeof(int));
+		int *i = (void *) kmalloc(sizeof(int), 0, 0);
 		kfree(i);
 	} else if (!strcmp(str, "usermode")) {
 		printk("CPU will jump to usermode, this will stop shell, because it is running only in kernel mode.\n");
-		init_usermode();
+		//init_usermode();
 		char s[] = "Welcome in usermode!\n";
 		call(1, (uint32_t) s, (uint32_t) strlen(s), 0, 0, 0);
 	} else if (!strcmp(str, "sys-info")) {

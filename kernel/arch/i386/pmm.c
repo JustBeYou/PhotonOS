@@ -13,6 +13,7 @@
 #include <io.h>
 #include <string.h>
 #include <system.h>
+#include <kheap.h>
 
 uint32_t nframes;
 uint32_t *frames;
@@ -21,16 +22,17 @@ int paging_enabled = 0;
 
 void init_pmm(uint32_t mem_size)
 {
-    nframes = mem_size / FRAME_SIZE;
-    frames = kmalloc(sizeof(uint32_t) * nframes);
-    for (int i = 0; i < nframes; i++) {
+    nframes = (mem_size * 1024) / FRAME_SIZE;
+    frames = kmalloc(sizeof(uint32_t) * nframes, 0, 0);
+    for (uint32_t i = 0; i < nframes; i++) {
         free_frame(FRAME_ADDR_FROM_INDEX(i));
     }
+    printk("Number of frames: %d and memory size: %d\n", nframes, mem_size / 1024);
 }
 
 uint32_t find_frame()
 {
-   for (int i = 0; i < nframes; i++) {
+   for (uint32_t i = 0; i < nframes; i++) {
         if (!frames[i]) {
 	    uint32_t frame_addr = FRAME_ADDR_FROM_INDEX(i);
             use_frame(frame_addr);

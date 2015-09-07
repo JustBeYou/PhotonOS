@@ -80,7 +80,7 @@ void init_tasking()
 
 task_t *create_task(task_t *new_task, void (*main)(), int32_t flags, uint32_t pagedir)
 {
-	new_task = (task_t*) kmalloc(sizeof(task_t));
+	new_task = (task_t*) kmalloc(sizeof(task_t), 0, 0);
 	new_task->pid = pid;
 	new_task->regs.eax = 0;
 	new_task->regs.ebx = 0;
@@ -91,7 +91,7 @@ task_t *create_task(task_t *new_task, void (*main)(), int32_t flags, uint32_t pa
 	new_task->regs.eflags = flags;
 	new_task->regs.eip = (uint32_t) main;
 	new_task->regs.cr3 = (uint32_t) pagedir;
-	new_task->regs.esp = (uint32_t) kmalloc(2000);
+	new_task->regs.esp = (uint32_t) kmalloc(2000, 0, 0);
 	new_task->next = 0;
 	
 	if (pid != (uint32_t) 1) {
