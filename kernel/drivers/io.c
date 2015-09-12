@@ -69,7 +69,7 @@ int write_char(const char c)
 {
     //((unsigned char*) stdout)[out_crs] = c;
     //out_crs++;
-    vga_putchar(c);
+    vga_putchar(c); // temp
     return 0;
 }
 

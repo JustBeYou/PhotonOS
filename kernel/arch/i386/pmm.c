@@ -15,42 +15,55 @@
 #include <system.h>
 #include <kheap.h>
 
-uint32_t nframes;
-uint32_t *frames;
 uint32_t placement_addr = (uint32_t) &kernel_end;
 int paging_enabled = 0;
+
+#ifdef BITMAP_FRAME_ALLOCATOR
+
+#include <bitmap.h>
+
+uint32_t nframes;
+uint32_t *frames;
 
 void init_pmm(uint32_t mem_size)
 {
     nframes = (mem_size * 1024) / FRAME_SIZE;
-    frames = kmalloc(sizeof(uint32_t) * nframes, 0, 0);
+    frames = kmalloc(sizeof(uint32_t) * nframes / 8 +
+                     sizeof(uint32_t) * nframes % 8,
+                     0,
+                     0);
+
     for (uint32_t i = 0; i < nframes; i++) {
-        free_frame(FRAME_ADDR_FROM_INDEX(i));
+        free_bit(frames, i);
     }
-    printk("Number of frames: %d and memory size: %d\n", nframes, mem_size / 1024);
 }
 
 uint32_t find_frame()
 {
-   for (uint32_t i = 0; i < nframes; i++) {
-        if (!frames[i]) {
-	    uint32_t frame_addr = FRAME_ADDR_FROM_INDEX(i);
-            use_frame(frame_addr);
-	    return frame_addr;
-	}
-   }
-   printk("[ERROR] No free frames!");
-   keep_running();
+    for (uint32_t i = 0; i < nframes; i++) {
+        if (test_bit(frames, i)) {
+            return i;
+        }
+    }
+    return -1;
 }
 
-void use_frame(uint32_t addr)
+uint32_t alloc_frame()
 {
-    int frame_index = FRAME_INDEX(addr);
-    frames[frame_index] = 1;
+    int frame_index = find_frame();
+    if (frame_index != -1) {
+        use_bit(frames, frame_index);
+        return frame_index * FRAME_SIZE;
+    }
+
+    panic("No free frames!", __LINE__, __FILE__);
+    return -1;
 }
 
-void free_frame(uint32_t addr)
+void free_frame(uint32_t address)
 {
-    int frame_index = FRAME_INDEX(addr);
-    frames[frame_index] = 0;
+    uint32_t frame_index = address / FRAME_SIZE;
+    free_bit(frames, frame_index);
 }
+
+#endif

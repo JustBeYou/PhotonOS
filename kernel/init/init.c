@@ -30,9 +30,19 @@
 #include <init.h>
 #include <vga.h>
 
+extern void enable_A20();
+
+extern uint32_t nframes;
+
 extern int detect_cpu(void);
 
 #define FREQ 100
+
+static uint32_t get_total_memory()
+{
+    // return memory in MiB
+    return nframes * FRAME_SIZE / 1024 / 1024;
+}
 
 void init_stdio() {
     inbuffer = (uint8_t*) kmalloc(sizeof(uint8_t) * STDIO_SIZE, 0, 0);
@@ -93,16 +103,17 @@ void init(multiboot *mboot_ptr, uint32_t init_stack) {
     install_keyboard();
     wstr_color("[OK]\n", COLOR_GREEN);
     
+    printk("Enable A20.    ");
+    enable_A20();
+    wstr_color("[OK]\n", COLOR_GREEN);
+    
     printk("Initialize PMM and VMM.   ");
     init_pmm(mboot_ptr->mem_lower + mboot_ptr->mem_upper);
-    init_vmm(mboot_ptr->mem_lower + mboot_ptr->mem_upper);
+    init_vmm();
     wstr_color("[OK]\n", COLOR_GREEN);
-    debug_mem_mngr();
-
-    printk("Memory info:\n");
-    printk("\tKernel starts at: %x\n", (size_t)&kernel_start);
-    printk("\tKernel ends at: %x\n", (size_t)&kernel_end);
-    //printk("\tRAM: %d MB\n", mem_size_mb);
+    
+    printk("Total system memory: %d MiB in %d frames.\n", get_total_memory(), 
+           nframes);
     
     printk("Initialize stdio (allow using of stdio header).   ");
     init_stdio();

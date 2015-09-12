@@ -173,7 +173,7 @@ void shell(char *str) {
 		kfree(i);
 	} else if (!strcmp(str, "usermode")) {
 		printk("CPU will jump to usermode, this will stop shell, because it is running only in kernel mode.\n");
-		//init_usermode();
+		init_usermode();
 		char s[] = "Welcome in usermode!\n";
 		call(1, (uint32_t) s, (uint32_t) strlen(s), 0, 0, 0);
 	} else if (!strcmp(str, "sys-info")) {

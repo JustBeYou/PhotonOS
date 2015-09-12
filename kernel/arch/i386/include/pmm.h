@@ -23,14 +23,13 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define FRAME_SIZE 0x20
-#define FRAME_INDEX(x) (x / FRAME_SIZE)
+#define FRAME_SIZE 0x1000
 #define PAGE_ALIGN(x) (x & 0xFFFFF000)
-#define FRAME_ADDR_FROM_INDEX(x) (x * FRAME_SIZE)
 
 void init_pmm(uint32_t mem_size);
 uint32_t find_frame();
-void use_frame(uint32_t frame);
-void free_frame(uint32_t frame);
+uint32_t alloc_frame();
+void free_frame(uint32_t address);
 
 #endif
+

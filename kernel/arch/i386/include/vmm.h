@@ -5,33 +5,29 @@
 #include <stdint.h>
 #include <system.h>
 
-typedef struct page {
-    uint32_t present    : 1;
-    uint32_t rw         : 1;
-    uint32_t us         : 1;
-    uint32_t accessed   : 1;
-    uint32_t dirty      : 1;
-    uint32_t unused     : 7;
-    uint32_t frame      : 20;
-} page_t;
+#define PAGE_PRESENT 0x1
+#define PAGE_READ_WRITE 0x2
+#define PAGE_USER 0x4
+#define PAGE_WRITE_THROUGH 0x8
+#define PAGE_CACHE_DISABLE 0x16
+#define PAGE_ACCESSED 0x32
+#define PAGE_DIRTY 0x64
+#define PAGE_GLOBAL 0x128
 
 typedef struct page_table {
-    page_t pages[1024];
-} page_table_t __attribute__((aligned(4096)));
+    uint32_t pages[1024];
+} page_table_t;
 
 typedef struct page_directory {
-    page_table_t *tables[1024];
     uint32_t phys_tables[1024];
-} page_directory_t __attribute__((aligned(4096)));
+    page_table_t *virt_tables[1024];
+} page_directory_t;
 
-void init_vmm(uint32_t mem_size);
+void init_vmm();
 void switch_page_directory(page_directory_t *dir);
 void enable_paging();
-void map(uint32_t va, uint32_t pa, uint32_t rw, uint32_t us);
+void map(uint32_t va, uint32_t pa, uint32_t flags);
 void unmap(uint32_t va);
-void create_page(page_t *page, uint32_t frame, uint32_t rw, uint32_t us);
-page_t *get_page(uint32_t address, page_directory_t *dir);
-void debug_mem_mngr();
 void page_fault_handler(registers_t *regs);
 
 #endif

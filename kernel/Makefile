@@ -13,7 +13,7 @@ BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra
-CPPFLAGS:=$(CPPFLAGS) -D__is_photon_kernel -D_TEXTMODE -Iinclude -Iarch/i386/include -I../libc/include
+CPPFLAGS:=$(CPPFLAGS) -DBITMAP_FRAME_ALLOCATOR -D__is_photon_kernel -D_TEXTMODE -Iinclude -Iarch/i386/include -I../libc/include
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 

@@ -47,6 +47,7 @@ string/strcmp.o \
 string/strlen.o \
 string/strrev.o \
 phapi/list.o \
+phapi/bitmap.o \
 
 HOSTEDOBJS:=\
 $(ARCH_HOSTEDOBJS) \

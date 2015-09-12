@@ -26,9 +26,9 @@ void init_heap ()
 
 void *kmalloc(size_t size, int align, uint32_t *phys)
 {
-    if (paging_enabled) {
-	panic("kmalloc isn't ready to work with paging.\n", __LINE__, __FILE__);
-    } else {
+    //if (paging_enabled) {
+    
+    //} else {
         if (align && (placement_addr & 0xFFFFF000)) {
             placement_addr &= 0xFFFFF000;
 	        placement_addr += 0x1000;
@@ -41,7 +41,7 @@ void *kmalloc(size_t size, int align, uint32_t *phys)
 	    placement_addr += size;
 	    void *ret_p = (void*) ret_addr;
 	    return ret_p;
-    }
+    //}
     return NULL;
 }
 
