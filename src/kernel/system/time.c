@@ -55,4 +55,5 @@ void print_time()
 	} else {
 		printk("pm");
 	}
+	printk("\n");
 }

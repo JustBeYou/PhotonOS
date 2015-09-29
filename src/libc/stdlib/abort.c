@@ -11,9 +11,7 @@ void abort(void)
     // TODO: Properly implement abort().
     exit(1);
 #elif defined(__is_photon_kernel)
-    // TODO: Add proper kernel panic.
-    printf("Kernel Panic: abort()\n");
-    while ( 1 ) { }
+    panic("Kernel aborted!\n", __LINE__, __FILE__);
 #else
 #error "You need to implement abort() in this freestanding environment."
 #endif

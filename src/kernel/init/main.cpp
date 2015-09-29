@@ -134,10 +134,6 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 
 void kernel_main() 
 {
-    sti();
-    printk("\nPress any key to continue...");
-    getch();
-    
     welcome();
     login();
     prompt();

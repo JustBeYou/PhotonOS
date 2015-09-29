@@ -12,7 +12,7 @@ EXEC_PREFIX?=$(PREFIX)
 BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra
+CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -fstack-protector-all
 CPPFLAGS:=$(CPPFLAGS) -DBITMAP_FRAME_ALLOCATOR -D__is_photon_kernel -D_TEXTMODE -Iinclude -Iarch/i386/include -I../libc/include
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
@@ -39,6 +39,9 @@ system/system.o \
 system/time.o \
 system/task.o \
 system/heap.o \
+system/ui.o \
+system/shell.o \
+system/stack_protector.o \
 
 CRTI_OBJ:=$(ARCHDIR)/crti.o
 CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
