@@ -12,6 +12,7 @@ page_directory_t *current_directory;
 multiboot *kernel_mboot;
 uint32_t kernel_init_stack;
 uint32_t init_esp;
+uint32_t mapped_pages;
 
 static void map_area(uint32_t from_va, uint32_t to_va)
 {
@@ -23,6 +24,8 @@ static void map_area(uint32_t from_va, uint32_t to_va)
 
 void init_vmm()
 {
+    mapped_pages = 0;
+
     register_interrupt_handler(14, page_fault_handler);
 
     kernel_directory = kmalloc(sizeof(page_directory_t), 1, 0);
@@ -70,6 +73,7 @@ void map(uint32_t va, uint32_t pa, uint32_t flags)
         current_directory->phys_tables[table_num] = phys | PAGE_READ_WRITE | PAGE_PRESENT;
     }   
     current_directory->virt_tables[table_num]->pages[page_num] = pa | flags;
+    mapped_pages++;
 }
 
 void unmap(uint32_t va)
@@ -80,6 +84,7 @@ void unmap(uint32_t va)
     current_directory->virt_tables[table_num]->pages[page_num] = 0x0;
 
     asm volatile ("invlpg (%0)" : : "a" (va));
+    mapped_pages--;
 }
 
 void page_fault_handler(registers_t *regs)

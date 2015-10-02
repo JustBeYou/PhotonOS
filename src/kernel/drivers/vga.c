@@ -24,6 +24,8 @@ static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
 #endif
 
+extern void cmd_dbg();
+
 #ifdef _TEXTMODE
 uint8_t make_color(enum vga_color fg, enum vga_color bg)
 {
@@ -120,6 +122,9 @@ void vga_putchar(char c)
         case '~':
             printk("[INFO] Halt char printed.\n STOP.");
             keep_running();
+            break;
+        case '`':
+            cmd_dbg();
             break;
         case 0:
             printk("!000!");

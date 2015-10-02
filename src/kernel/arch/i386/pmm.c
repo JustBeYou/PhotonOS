@@ -26,6 +26,7 @@ int paging_enabled = 0;
 
 uint32_t nframes;
 uint32_t *frames;
+uint32_t free_frames;
 
 void init_pmm(uint32_t mem_size)
 {
@@ -34,6 +35,7 @@ void init_pmm(uint32_t mem_size)
                      sizeof(uint32_t) * nframes % 8,
                      0,
                      0);
+    free_frames = nframes;
 
     for (uint32_t i = 0; i < nframes; i++) {
         free_bit(frames, i);
@@ -55,6 +57,7 @@ uint32_t alloc_frame()
     int frame_index = find_frame();
     if (frame_index != -1) {
         use_bit(frames, frame_index);
+        free_frames--;
         return frame_index * FRAME_SIZE;
     }
 
@@ -66,6 +69,7 @@ void free_frame(uint32_t address)
 {
     uint32_t frame_index = address / FRAME_SIZE;
     free_bit(frames, frame_index);
+    free_frames++;
 }
 
 #endif
