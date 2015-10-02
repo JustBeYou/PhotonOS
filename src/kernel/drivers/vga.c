@@ -134,7 +134,7 @@ void vga_putchar(char c)
             break;
     }
     if (++col >= 80) {
-        col = 0;
+        col = -1;
         ++row;
     }
     vga_scroll(&row);

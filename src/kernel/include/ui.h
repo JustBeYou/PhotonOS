@@ -9,6 +9,7 @@
 
 void prompt();
 void welcome();
+void logo();
 void login();
 
 #endif

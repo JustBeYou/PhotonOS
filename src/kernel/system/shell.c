@@ -65,6 +65,7 @@ void cmd_free()
 void cmd_clear()
 {
     clear_vga();
+    logo();
 }
 
 void cmd_dbg()
