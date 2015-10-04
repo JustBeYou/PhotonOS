@@ -70,6 +70,21 @@ void *kmalloc(size_t size, int align, uint32_t *phys)
     return NULL;
 }
 
+void *krealloc(void *p, size_t size)
+{
+    void *new_p = kmalloc(size, 0, 0);
+    Llist_t *chunk = get_chunk(kernel_heap, p);
+    mem_chunk_t *data = (mem_chunk_t*) chunk->data;
+    size_t chunk_size = data->size;
+    
+    for (size_t i = 0; i < chunk_size; i++) {
+        ((char*) new_p)[i] = ((char*) p)[i];
+    }
+    kfree(p);
+    
+    return new_p;
+}
+
 void kfree(void *p)
 {
     if (kheap_initialized) {
@@ -80,6 +95,20 @@ void kfree(void *p)
 	}
 }
 /* ------------------------------------ */
+
+Llist_t *get_chunk(mem_heap_t *heap, void *p)
+{
+    Llist_t *head = heap->head;
+    
+    while (head != NULL) {
+        if ((size_t) p == ((size_t) head + MEM_HEADER_SIZE)) {
+            return head;
+        }
+        head = head->next;
+    }
+    
+    return NULL;
+}
 
 Llist_t *split_mem_chunk(Llist_t *chunk, size_t size)
 {

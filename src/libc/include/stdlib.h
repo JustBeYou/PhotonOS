@@ -33,6 +33,7 @@ int atoi(char *str);
  * Allocate n bytes of memory.
  */
 void *malloc(size_t n);
+void *realloc(void *p, size_t size);
 
 /**
  * Free allocated memory.

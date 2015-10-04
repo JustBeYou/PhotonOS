@@ -17,11 +17,10 @@ static void init_malloc()
 void *malloc(size_t n)
 {
     if (!malloc_initialized) {
-        return NULL;
+        init_malloc();
     }
     
     Llist_t *chunk = alloc_mem_chunk(user_heap, n);
-    printk("Malloc: %x\n", chunk);
     if (chunk == NULL) {
         return NULL;
     }

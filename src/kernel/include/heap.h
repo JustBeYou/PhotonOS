@@ -26,9 +26,13 @@ typedef struct mem_heap {
 
 void init_heap ();
 
-void *kmalloc (size_t size, int align, uint32_t *phys);
+void *kmalloc(size_t size, int align, uint32_t *phys);
 
-void kfree (void *p);
+void *krealloc(void *p, size_t size);
+
+void kfree(void *p);
+
+Llist_t *get_chunk(mem_heap_t *heap, void *p);
 
 Llist_t *split_mem_chunk(Llist_t *chunk, size_t size);
 

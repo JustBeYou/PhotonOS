@@ -61,6 +61,7 @@ typedef void* type_t;
 #include <vga.h>
 #include <ui.h>
 #include <shell.h>
+#include <vfs.h>
 
 /* Kernel defines */
 #define OS_Name "PhotonOS"
