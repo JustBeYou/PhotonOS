@@ -14,7 +14,7 @@ void init_vfs()
         kernel_fd[i] = NULL;
     }
     
-    
+    return 1;    
 }
 
 int fs_read(fs_node_t **node, size_t sz, int n, char *buf)
