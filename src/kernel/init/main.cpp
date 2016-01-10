@@ -61,7 +61,7 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     detect_cpu();
     printk("\n-------------------------------------------------------------------\n");
 
-    printk("VGA driver was installed!");
+    printk("VGA driver was installed! ");
     wstr_color("[OK]\n", COLOR_GREEN);
     
     printk("Initialize GDT.   ");
@@ -125,10 +125,15 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     wstr_color("[OK]\n", COLOR_GREEN);
     printk("Initialized kernel heap at %x and created main block of %d bytes.\n",
             (size_t) kernel_heap + MEM_HEADER_SIZE, kernel_heap->mem_size);
-
+    
     printk("Initialize Virtual File System.    ");
     init_vfs();
-    wstr_color("[OK]\n", COLOR_GREEN);
+    //wstr_color("[OK]\n", COLOR_GREEN);
+    wstr_color("[ERROR]\n", COLOR_RED);
+
+    printk("---debug tree lib---\n");
+    
+    printk("--------------------\n");
 
     wstr_color("\nDONE!\n", COLOR_GREEN);
     
