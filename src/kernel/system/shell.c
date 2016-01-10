@@ -28,6 +28,7 @@ void cmd_help()
 -> time - display the time\n \
 -> free - display info about memory\n \
 -> clear - clear screen\n \
+-> reboot - reboot the PC\n \
 """);
 }
 
@@ -68,6 +69,13 @@ void cmd_clear()
     logo();
 }
 
+void cmd_reboot()
+{
+    clear_vga();
+    printk("System will go down and reboot...\n");
+    reboot();
+}
+
 void cmd_dbg()
 {
     printk("WHEN MULTI-TASKING WILL BE AVAILABLE THIS SHOULD GO INTO KERNEL THREAD BASED SHELL AND KILL USER SHELL TASK.\n");
@@ -81,6 +89,7 @@ shell_cmd_t cmd_table[] = {
     {"time",  cmd_time},
     {"free",  cmd_free},
     {"clear", cmd_clear},
+    {"reboot", cmd_reboot},
     {"dbg", cmd_dbg}
 };
 
