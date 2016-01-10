@@ -39,6 +39,8 @@ stdlib/intlen.o \
 stdlib/atoi.o \
 stdlib/itoa.o \
 stdlib/malloc.o \
+stdlib/realloc.o \
+stdlib/calloc.o \
 stdlib/free.o \
 string/memcmp.o \
 string/memcpy.o \
@@ -51,6 +53,7 @@ string/strrev.o \
 phapi/list.o \
 phapi/linked_list.o \
 phapi/bitmap.o \
+phapi/graph.o \
 
 HOSTEDOBJS:=\
 $(ARCH_HOSTEDOBJS) \
