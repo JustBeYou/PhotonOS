@@ -89,9 +89,6 @@ typedef struct fs_node {
     uint32_t nlink;
 } fs_node_t;
 
-#define FILE_BEGIN(node) ((size_t) node + sizeof(fs_node_t))
-#define FILE_END(node) ((size_t) node + sizeof(fs_node_t) + node->length)
-
 struct dirent {
     uint32_t ino;
     char name[256];
