@@ -9,6 +9,7 @@ Llist_t *Llist_create()
     Llist_t *head = malloc(sizeof(Llist_t));
     head->prev = NULL;
     head->next = NULL;
+    head->data = NULL;
     
     return head;
 }
@@ -66,6 +67,10 @@ void Llist_remove(Llist_t *location)
     location->prev->next = next;
     location->next->prev = prev;
     
+    if (location->data != NULL) {
+        free(location->data);
+    }
+    
     free(location);
 }
 
@@ -77,6 +82,7 @@ void Llist_destroy(Llist_t *head)
         current->prev = NULL;
         current = current->next;
         free(current->prev);
+        free(current->data);
     }
     current->prev = NULL;
     current->next = NULL;
