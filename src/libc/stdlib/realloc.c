@@ -6,6 +6,9 @@
 
 void *realloc(void *p, size_t size)
 {
+#if defined(__is_photon_kernel)
+    return krealloc(p, size);
+#elif defined(__STDC_HOSTED__)
     void *new_p = malloc(size);
     Llist_t *chunk = get_chunk(user_heap, p);
     mem_chunk_t *data = (mem_chunk_t*) chunk->data;
@@ -17,4 +20,5 @@ void *realloc(void *p, size_t size)
     free(p);
     
     return new_p;
+#endif
 }
