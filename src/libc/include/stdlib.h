@@ -34,6 +34,7 @@ int atoi(char *str);
  */
 void *malloc(size_t n);
 void *realloc(void *p, size_t size);
+void *calloc(size_t n);
 
 /**
  * Free allocated memory.
