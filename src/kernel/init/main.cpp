@@ -133,6 +133,19 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 
     printk("---debug tree lib---\n");
     
+    graph_node_t *root = graph_create(NULL);
+    graph_node_t *folder = graph_create(NULL);
+    graph_node_t *subfolder = graph_create(NULL);
+    graph_node_t *another_subfolder = graph_create(NULL);
+    
+    graph_add_node(root, folder);
+    graph_add_node(folder, subfolder);
+    graph_add_node(folder, another_subfolder);
+    
+    graph_node_t *a = (graph_node_t*) root->nodes->data;
+    graph_node_t *b = (graph_node_t*) a->nodes->data;
+
+    printk("test 1: %d test 2: %d test 3: %d test 4: %d\n", graph_is_reachable(root, folder), graph_is_reachable(folder, subfolder), graph_is_reachable(folder, another_subfolder), graph_is_reachable(root, subfolder));
     printk("--------------------\n");
 
     wstr_color("\nDONE!\n", COLOR_GREEN);
