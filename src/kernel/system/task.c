@@ -13,6 +13,9 @@
 #include <string.h>
 #include <phapi.h>
 
+/*** REMOVED BECAUSE IS UNSTABLE ***/
+/*** TODO: GET STABLE TASKING ***/
+
 task_t *current_task;
 task_t *start_task;
 uint32_t pid;

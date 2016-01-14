@@ -17,8 +17,9 @@ graph_node_t *graph_create(void *data)
     return g;
 }
 
-graph_node_t *graph_find(graph_node_t *base)
+graph_node_t *graph_find(__attribute__((unused)) graph_node_t *base)
 {
+    // TODO: implement graph find
     return NULL;
 }
 
@@ -46,7 +47,7 @@ int graph_is_reachable(graph_node_t *a, graph_node_t *b)
 {
     Llist_t *node_list = a->nodes;
     while (node_list != NULL) {
-        Llist_t *cmp_data = (Llist_t*) node_list->data;
+        graph_node_t *cmp_data = (graph_node_t*) node_list->data;
         if (cmp_data == b) {
             return 1;
         }
@@ -56,7 +57,7 @@ int graph_is_reachable(graph_node_t *a, graph_node_t *b)
     return 0;
 }
 
-void graph_destroy(graph_node_t *graph)
+void graph_destroy(__attribute__((unused)) graph_node_t *graph)
 {
     // TODO: implement destroy
 }

@@ -62,9 +62,8 @@ void print_regs(registers_t *regs)
 
 int write_char(const char c)
 {
-    //((unsigned char*) stdout)[out_crs] = c;
-    //out_crs++;
-    vga_putchar(c); // temp
+    // TODO: implement write_char using FILE
+    vga_putchar(c); 
     return 0;
 }
 

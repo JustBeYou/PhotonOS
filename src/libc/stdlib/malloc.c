@@ -9,20 +9,13 @@ Llist_t *user_free_mem_head;
 mem_chunk_t *user_mem_chunk_head;
 char malloc_initialized = 0;
 
-#if defined(__STDC_HOSTED__)
-static void init_malloc()
-{
-
-}
-#endif
-
 void *malloc(size_t n)
 {
 #if defined(__is_photon_kernel)
     return kmalloc(n, 0, 0);
 #elif defined(__STDC_HOSTED__)
     if (!malloc_initialized) {
-        init_malloc();
+        // TODO: add malloc init
     }
     
     Llist_t *chunk = alloc_mem_chunk(user_heap, n);

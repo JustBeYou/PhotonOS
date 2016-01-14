@@ -35,13 +35,10 @@ extern mem_heap_t *kernel_heap;
 extern char user[20];
 extern char machine[30];
 
-void* stdout;
 void* stdin;
 volatile int in_size;
-int out_crs;
 
 uint8_t inbuffer[STDIO_SIZE];
-char outbuffer[STDIO_SIZE];
 
 static uint32_t get_total_memory()
 {
@@ -59,7 +56,7 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 
     init_vga();
     
-    printk("%s %s (%s) by %s. Copyright C 2015 %s. All rights reserved.\n", OS_Name, Version, Relase_Date, Author, Author);
+    printk("%s %s (%s) by %s. Copyright C 2016 %s. All rights reserved.\n", OS_Name, Version, Relase_Date, Author, Author);
     detect_cpu();
     printk("\n-------------------------------------------------------------------\n");
 
@@ -114,11 +111,9 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     printk("Initialize stdio (allow using of stdio header).   ");
 
     stdin = (uint8_t*) inbuffer;
-    stdout = (char*) outbuffer;
     
     for (int i = 0; i < STDIO_SIZE; i++) {
         inbuffer[i] = 0;
-        outbuffer[i] = 0;
     }
     wstr_color("[OK]\n", COLOR_GREEN);
     
@@ -128,6 +123,14 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     printk("Initialized kernel heap at %x and created main block of %d bytes.\n",
             (size_t) kernel_heap + MEM_HEADER_SIZE, kernel_heap->mem_size);
     
+    KernelClass mainKernelClass;
+    mainKernelClass.setVersion(Version);
+    mainKernelClass.setID(104);
+    printk("Testing C++. Kernel Class: %s %d.    ", mainKernelClass.getVersion(), mainKernelClass.getID());
+    wstr_color("[OK]\n", COLOR_GREEN);
+    
+/*
+    *** REMOVED BECAUSE IS UNSTABLE CODE ***
     printk("Initialize Virtual File System.    ");
     init_vfs();
     //wstr_color("[OK]\n", COLOR_GREEN);
@@ -135,8 +138,10 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 
     init_tasking();
     wstr_color("[OK]\n", COLOR_GREEN);
+    TODO: GET STABLE WITH TASKING AND VFS
+*/
 
-    wstr_color("\nDONE!\n", COLOR_GREEN);
+    wstr_color("\nDONE!", COLOR_GREEN);
     
     sti();
     getch();

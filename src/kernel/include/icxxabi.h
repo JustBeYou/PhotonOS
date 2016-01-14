@@ -8,6 +8,7 @@
     #endif
  
 typedef unsigned uarch_t;
+typedef signed arch_t;
  
 struct atexit_func_entry_t
 {

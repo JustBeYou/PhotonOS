@@ -17,7 +17,9 @@ void __stack_chk_fail(void)
 {
 #if __STDC_HOSTED__
 	abort();
+	while (1) {}
 #elif __is_photon_kernel
 	panic("Stack smashing detected", __LINE__, __FILE__);
+	while (1) {}
 #endif
 }

@@ -42,7 +42,6 @@ system/heap.o \
 system/ui.o \
 system/shell.o \
 system/stack_protector.o \
-system/vfs.o \
 
 CRTI_OBJ:=$(ARCHDIR)/crti.o
 CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)

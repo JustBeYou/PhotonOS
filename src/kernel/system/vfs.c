@@ -4,6 +4,9 @@
 #include <string.h>
 #include <phapi.h>
 
+/*** REMOVED BECAUSE IS UNSTABLE ***/
+/*** TODO: GET STABLE VFS ***/
+
 char *virtual_disk;
 
 FILE *kernel_fd[MAX_KERNEL_FD];
