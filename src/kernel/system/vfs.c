@@ -100,7 +100,7 @@ int inode_rewind(inode_t *node)
     if (!node)
         return -1;
         
-    node->rewind();
+    node->rewind(node);
     return 0;
 }
 
