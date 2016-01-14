@@ -16,11 +16,15 @@
 task_t *current_task;
 task_t *start_task;
 uint32_t pid;
+int start_tasking = 0;
 
 void *syscalls[] = {
 	&write
 };
 int num_syscalls = 1;
+
+extern void switch_task(t_regs_t *from, t_regs_t *to);
+extern void kernel_main();
 
 void init_usermode() {
 	set_kernel_stack((uint32_t) stack_top);
@@ -75,7 +79,7 @@ void init_tasking()
 	asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=r"(cr3)::"%eax");
 	asm volatile("pushfl; movl (%%esp), %%eax; movl %%eax, %0; popfl;":"=r"(eflags)::"%eax");
 	
-	start_task = create_task(start_task, NULL, eflags, cr3);
+	start_task = create_task(start_task, kernel_main, eflags, cr3);
 	
 	current_task = start_task;
 }
@@ -83,6 +87,7 @@ void init_tasking()
 task_t *create_task(task_t *new_task, void (*main)(), int32_t flags, uint32_t pagedir)
 {
 	new_task = (task_t*) kmalloc(sizeof(task_t), 0, 0);
+	printk("%x\n", new_task);
 	new_task->pid = pid;
 	new_task->regs.eax = 0;
 	new_task->regs.ebx = 0;
@@ -112,49 +117,15 @@ void preempt()
 	printk("Current task: %x\n", current_task);
 	printk("Start task: %x\n", start_task);
 	printk("Main address: %x\n", current_task->regs.eip);
-	switch_task();
+	if (current_task->next != NULL) {
+	    switch_task(&(current_task->regs), &(current_task->next->regs));
+	    keep_running();
+	    current_task = current_task->next;
+	} else {
+	    switch_task(&(current_task->regs), &(start_task->regs));
+	    keep_running();
+	    current_task = start_task;
+	}
+	
 	sti();
-}
-
-void switch_task()
-{  
-    uint32_t esp, ebp, eip;
-    asm volatile("mov %%esp, %0" : "=r"(esp));
-    asm volatile("mov %%ebp, %0" : "=r"(ebp));
-
-    eip = read_eip();
-    if (eip == 0x12345)
-        return;
-
-    current_task->regs.eip = eip;
-    current_task->regs.esp = esp;
-    current_task->regs.ebp = ebp;
-    
-    current_task = current_task->next;
-    if (!current_task) {
-    	current_task = start_task;
-    	return;	
-    }
-    printk("Current task: %x\n", current_task);
-    printk("Current task regs: %x\n", &current_task->regs);
-
-    eip = current_task->regs.eip;
-    esp = current_task->regs.esp;
-    ebp = current_task->regs.ebp;
-    
-    printk("%x\n", &update_time);
-    printk("%x\n", eip);
-    printk("%x\n", esp);
-    printk("%x\n", ebp);
-    printk("%x\n", current_task->regs.cr3);
-    
-    asm volatile("         \
-      mov %0, %%ecx;       \
-      mov %1, %%esp;       \
-      mov %2, %%ebp;       \
-      mov %3, %%cr3;       \
-      mov $0x12345, %%eax; \
-      jmp *%%ecx           "
-                 : : "r"(eip), "r"(esp), "r"(ebp), "r"(current_task->regs.cr3));
-                     keep_running();
 }
