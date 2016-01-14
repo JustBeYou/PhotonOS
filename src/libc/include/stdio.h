@@ -9,6 +9,27 @@
 
 #define STDIO_SIZE 4096
 
+struct __sbuf {
+    unsigned char *_base;
+    int _size;
+};
+
+typedef struct __sFILE {
+    unsigned char *_p;
+    int _r;
+    int _w;
+    short _flags;
+    short _file;
+    struct __sbuf _bf;
+    
+    int (*_close)(void *);
+    int (*_read)(void *, char *, int);
+    // TODO: add _seek
+    int (*_write)(void *, const char *, int);
+    
+    size_t _offset;
+} FILE;
+
 /**
   * Puts a char in standard out buffer.
   */
