@@ -4,25 +4,11 @@
 #include <string.h>
 #include <sys/cdefs.h>
 
-graph_node_t *graph_create(int id, char *name, void *data)
+graph_node_t *graph_create(void *data)
 {
     graph_node_t *g = malloc(sizeof(graph_node_t));
-    
-    if ((id < 0 && name == NULL) || (id > -1 && name != NULL)) {
-        return NULL;
-    }
-    
-    if (id > -1) {
-        g->id = id;
-    }
-    
-    if (name != NULL) {
-        g->name = name;
-    }
-    
     g->visited = 0;
     g->data = data;
-    
     g->nodes = malloc(sizeof(Llist_t));
     g->nodes->prev = NULL;
     g->nodes->next = NULL;
@@ -31,7 +17,7 @@ graph_node_t *graph_create(int id, char *name, void *data)
     return g;
 }
 
-graph_node_t *graph_find(graph_node_t *base, int id, char *name)
+graph_node_t *graph_find(graph_node_t *base)
 {
     return NULL;
 }
