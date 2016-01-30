@@ -29,3 +29,11 @@ void reboot()
 	outb(0x64, 0xFE);
 	hlt();
 }
+
+void system_wait(int ticks)
+{
+    volatile int start_tick = get_tick();
+    while (get_tick() - start_tick >= ticks) {
+        ;
+    }
+}

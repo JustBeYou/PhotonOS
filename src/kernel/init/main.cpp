@@ -77,7 +77,6 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     IRQ_set_mask(3);
     IRQ_set_mask(4);
     IRQ_set_mask(5);
-    IRQ_set_mask(6);
     IRQ_set_mask(7);
     IRQ_set_mask(8);
     IRQ_set_mask(9);
@@ -128,6 +127,14 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     mainKernelClass.setID(104);
     printk("Testing C++. Kernel Class: %s %d.    ", mainKernelClass.getVersion(), mainKernelClass.getID());
     wstr_color("[OK]\n", COLOR_GREEN);
+    
+    printk("Initialize FDC driver.    ");
+    fdc_init();
+    wstr_color("[OK]\n", COLOR_GREEN);
+
+    uint32_t sectornum = 0;
+    char sectornumbuf[4];
+    uint8_t* sector = NULL;
     
 /*
     *** REMOVED BECAUSE IS UNSTABLE CODE ***

@@ -34,6 +34,7 @@ system/cpu.o \
 drivers/keyboard.o \
 drivers/io.o \
 drivers/vga.o \
+drivers/fdc.o \
 init/main.o \
 system/system.o \
 system/time.o \

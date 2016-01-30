@@ -73,7 +73,7 @@ extern void isr128();
 #define IRQ3 35 // COM2 (if enabled)
 #define IRQ4 36 // COM1 (if enabled)
 #define IRQ5 37 // LPT2 (if enabled)
-#define IRQ6 38 // Floppy Disk
+#define IRQ6 38 // Floppy Disk (handled)
 #define IRQ7 39 // LPT1 / Unreliable "spurious" interrupt (usually)
 #define IRQ8 40 // CMOS real-time clock (if enabled)
 #define IRQ9 41 // Free for peripherals / legacy SCSI / NIC
