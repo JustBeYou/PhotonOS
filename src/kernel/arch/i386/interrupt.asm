@@ -8,7 +8,7 @@
  ;
  ; Detect interrupt, push registers and call handler.
  ;
-       
+
 ; define ISR codes
 %macro ISR_NOERRCODE 1  ; define a macro, taking one parameter
   global isr%1        ; %1 accesses the first parameter.
@@ -25,7 +25,7 @@
     cli
     push byte %1
     jmp isr_common_stub
-%endmacro 
+%endmacro
 
 %macro IRQ 2
   global irq%1
@@ -35,7 +35,7 @@
     push byte %2
     jmp irq_common_stub
 %endmacro
-        
+
 ISR_NOERRCODE 0
 ISR_NOERRCODE 1
 ISR_NOERRCODE 2
@@ -112,7 +112,7 @@ isr_common_stub:
     popa                     ; Pops edi,esi,ebp...
     add esp, 8     ; Cleans up the pushed error code and pushed ISR number
     sti
-    iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+    iret           ; pops 5 things at once: EIP, CS, EFLAGS, ESP, and SS
 
 extern irq_handler
 
