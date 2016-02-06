@@ -27,10 +27,10 @@ void timer_callback(__attribute__ ((unused)) registers_t *regs)
         in_cursor = 0;
     }
 
-    if (--time_to_run <= 0) {
+    /*if (--time_to_run <= 0) {
         printk("Process ran out of time. Switching...\n");
         switch_process();
-    }
+    }*/
     sti();
 }
 

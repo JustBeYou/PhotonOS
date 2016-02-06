@@ -18,7 +18,7 @@ static void map_area(uint32_t from_va, uint32_t to_va)
 {
     for (uint32_t va = from_va; va < to_va; va += 0x1000) {
         uint32_t pa = alloc_frame();
-        map(va, pa, PAGE_READ_WRITE | PAGE_PRESENT);
+        map(va, pa, PAGE_READ_WRITE | PAGE_PRESENT | PAGE_USER);
     }
 }
 
@@ -30,17 +30,17 @@ void init_vmm()
 
     kernel_directory = kmalloc(sizeof(page_directory_t), 1, 0);
     memset(kernel_directory, 0, sizeof(page_directory_t));
-    
+
     for (int i = 0; i < 1024; i++) {
-        kernel_directory->phys_tables[i] = 0x0 | PAGE_READ_WRITE;
+        kernel_directory->phys_tables[i] = 0x0 | PAGE_READ_WRITE | PAGE_USER;
     }
-    
+
     current_directory = kernel_directory;
-    
+
     // Map kernel + 1 MiB
     uint32_t mem_to_map = (size_t) &kernel_end + 0x10000;
     map_area(0x0, mem_to_map);
-    
+
     switch_page_directory(kernel_directory);
     enable_paging();
 }
@@ -61,26 +61,26 @@ void enable_paging()
 
 void map(uint32_t va, uint32_t pa, uint32_t flags)
 {
-    uint32_t page_num = (va / 4096) % 1024;  
+    uint32_t page_num = (va / 4096) % 1024;
     uint32_t table_num = (va / 4096) / 1024;
-    
+
     if (!current_directory->virt_tables[table_num]) {
         uint32_t phys;
-        current_directory->virt_tables[table_num] = kmalloc(sizeof(page_table_t), 
-                                                    1, 
+        current_directory->virt_tables[table_num] = kmalloc(sizeof(page_table_t),
+                                                    1,
                                                     &phys);
-                        
-        current_directory->phys_tables[table_num] = phys | PAGE_READ_WRITE | PAGE_PRESENT;
-    }   
+
+        current_directory->phys_tables[table_num] = phys | PAGE_READ_WRITE | PAGE_PRESENT | PAGE_USER;
+    }
     current_directory->virt_tables[table_num]->pages[page_num] = pa | flags;
     mapped_pages++;
 }
 
 void unmap(uint32_t va)
 {
-    uint32_t page_num = (va / 4096) % 1024;  
+    uint32_t page_num = (va / 4096) % 1024;
     uint32_t table_num = (va / 4096) / 1024;
-    
+
     current_directory->virt_tables[table_num]->pages[page_num] = 0x0;
 
     asm volatile ("invlpg (%0)" : : "a" (va));

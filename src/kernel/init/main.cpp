@@ -51,6 +51,7 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     kernel_init_stack = init_stack;
     kernel_mboot = mboot_ptr;
 
+
     cli();
     init_esp = kernel_init_stack;
 
@@ -132,8 +133,8 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     fdc_init();
     wstr_color("[OK]\n", COLOR_GREEN);
 
-    printk("Initialize tasking.    ");
-    init_multitasking();
+    /*printk("Initialize tasking.    ");
+    init_multitasking();*/
 
     uint32_t sectornum = 0;
     char sectornumbuf[4];
@@ -155,6 +156,7 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 
     sti();
     getch();
+    init_usermode();
 }
 
 void kernel_main()

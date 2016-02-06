@@ -28,25 +28,11 @@ void *syscalls[] = {
 int num_syscalls = 1;
 
 extern void kernel_main();
+extern void jmp_to_usermode();
 
 void init_usermode() {
 	set_kernel_stack((uint32_t) stack_top);
-    asm volatile("  \
-      cli; \
-      mov $0x23, %ax; \
-      mov %ax, %ds; \
-      mov %ax, %es; \
-      mov %ax, %fs; \
-      mov %ax, %gs; \
-                    \
-       \
-      mov %esp, %eax; \
-      pushl $0x23; \
-      pushl %esp; \
-      pushf; \
-      pushl $0x1B; \
-      iret; \
-      ");
+    jmp_to_usermode();
 }
 
 void syscall_handler(registers_t *regs)
