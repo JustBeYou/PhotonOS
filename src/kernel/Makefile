@@ -2,7 +2,7 @@ HOST?=$(shell ../default-host.sh)
 HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
 
 CFLAGS?=-O0 -g
-CPPFLAGS?= 
+CPPFLAGS?=
 LDFLAGS?=
 LIBS?= -L../libc
 
@@ -38,7 +38,7 @@ drivers/fdc.o \
 init/main.o \
 system/system.o \
 system/time.o \
-system/task.o \
+system/process.o \
 system/heap.o \
 system/ui.o \
 system/shell.o \
@@ -72,13 +72,13 @@ photon.elf: $(OBJ_LINK_LIST) $(ARCHDIR)/linker.ld
 
 %.o: %.c
 	$(CC) -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
-	
+
 %.o: %.cpp
 	i686-elf-g++ -c $< -o $@ -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -D__is_photon_kernel -Iinclude -Iarch/i386/include -I../libc/include
 
 %.o: %.S
 	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
-	
+
 %.o: %.asm
 	$(NAS) -felf32 $< -o $@
 
@@ -96,6 +96,6 @@ install-headers:
 
 install-kernel: photon.elf
 	echo "Installing kernel..."
-	mkdir -p $(DESTDIR)$(BOOTDIR) 
+	mkdir -p $(DESTDIR)$(BOOTDIR)
 	cp photon.elf $(DESTDIR)$(BOOTDIR)
 	echo "Kernel installed!"
