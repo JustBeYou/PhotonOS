@@ -13,7 +13,7 @@
 #include <string.h>
 #include <phapi.h>
 
-void (*keyboard_handler)(uint8_t *buf, uint16_t size);  
+void (*keyboard_handler)(uint8_t *buf, uint16_t size);
 
 // Keyboard map
 char USasciiNonShift[] = {
@@ -40,16 +40,16 @@ char *ascii_s;
 char *ascii_S;
 
 extern void *stdin;
-extern uint32_t in_size;
+extern uint32_t in_cursor;
 
 void install_keyboard()
 {
-    in_size = 0;
-    
+    in_cursor = 0;
+
     ascii_s = USasciiNonShift;
     ascii_S = USasciiShift;
     last = 0;
-    
+
     keyboard_set_handler(&read_kb_buff);
     register_interrupt_handler(IRQ1, &keyboard_interrupt_handler);
 }
@@ -64,7 +64,7 @@ void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
     cli();
     uint8_t scancode = inb(0x60);
     int special = 0;
-     
+
     if (scancode & 0x80) {
         scancode &= 0x7F;
         if (scancode == KRLEFT_SHIFT || scancode == KRRIGHT_SHIFT) {
@@ -76,17 +76,17 @@ void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
             shift = 1;
             special = 1;
         }
-        
+
         if (shift) {
             kb_buffer[last++] = ascii_S[scancode];
         } else {
             kb_buffer[last++] = ascii_s[scancode];
         }
-        
+
         if (special != 1) {
             keyboard_handler(kb_buffer, last);
         }
-        
+
         if (last == KEYBOARD_BUFFER_SIZE) {
             last = 0;
         }
@@ -94,7 +94,7 @@ void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
     sti();
 }
 
-void read_kb_buff(uint8_t *buf, uint16_t size) 
+void read_kb_buff(uint8_t *buf, uint16_t size)
 {
-    ((uint8_t*) stdin)[in_size] = buf[size - 1]; 
+    ((uint8_t*) stdin)[in_cursor] = buf[size - 1];
 }

@@ -13,6 +13,9 @@
 #include <string.h>
 #include <phapi.h>
 
+extern void *stdin;
+extern volatile uint32_t in_cursor;
+
 /* output byte */
 void outb(uint32_t ad, uint8_t v)
 {
@@ -31,22 +34,22 @@ void outl(uint32_t ad, uint32_t v)
 /* input byte */
 uint8_t inb(uint32_t ad)
 {
-    uint8_t _v;       
-    asm volatile("inb %%dx, %%al" : "=a" (_v) : "d" (ad)); 
+    uint8_t _v;
+    asm volatile("inb %%dx, %%al" : "=a" (_v) : "d" (ad));
     return _v;
 }
 /* input word */
 uint16_t inw(uint32_t ad)
 {
-    uint16_t _v;         
-    asm volatile("inw %%dx, %%ax" : "=a" (_v) : "d" (ad));  
+    uint16_t _v;
+    asm volatile("inw %%dx, %%ax" : "=a" (_v) : "d" (ad));
     return _v;
 }
 /* input word */
 uint32_t inl(uint32_t ad)
 {
-    uint32_t _v;         
-    asm volatile("inl %%dx, %%eax" : "=a" (_v) : "d" (ad)); 
+    uint32_t _v;
+    asm volatile("inl %%dx, %%eax" : "=a" (_v) : "d" (ad));
     return _v;
 }
 
@@ -63,8 +66,20 @@ void print_regs(registers_t *regs)
 int write_char(const char c)
 {
     // TODO: implement write_char using FILE
-    vga_putchar(c); 
+    vga_putchar(c);
     return 0;
+}
+
+char read_char ()
+{
+    while (true) {
+        if (((uint8_t*)stdin)[in_cursor] != 0) {
+            in_cursor++;
+            break;
+        }
+    }
+    int c = ((uint8_t*)stdin)[in_cursor - 1];
+    return c;
 }
 
 int write(const char *buf, size_t len)
@@ -74,15 +89,20 @@ int write(const char *buf, size_t len)
     return 0;
 }
 
+int read(char *buf, size_t len)
+{
+
+}
+
 int printk(const char* format, ...)
 {
     va_list parameters;
     va_start(parameters, format);
- 
+
     int written = 0;
     size_t amount;
     bool rejected_bad_specifier = false;
- 
+
     while ( *format != '\0' ) {
         if ( *format != '%' ) {
         print_c:
@@ -94,18 +114,18 @@ int printk(const char* format, ...)
             written += amount;
             continue;
         }
- 
+
         const char* format_begun_at = format;
- 
+
         if ( *(++format) == '%' )
             goto print_c;
- 
+
         if ( rejected_bad_specifier ) {
         incomprehensible_conversion:
             rejected_bad_specifier = true;
             format = format_begun_at;
             goto print_c;
-        } 
+        }
         if ( *format == 'c' ) {
             format++;
             char c = (char) va_arg(parameters, int /* char promotes to int */);
@@ -138,7 +158,7 @@ int printk(const char* format, ...)
             goto incomprehensible_conversion;
         }
     }
- 
+
     va_end(parameters);
     return written;
 }

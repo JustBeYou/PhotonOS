@@ -31,8 +31,14 @@ void print_regs(registers_t *regs);
 /* write char to stdout */
 int write_char(const char c);
 
+/* read char from stdin */
+char read_char();
+
 /* write string to stdout */
 int write(const char *buf, size_t len);
+
+/* read string from stdin */
+int read(char *buf, size_t len);
 
 /* formatted printing for kernel mode */
 int printk(const char* format, ...);

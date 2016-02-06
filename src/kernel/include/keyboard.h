@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <phapi.h>
-                                           /* Defines. */                                       
-                                            
+
+/* Defines. */
 #define KEYBOARD_BUFFER_SIZE 32
 
 #define ESC 27
@@ -70,8 +70,8 @@
 #define KRNUM_LOCK 0x45
 #define KRDEL 0x53
 
-                                                  /* Functions. */
-                                                  
+/* Functions. */
+
 /**
   * Install the keyboard driver.
   */
@@ -88,7 +88,7 @@ void keyboard_set_handler(void (*callback)(uint8_t *buf, uint16_t size));
 void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs);
 
 /**
-  * Read keyboard buffer to stdin. 
+  * Read keyboard buffer to stdin.
   */
 void read_kb_buff(uint8_t *buf, uint16_t size);
 
