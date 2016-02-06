@@ -117,6 +117,7 @@ isr_common_stub:
 extern irq_handler
 
 irq_common_stub:
+    cli
     pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
 
     mov ax, ds               ; Lower 16-bits of eax = ds.

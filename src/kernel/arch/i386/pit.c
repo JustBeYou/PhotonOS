@@ -15,15 +15,21 @@
 
 extern mem_heap_t *kernel_heap;
 extern int tick;
-extern volatile int in_size;
+extern volatile int in_cursor;
+int time_to_run = 0;
 
 void timer_callback(__attribute__ ((unused)) registers_t *regs)
 {
     cli();
     tick++;
     update_time();
-    if (in_size >= STDIO_SIZE) {
-        in_size = 0;
+    if (in_cursor >= STDIO_SIZE) {
+        in_cursor = 0;
+    }
+
+    if (--time_to_run <= 0) {
+        printk("Process ran out of time. Switching...\n");
+        switch_process();
     }
     sti();
 }

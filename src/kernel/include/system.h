@@ -21,20 +21,6 @@ typedef struct registers
     uint32_t eip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
 } registers_t; // registers for interrupts
 
-typedef struct g_regs
-{
-    uint32_t edi;
-    uint32_t esi;
-    uint32_t edx;
-    uint32_t ecx;
-    uint32_t ebx;
-    uint32_t eax;
-} g_regs_t; // general registers for system calls
-
-typedef struct t_regs {
-    uint32_t eax, ebx, ecx, edx, esi, edi, esp, ebp, eip, eflags, cr3;
-} t_regs_t; // task registers
-
 typedef void (*isr_t)(registers_t*);
 void register_interrupt_handler(uint8_t n, isr_t handler);
 
@@ -56,7 +42,7 @@ typedef void* type_t;
 #include <io.h>
 #include <keyboard.h>
 #include <heap.h>
-#include <task.h>
+#include <process.h>
 #include <time.h>
 #include <vga.h>
 #include <ui.h>

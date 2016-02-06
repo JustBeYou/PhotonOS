@@ -9,7 +9,7 @@
 
 #include <kernel_class.h>
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -36,7 +36,7 @@ extern char user[20];
 extern char machine[30];
 
 void* stdin;
-volatile int in_size;
+volatile int in_cursor;
 
 uint8_t inbuffer[STDIO_SIZE];
 
@@ -50,28 +50,28 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 {
     kernel_init_stack = init_stack;
     kernel_mboot = mboot_ptr;
-    
+
     cli();
     init_esp = kernel_init_stack;
 
     init_vga();
-    
+
     printk("%s %s (%s) by %s. Copyright C 2016 %s. All rights reserved.\n", OS_Name, Version, Relase_Date, Author, Author);
     detect_cpu();
     printk("\n-------------------------------------------------------------------\n");
 
     printk("VGA driver was installed! ");
     wstr_color("[OK]\n", COLOR_GREEN);
-    
+
     printk("Initialize GDT.   ");
     init_gdt();
     wstr_color("[OK]\n", COLOR_GREEN);
-    
+
     printk("Initialize IDT and interrupts.   ");
     init_idt();
     wstr_color("[OK]\n", COLOR_GREEN);
-    
-    
+
+
     // mask some interrupts
     IRQ_set_mask(2);
     IRQ_set_mask(3);
@@ -86,7 +86,7 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     IRQ_set_mask(13);
     IRQ_set_mask(14);
     IRQ_set_mask(15);
-    
+
     printk("Install timer and clock.   ");
     init_timer(TIMER_FREQ);
     wstr_color("[OK]\n", COLOR_GREEN);
@@ -94,48 +94,51 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     printk("Install keyboard support.   ");
     install_keyboard();
     wstr_color("[OK]\n", COLOR_GREEN);
-    
+
     printk("Enable A20.    ");
     enable_A20();
     wstr_color("[OK]\n", COLOR_GREEN);
-    
+
     printk("Initialize PMM and VMM.   ");
     init_pmm(kernel_mboot->mem_lower + kernel_mboot->mem_upper);
     init_vmm();
     wstr_color("[OK]\n", COLOR_GREEN);
-    
-    printk("Total system memory: %d MiB in %d frames.\n", get_total_memory(), 
+
+    printk("Total system memory: %d MiB in %d frames.\n", get_total_memory(),
            nframes);
-    
+
     printk("Initialize stdio (allow using of stdio header).   ");
 
     stdin = (uint8_t*) inbuffer;
-    
+
     for (int i = 0; i < STDIO_SIZE; i++) {
         inbuffer[i] = 0;
     }
     wstr_color("[OK]\n", COLOR_GREEN);
-    
+
     printk("Initialize kernel heap.    ");
     init_heap();
     wstr_color("[OK]\n", COLOR_GREEN);
     printk("Initialized kernel heap at %x and created main block of %d bytes.\n",
             (size_t) kernel_heap + MEM_HEADER_SIZE, kernel_heap->mem_size);
-    
+
     KernelClass mainKernelClass;
     mainKernelClass.setVersion(Version);
     mainKernelClass.setID(104);
     printk("Testing C++. Kernel Class: %s %d.    ", mainKernelClass.getVersion(), mainKernelClass.getID());
     wstr_color("[OK]\n", COLOR_GREEN);
-    
+
     printk("Initialize FDC driver.    ");
     fdc_init();
     wstr_color("[OK]\n", COLOR_GREEN);
 
+    printk("Initialize tasking.    ");
+    init_multitasking();
+
     uint32_t sectornum = 0;
     char sectornumbuf[4];
     uint8_t* sector = NULL;
-    
+
 /*
     *** REMOVED BECAUSE IS UNSTABLE CODE ***
     printk("Initialize Virtual File System.    ");
@@ -149,19 +152,18 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 */
 
     wstr_color("\nDONE!", COLOR_GREEN);
-    
+
     sti();
     getch();
 }
 
-void kernel_main() 
+void kernel_main()
 {
-    start_tasking = 1;
     welcome();
     login();
     prompt();
 }
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 }
 #endif

@@ -16,6 +16,7 @@
 gdt_entry_t gdt_entries[5];
 gdt_ptr_t   gdt_ptr;
 tss_entry_t tss_entry;
+extern uint32_t init_esp;
 
 void init_gdt()
 {
@@ -28,6 +29,7 @@ void init_gdt()
    gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User mode code segment
    gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User mode data segment
    write_tss(5, 0x10, 0x0);
+   set_kernel_stack(init_esp);
 
    gdt_flush((uint32_t)&gdt_ptr);
    tss_flush();
@@ -50,7 +52,7 @@ void write_tss(int32_t num, uint16_t ss0, uint32_t esp0)
 {
 	uint32_t base = (uint32_t) &tss_entry;
 	uint32_t limit = base + sizeof(tss_entry);
-   
+
 	gdt_set_gate(num, base, limit, 0xE9, 0x00);
 	memset(&tss_entry, 0, sizeof(tss_entry));
 
