@@ -65,7 +65,118 @@ void irq_handler(registers_t regs)
 
 static void zero_division_handler(__attribute__((unused)) registers_t *regs)
 {
-    panic("Division by 0!", __LINE__, __FILE__);
+    print_regs(regs);
+    panic("Division by 0!\n", __LINE__, __FILE__);
+}
+
+static void debugger_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Debugger interrupt!\n", __LINE__, __FILE__);
+}
+
+static void nmi_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Non maskable interrupt error.\n", __LINE__, __FILE__);
+}
+
+static void breakpoint_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Breakpoint found!\n", __LINE__, __FILE__);
+}
+
+static void overflow_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Overflow!\n", __LINE__, __FILE__);
+}
+
+static void bounds_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Bounds interrupt!\n", __LINE__, __FILE__);
+}
+
+static void invalid_opcode_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Opcode is invalid!\n", __LINE__, __FILE__);
+}
+
+static void coprocessor_notavail_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Coprocessor is not found!\n", __LINE__, __FILE__);
+}
+
+static void double_fault_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Double fault!\n", __LINE__, __FILE__);
+}
+
+static void coprocessor_overrun_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Coprocessor segment overrun!\n", __LINE__, __FILE__);
+}
+
+static void invalid_tss_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("TSS is invalid!\n", __LINE__, __FILE__);
+}
+
+static void segment_not_present_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Segment is not present!\n", __LINE__, __FILE__);
+}
+
+static void stack_fault_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Stack fault!\n", __LINE__, __FILE__);
+}
+
+static void gpf_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("General protection fault!\n", __LINE__, __FILE__);
+}
+
+/* Page fault handler is implemented in paging code. */
+
+static void reserved_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Reserved?\n", __LINE__, __FILE__);
+}
+
+static void math_fault_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Math fault!\n", __LINE__, __FILE__);
+}
+
+static void align_check_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Alignment check!\n", __LINE__, __FILE__);
+}
+
+static void machine_check_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("Machine check!\n", __LINE__, __FILE__);
+}
+
+static void simd_handler(__attribute__((unused)) registers_t *regs)
+{
+    print_regs(regs);
+    panic("SIMD error!\n", __LINE__, __FILE__);
 }
 
 void init_isr()
@@ -109,6 +220,24 @@ void init_isr()
     }
 
     register_interrupt_handler(0, &zero_division_handler);
+    register_interrupt_handler(1, &debugger_handler);
+    register_interrupt_handler(2, &nmi_handler);
+    register_interrupt_handler(3, &breakpoint_handler);
+    register_interrupt_handler(4, &overflow_handler);
+    register_interrupt_handler(5, &bounds_handler);
+    register_interrupt_handler(6, &invalid_opcode_handler);
+    register_interrupt_handler(7, &coprocessor_notavail_handler);
+    register_interrupt_handler(8, &double_fault_handler);
+    register_interrupt_handler(9, &coprocessor_overrun_handler);
+    register_interrupt_handler(10, &invalid_tss_handler);
+    register_interrupt_handler(11, &segment_not_present_handler);
+    register_interrupt_handler(12, &stack_fault_handler);
+    register_interrupt_handler(13, &gpf_handler);
+    register_interrupt_handler(15, &reserved_handler);
+    register_interrupt_handler(16, &math_fault_handler);
+    register_interrupt_handler(17, &align_check_handler);
+    register_interrupt_handler(18, &machine_check_handler);
+    register_interrupt_handler(19, &simd_handler);
     register_interrupt_handler(128, &syscall_handler);
 }
 

@@ -92,6 +92,7 @@ void cmd_dbguser()
 
 void cmd_shutdown()
 {
+    printk("System go down...\n");
     outw(0xB004, 0x2000);
 }
 
