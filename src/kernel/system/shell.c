@@ -29,6 +29,8 @@ void cmd_help()
 -> free - display info about memory\n \
 -> clear - clear screen\n \
 -> reboot - reboot the PC\n \
+-> shutdown - shutdown the PC\n \
+-> dbguser - jump to user mode\n \
 """);
 }
 
@@ -46,13 +48,13 @@ void cmd_free()
 {
     printk("Toatal memory: %d MiB (%d pages)\n", get_memory(), nframes);
     printk("Mapped memory: %d MiB (%d pages) Free memory: %d MiB\n",
-            get_mapped_mem(), 
-            mapped_pages, 
+            get_mapped_mem(),
+            mapped_pages,
             get_memory() - get_mapped_mem());
-    printk("Usable memory (allocated only for kernel): %d MiB = %d Bytes\n", 
+    printk("Usable memory (allocated only for kernel): %d MiB = %d Bytes\n",
             kernel_heap->mem_size / 1024 / 1024,
             kernel_heap->mem_size);
-    printk("Usable memory (allocated for user-space): %d MiB (%s)\n", 
+    printk("Usable memory (allocated for user-space): %d MiB (%s)\n",
             0,
             "User-space isn't available!");
     printk("Allocated memory: %d MiB Free memory: %d MiB\n",
@@ -81,7 +83,19 @@ void cmd_dbg()
     printk("\nWHEN MULTI-TASKING WILL BE AVAILABLE THIS SHOULD GO INTO KERNEL THREAD BASED SHELL AND KILL USER SHELL TASK.\n");
 }
 
-int cmd_limit = 6;
+void cmd_dbguser()
+{
+    printk("[WARN] You would jump to user mode. It is unstable, be sure debugger is ready.\n");
+    getch();
+    jmp_to_usermode();
+}
+
+void cmd_shutdown()
+{
+    outw(0xB004, 0x2000);
+}
+
+int cmd_limit = 9;
 
 shell_cmd_t cmd_table[] = {
     {"help",  cmd_help},
@@ -90,7 +104,9 @@ shell_cmd_t cmd_table[] = {
     {"free",  cmd_free},
     {"clear", cmd_clear},
     {"reboot", cmd_reboot},
-    {"dbg", cmd_dbg}
+    {"dbg", cmd_dbg},
+    {"dbguser", cmd_dbguser},
+    {"shutdown", cmd_shutdown}
 };
 
 int shell(char *cmd)

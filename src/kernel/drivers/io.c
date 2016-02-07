@@ -163,7 +163,7 @@ int printk(const char* format, ...)
     return written;
 }
 
-void call(int32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi)
+void syscall(int32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi)
 {
     asm volatile (" \
     movl %0, %%eax; \

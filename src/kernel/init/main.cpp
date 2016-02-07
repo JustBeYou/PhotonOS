@@ -156,7 +156,6 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 
     sti();
     getch();
-    init_usermode();
 }
 
 void kernel_main()
