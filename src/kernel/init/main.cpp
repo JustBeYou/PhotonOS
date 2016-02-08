@@ -129,9 +129,9 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     printk("Testing C++. Kernel Class: %s %d.    ", mainKernelClass.getVersion(), mainKernelClass.getID());
     wstr_color("[OK]\n", COLOR_GREEN);
 
-    printk("Initialize FDC driver.    ");
+    /*printk("Initialize FDC driver.    ");
     fdc_init();
-    wstr_color("[OK]\n", COLOR_GREEN);
+    wstr_color("[OK]\n", COLOR_GREEN);*/
 
     /*printk("Initialize tasking.    ");
     init_multitasking();*/

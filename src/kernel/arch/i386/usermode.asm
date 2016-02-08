@@ -11,7 +11,6 @@ jmp_to_usermode:
     mov eax, esp
     push 0x23
     push eax
-    push 0x02
     pushf
     pop eax
     or eax, 0x200

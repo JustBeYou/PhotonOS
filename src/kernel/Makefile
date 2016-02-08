@@ -80,7 +80,7 @@ photon.elf: $(OBJ_LINK_LIST) $(ARCHDIR)/linker.ld
 	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 %.o: %.asm
-	$(NAS) -felf32 $< -o $@
+	$(NAS) -felf32 $< -o $@ -g
 
 clean:
 	rm -f photon.elf $(OBJS) $(ALL_OUR_OBJS) *.o */*.o */*/*.o
