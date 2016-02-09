@@ -26,6 +26,7 @@ typedef struct page_directory {
 } page_directory_t;
 
 void init_vmm();
+void set_current_directory(page_directory_t *dir);
 void switch_page_directory(page_directory_t *dir);
 void enable_paging();
 void map(uint32_t va, uint32_t pa, uint32_t flags);

@@ -14,11 +14,11 @@ uint32_t kernel_init_stack;
 uint32_t init_esp;
 uint32_t mapped_pages;
 
-static void map_area(uint32_t from_va, uint32_t to_va)
+static void map_area(uint32_t from_va, uint32_t to_va, uint32_t flags)
 {
     for (uint32_t va = from_va; va < to_va; va += 0x1000) {
         uint32_t pa = alloc_frame();
-        map(va, pa, PAGE_READ_WRITE | PAGE_PRESENT | PAGE_USER);
+        map(va, pa, flags);
     }
 }
 
@@ -32,22 +32,27 @@ void init_vmm()
     memset(kernel_directory, 0, sizeof(page_directory_t));
 
     for (int i = 0; i < 1024; i++) {
-        kernel_directory->phys_tables[i] = 0x0 | PAGE_READ_WRITE | PAGE_USER;
+        kernel_directory->phys_tables[i] = 0x0 | PAGE_READ_WRITE;
     }
 
-    current_directory = kernel_directory;
+    set_current_directory(kernel_directory);
 
-    // Map kernel + 1 MiB
-    uint32_t mem_to_map = (size_t) &kernel_end + 0x10000;
-    map_area(0x0, mem_to_map);
+    // Map kernel + 16 MiB
+    uint32_t mem_to_map = (size_t) &kernel_end + 0x1000000;
+    map_area(0x0, mem_to_map, PAGE_READ_WRITE | PAGE_PRESENT);
 
     switch_page_directory(kernel_directory);
     enable_paging();
 }
 
-void switch_page_directory(page_directory_t *dir)
+void set_current_directory(page_directory_t *dir)
 {
     current_directory = dir;
+}
+
+void switch_page_directory(page_directory_t *dir)
+{
+    set_current_directory(dir);
     write_cr3(current_directory);
 }
 
@@ -70,7 +75,7 @@ void map(uint32_t va, uint32_t pa, uint32_t flags)
                                                     1,
                                                     &phys);
 
-        current_directory->phys_tables[table_num] = phys | PAGE_READ_WRITE | PAGE_PRESENT | PAGE_USER;
+        current_directory->phys_tables[table_num] = phys | flags;
     }
     current_directory->virt_tables[table_num]->pages[page_num] = pa | flags;
     mapped_pages++;
