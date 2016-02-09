@@ -15,7 +15,7 @@
   isr%1:
     cli
     push byte 0
-    push byte %1
+    push %1
     jmp isr_common_stub
 %endmacro
 
@@ -90,6 +90,7 @@ IRQ  15,    47
 extern isr_handler
 
 isr_common_stub:
+    cli
     pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
 
     mov ax, ds               ; Lower 16-bits of eax = ds.
@@ -101,8 +102,12 @@ isr_common_stub:
     mov fs, ax
     mov gs, ax
 
+    lea eax, [esp] ; load address of the context structure
+    push eax ; push address
+
     call isr_handler
 
+    pop ebx ; pop address structure
     pop ebx        ; reload the original data segment descriptor
     mov ds, bx
     mov es, bx
@@ -129,8 +134,12 @@ irq_common_stub:
     mov fs, ax
     mov gs, ax
 
+    lea eax, [esp] ; load address of the context structure
+    push eax ; push address
+
     call irq_handler
 
+    pop ebx ; pop address structure
     pop ebx        ; reload the original data segment descriptor
     mov ds, bx
     mov es, bx
