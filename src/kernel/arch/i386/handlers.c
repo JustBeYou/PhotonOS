@@ -9,8 +9,9 @@ isr_t interrupt_handlers[256];
 
 void std_handler(registers_t *regs)
 {
-    print_regs(regs);
-    panic("Unsupported error occured.\n", __LINE__, __FILE__);
+    /*print_regs(regs);
+    panic("Unsupported error occured.\n", __LINE__, __FILE__);*/
+    return;
 }
 
 void init_irq()
@@ -44,11 +45,10 @@ void init_irq()
     idt_set_gate(47, (uint32_t)irq15, 0x08, 0x8E);
 }
 
-void irq_handler(registers_t regs)
+void irq_handler(registers_t *regs)
 {
-    cli();
     // If interrupt involve the slave
-    if (regs.int_no >= 40) {
+    if (regs->int_no >= 40) {
         // Send reset signal.
         outb(0xA0, 0x20);
     }
@@ -56,11 +56,10 @@ void irq_handler(registers_t regs)
     // Reset signal to master.
     outb(0x20, 0x20);
 
-    if (interrupt_handlers[regs.int_no] != 0) {
-        isr_t handler = interrupt_handlers[regs.int_no];
-        handler(&regs);
+    if (interrupt_handlers[regs->int_no] != 0) {
+        isr_t handler = interrupt_handlers[regs->int_no];
+        handler(regs);
     }
-    sti();
 }
 
 static void zero_division_handler(__attribute__((unused)) registers_t *regs)
@@ -242,12 +241,9 @@ void init_isr()
 }
 
 // This gets called from our ASM interrupt handler stub.
-void isr_handler(registers_t regs)
+void isr_handler(registers_t *regs)
 {
-    cli();
-    regs.int_no &= 0xFF;
-    interrupt_handlers[regs.int_no](&regs);
-    sti();
+    interrupt_handlers[regs->int_no](regs);
 }
 
 void register_interrupt_handler(uint8_t n, isr_t handler)

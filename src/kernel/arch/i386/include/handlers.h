@@ -30,7 +30,7 @@ void init_isr();
 /**
   * Handle the isr.
   */
-void isr_handler(registers_t regs);
+void isr_handler(registers_t *regs);
 
 // isr handlers
 extern void isr0 ();
@@ -116,7 +116,7 @@ void init_irq();
 /**
   * Handle the irq.
   */
-void irq_handler(registers_t regs);
+void irq_handler(registers_t *regs);
 
 // irq handlers
 extern void irq0();
