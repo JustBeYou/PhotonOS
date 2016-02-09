@@ -41,7 +41,7 @@ process_t *create_process(char *name);
 /**
   * Switch the process.
   */
-void switch_process();
+void switch_process(registers_t *context);
 
 extern int read_eip();
 

@@ -23,9 +23,10 @@ uint32_t pid;
 int start_processing = 0;
 
 void *syscalls[] = {
-	&write
+	&write,
+    &read
 };
-int num_syscalls = 1;
+int num_syscalls = 2;
 
 extern void kernel_main();
 extern void jmp_to_usermode();
@@ -104,19 +105,12 @@ process_t *create_process(char *name)
 	return new_process;
 }
 
-void switch_process()
+void switch_process(registers_t *context)
 {
     if (current_process->next != NULL) {
 
     } else {
-        printk("Go to start proc.\n");
-        printk("cr3: %x esp: %x\n", current_process->cr3, current_process->esp);
         current_process = start_process;
-        write_cr3(current_process->cr3);
-        asm volatile ( " \
-            mov %%esp, %0 \
-            " : "=a" (current_process->esp)
-        );
     }
     time_to_run = current_process->time_to_run;
 }

@@ -91,7 +91,9 @@ int write(const char *buf, size_t len)
 
 int read(char *buf, size_t len)
 {
-
+    for (size_t i = 0; i < len; i++)
+        buf[i] = read_char();
+    return 0;
 }
 
 int printk(const char* format, ...)
