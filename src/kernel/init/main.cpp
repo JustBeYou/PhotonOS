@@ -26,6 +26,8 @@ extern int start_tasking;
 extern uint32_t kernel_init_stack;
 extern multiboot *kernel_mboot;
 
+extern uint32_t phys_ram_mb;
+
 extern uint32_t nframes;
 extern uint32_t init_esp;
 extern uint32_t kernel_init_stack;
@@ -39,12 +41,6 @@ void* stdin;
 volatile int in_cursor;
 
 uint8_t inbuffer[STDIO_SIZE];
-
-static uint32_t get_total_memory()
-{
-    // return memory in MiB
-    return nframes * FRAME_SIZE / 1024 / 1024;
-}
 
 void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 {
@@ -105,7 +101,7 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     init_vmm();
     wstr_color("[OK]\n", COLOR_GREEN);
 
-    printk("Total system memory: %d MiB in %d frames.\n", get_total_memory(),
+    printk("Total system memory: %d MiB in %d frames.\n", phys_ram_mb,
            nframes);
 
     printk("Initialize stdio (allow using of stdio header).   ");
