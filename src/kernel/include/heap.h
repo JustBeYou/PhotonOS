@@ -7,7 +7,7 @@
 #include <string.h>
 #include <phapi.h>
 
-#define KERNEL_HEAP_SIZE 0x10000
+#define KERNEL_HEAP_SIZE 0x1000000
 
 typedef struct mem_chunk {
     char used;
