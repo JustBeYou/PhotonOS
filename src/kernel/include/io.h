@@ -46,6 +46,14 @@ int printk(const char* format, ...);
 /**
   * Allow C code to call system.
   */
-void syscall(int32_t eax, uint32_t ebx, uint32_t ecx, uint32_t edx, uint32_t esi, uint32_t edi);
+#define syscall(eax, ebx, ecx, edx, esi, edi) \
+        asm volatile ("movl %0, %%eax;" \
+        "movl %1, %%ebx;" \
+        "movl %2, %%ecx;" \
+        "movl %3, %%edx;" \
+        "movl %4, %%esi;" \
+        "movl %5, %%edi;" \
+        "int $0x80;" \
+        : : "r" (eax) , "r" (ebx) , "r" (ecx) , "r" (edx) , "r" (esi) , "r" (edi))
 
 #endif
