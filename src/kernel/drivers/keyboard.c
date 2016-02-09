@@ -61,7 +61,6 @@ void keyboard_set_handler(void (*callback)(uint8_t *buf, uint16_t size))
 
 void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
 {
-    cli();
     uint8_t scancode = inb(0x60);
     int special = 0;
 
@@ -91,7 +90,6 @@ void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
             last = 0;
         }
     }
-    sti();
 }
 
 void read_kb_buff(uint8_t *buf, uint16_t size)
