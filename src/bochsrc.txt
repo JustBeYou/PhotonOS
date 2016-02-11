@@ -1,0 +1,19 @@
+# Logging
+log: log.txt
+error: action=report
+info: action=report
+magic_break: enabled=1
+
+# ROMs and RAM
+megs: 256
+romimage: file=/usr/share/bochs/BIOS-bochs-latest
+vgaromimage: file=/usr/share/bochs/VGABIOS-lgpl-latest
+
+# Boot
+ata0-master: type=cdrom, path=photon.iso, status=inserted
+boot: cdrom
+
+# CPU and other devices
+mouse: enabled=0
+clock: sync=realtime
+cpu: count=1, ips=50000000, reset_on_triple_fault=0
