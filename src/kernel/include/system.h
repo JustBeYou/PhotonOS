@@ -96,6 +96,7 @@ extern uint32_t read_eflags();
 extern uint32_t read_ss();
 extern uint32_t read_cs();
 extern uint32_t read_ebp();
+extern void jmp_to_usermode();
 
 /* Kernel system functions */
 void panic(const char *msg, int line, char *file);
