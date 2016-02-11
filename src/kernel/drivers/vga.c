@@ -31,7 +31,7 @@ uint8_t make_color(enum vga_color fg, enum vga_color bg)
 {
     return fg | bg << 4;
 }
- 
+
 uint16_t make_vgaentry(char c, uint8_t color)
 {
     uint16_t c16 = c;
@@ -74,12 +74,12 @@ int vga_scroll(size_t *row)
 {
     #ifdef _TEXTMODE
     uint16_t blank = make_vgaentry(' ', make_color(default_fg, default_bg));
-    
+
     if (*row >= 25)
     {
         int temp = *row - 25 + 1;
         memcpy ((uint16_t*) vga_memory, (uint16_t*) vga_memory + temp * 80, (25 - temp) * 80 * 2);
-        
+
         memsetw ((uint16_t*) vga_memory + (25 - temp) * 80, blank, 80);
         *row = 24;
     }
@@ -103,12 +103,15 @@ void vga_putentryat(char c, uint8_t color, size_t x, size_t y)
 #endif
 
 void vga_putchar(char c)
-{    
+{
     #ifdef _TEXTMODE
     switch (c) {
         case '\n':
             row++;
             col = -1;
+            break;
+        case '\r':
+            col = 0;
             break;
         case '\t':
             for (int i = 1; i < tabstop; i++) {
@@ -145,9 +148,11 @@ void vga_putchar(char c)
 void vga_writestring(const char* data)
 {
     #ifdef _TEXTMODE
+    cli();
     size_t datalen = strlen(data);
     for ( size_t i = 0; i < datalen; i++ )
         vga_putchar(data[i]);
+    sti();
     #endif
 }
 
@@ -180,8 +185,10 @@ void vga_putchar_color(char c, enum vga_color fg)
 void wstr_color(const char* data, enum vga_color fg)
 {
     #ifdef _TEXTMODE
+    cli();
     for ( size_t i = 0, n = strlen(data); i < n; i++ )
         vga_putchar_color((int) ((const unsigned char*) data)[i], fg);
+    sti();
     #endif
 }
 
