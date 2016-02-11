@@ -22,7 +22,7 @@
 /**
   * Function called by PIT handler.
   */
-void timer_callback (__attribute__ ((unused)) registers_t *regs);
+void timer_callback (registers_t *regs);
 
 /**
   * Initialize the PIT.
