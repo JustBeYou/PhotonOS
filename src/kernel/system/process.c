@@ -62,15 +62,12 @@ void syscall_handler(registers_t *regs)
 
 void init_multitasking()
 {
-    uint32_t cr3;
+    uint32_t cr3 = read_cr3();
 
-    asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=r"(cr3)::"%eax");
 	pid = 2;
 
     start_process = (process_t*) kmalloc(sizeof(process_t), 0, 0);
     start_process->pid = 1;
-    start_process->cr3 = cr3;
-    start_process->esp = stack_top;
     start_process->time_to_run = 100;
     start_process->prior = 0;
     memcpy(start_process->name, "kernel", 7);
@@ -78,18 +75,14 @@ void init_multitasking()
     time_to_run = 10;
 
 	current_process = start_process;
-    printk("cr3: %x esp: %x\n", current_process->cr3, current_process->esp);
 }
 
 process_t *create_process(char *name)
 {
-    uint32_t cr3;
-    asm volatile("movl %%cr3, %%eax; movl %%eax, %0;":"=r"(cr3)::"%eax");
+    uint32_t cr3 = read_cr3();
 
 	process_t *new_process = (process_t*) kmalloc(sizeof(process_t), 0, 0);
 	new_process->pid = pid;
-	new_process->cr3 = cr3;
-	new_process->esp = (uint32_t) kmalloc(2000, 1, 0);
     new_process->time_to_run = 10;
     new_process->prior = 0;
     memcpy(new_process->name, name, strlen(name) + 1);
@@ -103,14 +96,4 @@ process_t *create_process(char *name)
 	}
 	pid++;
 	return new_process;
-}
-
-void switch_process(registers_t *context)
-{
-    if (current_process->next != NULL) {
-
-    } else {
-        current_process = start_process;
-    }
-    time_to_run = current_process->time_to_run;
 }

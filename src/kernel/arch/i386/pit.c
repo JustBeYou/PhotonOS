@@ -25,11 +25,6 @@ void timer_callback(__attribute__ ((unused)) registers_t *regs)
     if (in_cursor >= STDIO_SIZE) {
         in_cursor = 0;
     }
-
-    /*if (--time_to_run <= 0) {
-        printk("Process ran out of time. Switching...\n");
-        switch_process();
-    }*/
 }
 
 void init_timer(uint32_t frequency)
