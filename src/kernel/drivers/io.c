@@ -55,12 +55,39 @@ uint32_t inl(uint32_t ad)
 
 void print_regs(registers_t *regs)
 {
-    printk("\nds: %d\tedi: %d\tesi: %d\n", regs->ds, regs->edi, regs->esi);
-    printk("ebp: %d\tesp: %d\tebx: %d\n", regs->ebp, regs->esp, regs->ebx);
-    printk("edx: %d\tecx: %d\teax: %d\n", regs->edx, regs->ecx, regs->eax);
-    printk("eip: %d\tcs: %d\teflags: %d\n", regs->eip, regs->cs, regs->eflags);
-    printk("useresp: %d\tss: %d\n", regs->useresp, regs->ss);
-    printk("int_no: %d\terr_code: %d\n\n", regs->int_no, regs->err_code);
+    printk("\n\rPushed by CPU:\n\r");
+    printk("ss: %x uesp: %x eflags: %x cs: %x eip: %x\n\r",
+        regs->ss,
+        regs->uesp,
+        regs->eflags,
+        regs->cs,
+        regs->eip
+    );
+    printk("int_no: %x err_code: %x\n\r", regs->int_no, regs->err_code);
+    printk("Pushed by pusha:\n\r");
+    printk("eax: %x ecx: %x edx: %x ebx: %x kesp: %x\n\r",
+        regs->eax,
+        regs->ecx,
+        regs->edx,
+        regs->ebx,
+        regs->kesp
+    );
+    printk("ebp: %x esi: %x edi: %x\n\r",
+        regs->ebp,
+        regs->esi,
+        regs->edi
+    );
+    printk("Others:\n\r");
+    printk("es: %x ds: %x fs: %x gs: %x\n\r",
+        regs->es,
+        regs->ds,
+        regs->fs,
+        regs->gs
+    );
+    printk("cr2: %x cr3: %x\n\r",
+        regs->cr2,
+        regs->cr3
+    );
 }
 
 int write_char(const char c)

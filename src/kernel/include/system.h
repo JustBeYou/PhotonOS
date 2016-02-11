@@ -15,10 +15,27 @@
 /* Kernel Data Structures */
 typedef struct registers
 {
-    uint32_t ds;                  // Data segment selector
-    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; // Pushed by pusha.
-    uint32_t int_no, err_code;    // Interrupt number and error code (if applicable)
-    uint32_t eip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
+    uint32_t cr3;
+    uint32_t cr2;
+    uint32_t gs;
+    uint32_t fs;
+    uint32_t ds;
+    uint32_t es;
+    uint32_t edi;
+    uint32_t esi;
+    uint32_t ebp;
+    uint32_t kesp;
+    uint32_t ebx;
+    uint32_t edx;
+    uint32_t ecx;
+    uint32_t eax;
+    uint32_t int_no;
+    uint32_t err_code;
+    uint32_t eip;
+    uint32_t cs;
+    uint32_t eflags;
+    uint32_t uesp;
+    uint32_t ss;
 } registers_t; // registers for interrupts
 
 typedef void (*isr_t)(registers_t*);
@@ -73,7 +90,12 @@ extern int detect_cpu(void);
 extern void write_cr3();
 extern void write_cr0();
 extern uint32_t read_cr3();
+extern uint32_t read_cr2();
 extern uint32_t read_cr0();
+extern uint32_t read_eflags();
+extern uint32_t read_ss();
+extern uint32_t read_cs();
+extern uint32_t read_ebp();
 
 /* Kernel system functions */
 void panic(const char *msg, int line, char *file);
