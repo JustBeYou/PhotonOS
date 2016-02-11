@@ -94,8 +94,7 @@ void unmap(uint32_t va)
 
 void page_fault_handler(registers_t *regs)
 {
-    uint32_t cr2;
-    asm volatile ("mov %%cr2, %0": "=r" (cr2));
+    uint32_t cr2 = read_cr2();
     printk("Page fault at %x, faulting address %x\n", regs->eip, cr2);
     printk("Error code %x\n", regs->err_code);
     panic("Core dumb.\n", __LINE__, __FILE__);
