@@ -39,7 +39,7 @@ extern char machine[30];
 
 void* stdin;
 volatile int in_cursor;
-
+uint32_t user_stack;
 uint8_t inbuffer[STDIO_SIZE];
 
 void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
@@ -125,18 +125,18 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     printk("Testing C++. Kernel Class: %s %d.    ", mainKernelClass.getVersion(), mainKernelClass.getID());
     wstr_color("[OK]\n", COLOR_GREEN);
 
-    uint32_t sectornum = 0;
-    char sectornumbuf[4];
-    uint8_t* sector = NULL;
+    init_multitasking();
 
     wstr_color("\nDONE!", COLOR_GREEN);
 
-    sti();
-    getch();
+    jmp_to_usermode();
 }
+
+extern int switch_on;
 
 void kernel_main()
 {
+    switch_on = 1;
     welcome();
     login();
     prompt();
