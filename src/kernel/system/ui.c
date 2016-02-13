@@ -24,15 +24,15 @@ void prompt() {
 void welcome() {
     vga_setcolor(COLOR_LIGHT_GREY, COLOR_GREEN);
     clear_vga();
-    
+
     wstr_color("      |\\     /|(  ____ \\( \\      (  ____ \\(  ___  )(       )(  ____ \\\n", COLOR_RED);
     wstr_color("      | )   ( || (    \\/| (      | (    \\/| (   ) || () () || (    \\/\n", COLOR_RED);
     wstr_color("      | | _ | || (__    | |      | |      | |   | || || || || (\\\n", COLOR_RED);
-    wstr_color("      | |( )| ||  __)   | |      | |      | |   | || |(_)| ||  __)\\\n", COLOR_RED);   
-    wstr_color("      | || || || (      | |      | |      | |   | || |   | || (\\\n", COLOR_RED);      
+    wstr_color("      | |( )| ||  __)   | |      | |      | |   | || |(_)| ||  __)\\\n", COLOR_RED);
+    wstr_color("      | || || || (      | |      | |      | |   | || |   | || (\\\n", COLOR_RED);
     wstr_color("      | () () || (____/\\| (____/\\| (____/\\| (___) || )   ( || (____/\\\n", COLOR_RED);
     wstr_color("      (_______)(_______/(_______/(_______/(_______)|/     \\|(_______/\n\n", COLOR_RED);
-    
+
     wstr_color("                           \\__   __/(  ___  )\n", COLOR_YELLOW);
     wstr_color("                              ) (   | (   ) |\n", COLOR_YELLOW);
     wstr_color("                              | |   | |   | |\n", COLOR_YELLOW);
@@ -40,7 +40,7 @@ void welcome() {
     wstr_color("                              | |   | |   | |\n", COLOR_YELLOW);
     wstr_color("                              | |   | (___) |\n", COLOR_YELLOW);
     wstr_color("                              )_(   (_______)\n\n", COLOR_YELLOW);
-    
+
     wstr_color(" _______           _______ _________ _______  _        _______  _______ \n", COLOR_BLUE);
     wstr_color("(  ____ )|\\     /|(  ___  )\\__   __/(  ___  )( (    /|(  ___  )(  ____ \\\n", COLOR_BLUE);
     wstr_color("| (    )|| )   ( || (   ) |   ) (   | (   ) ||  \\  ( || (   ) || (    \\/\n", COLOR_BLUE);
@@ -49,9 +49,9 @@ void welcome() {
     wstr_color("| (      | (   ) || |   | |   | |   | |   | || | \\   || |   | |      ) |\n", COLOR_BLUE);
     wstr_color("| )      | )   ( || (___) |   | |   | (___) || )  \\  || (___) |/\\____) |\n", COLOR_BLUE);
     wstr_color("|/       |/     \\|(_______)   )_(   (_______)|/    )_)(_______)\\_______)\n", COLOR_BLUE);
-    
+
     printk("                                                        by Feraru Mihail");
-    
+
     getch();
     vga_setcolor(COLOR_LIGHT_GREY, COLOR_BLACK);
     clear_vga();
@@ -73,7 +73,7 @@ void logo()
 
 void login()
 {
-    logo(); 
+    logo();
     printk("Log in please.\n");
     printk("Username: ");
     gets(user);
