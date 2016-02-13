@@ -16,6 +16,7 @@
 extern mem_heap_t *kernel_heap;
 extern int tick;
 extern volatile int in_cursor;
+extern int switch_on;
 int time_to_run = 0;
 
 void timer_callback(__attribute__ ((unused)) registers_t *regs)
@@ -24,6 +25,10 @@ void timer_callback(__attribute__ ((unused)) registers_t *regs)
     update_time();
     if (in_cursor >= STDIO_SIZE) {
         in_cursor = 0;
+    }
+
+    if (--time_to_run <= 0 && switch_on) {
+        switch_to();
     }
 }
 
