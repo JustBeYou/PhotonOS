@@ -148,11 +148,9 @@ void vga_putchar(char c)
 void vga_writestring(const char* data)
 {
     #ifdef _TEXTMODE
-    cli();
     size_t datalen = strlen(data);
     for ( size_t i = 0; i < datalen; i++ )
         vga_putchar(data[i]);
-    sti();
     #endif
 }
 
@@ -185,10 +183,8 @@ void vga_putchar_color(char c, enum vga_color fg)
 void wstr_color(const char* data, enum vga_color fg)
 {
     #ifdef _TEXTMODE
-    cli();
     for ( size_t i = 0, n = strlen(data); i < n; i++ )
         vga_putchar_color((int) ((const unsigned char*) data)[i], fg);
-    sti();
     #endif
 }
 
