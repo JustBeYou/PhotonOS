@@ -30,7 +30,7 @@ void cmd_help()
 -> clear - clear screen\n \
 -> reboot - reboot the PC\n \
 -> shutdown - shutdown the PC\n \
--> dbguser - jump to user mode\n \
+-> top - print processes info\n \
 """);
 }
 
@@ -80,20 +80,29 @@ void cmd_reboot()
 
 void cmd_dbg()
 {
-    printk("\nWHEN MULTI-TASKING WILL BE AVAILABLE THIS SHOULD GO INTO KERNEL THREAD BASED SHELL AND KILL USER SHELL TASK.\n");
-}
 
-void cmd_dbguser()
-{
-    printk("[WARN] You would jump to user mode. It is unstable, be sure debugger is ready.\n");
-    getch();
-    jmp_to_usermode();
 }
 
 void cmd_shutdown()
 {
     printk("System go down...\n");
     outw(0xB004, 0x2000);
+}
+
+extern process_t *start_process;
+
+void cmd_top()
+{
+    printk("Running processes:\n");
+    process_t *tmp_process = start_process;
+    while (tmp_process) {
+        printk("PID: %x Name: %s Stacks: %x %x\n",
+            tmp_process->pid,
+            tmp_process->name,
+            tmp_process->kern_stack,
+            tmp_process->user_stack);
+        tmp_process = tmp_process->next;
+    }
 }
 
 int cmd_limit = 9;
@@ -106,8 +115,8 @@ shell_cmd_t cmd_table[] = {
     {"clear", cmd_clear},
     {"reboot", cmd_reboot},
     {"dbg", cmd_dbg},
-    {"dbguser", cmd_dbguser},
-    {"shutdown", cmd_shutdown}
+    {"shutdown", cmd_shutdown},
+    {"top", cmd_top}
 };
 
 int shell(char *cmd)
