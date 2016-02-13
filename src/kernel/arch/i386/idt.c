@@ -14,7 +14,7 @@
 #include <phapi.h>
 
 idt_entry_t idt_entries[256];
-idt_ptr_t   idt_ptr; 
+idt_ptr_t   idt_ptr;
 
 static void unhandled_interrupt(__attribute__((unused)) registers_t *regs)
 {
@@ -48,5 +48,5 @@ void idt_set_gate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags)
    idt_entries[num].always0 = 0;
    // We must uncomment the OR below when we get to using user-mode.
    // It sets the interrupt gate's privilege level to 3.
-   idt_entries[num].flags   = flags /* | 0x60 */;
-} 
+   idt_entries[num].flags   = flags | 0x60;
+}
