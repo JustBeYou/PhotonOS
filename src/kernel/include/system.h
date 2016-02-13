@@ -66,6 +66,7 @@ typedef void* type_t;
 #include <shell.h>
 #include <vfs.h>
 #include <fdc.h>
+#include <syscalls.h>
 
 /* Kernel defines */
 #define OS_Name "PhotonOS"
@@ -97,6 +98,10 @@ extern uint32_t read_ss();
 extern uint32_t read_cs();
 extern uint32_t read_ebp();
 extern void jmp_to_usermode();
+extern void switch_context();
+extern void save_context();
+extern void switch_mm();
+extern void switch_to();
 
 /* Kernel system functions */
 void panic(const char *msg, int line, char *file);
