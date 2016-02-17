@@ -31,7 +31,7 @@ void init_multitasking()
 
     start_process = (process_t*) kmalloc(sizeof(process_t), 0, 0);
     start_process->pid = 1;
-    start_process->time_to_run = 100;
+    start_process->time_to_run = 10;
     start_process->ready = 1;
     start_process->prior = 0;
     memcpy(start_process->name, "kernel\0", 7);
@@ -73,4 +73,26 @@ process_t *create_process(char *name)
 	}
 	pid++;
 	return new_process;
+}
+
+int fork()
+{
+    process_t *parent = current_process;
+    process_t *child = kmalloc(sizeof(process_t), 0, 0);
+
+    child->pid = ++pid;
+    child->time_to_run = parent->time_to_run;
+    child->ready = 1;
+    child->prior = 0;
+    memcpy(child->name, "child\0", 6);
+    child->next = NULL;
+
+    child->esp = 0;
+    child->ss = 0x13;
+    child->kern_stack = kmalloc(PROC_KERN_STACK, 1, 0) + PROC_KERN_STACK;
+    child->user_stack = kmalloc(PROC_USER_STACK, 1, 0) + PROC_USER_STACK;
+    start_process->cr3 = 0;
+
+    /* This should push state for fork process. */
+    fork_push_state();
 }

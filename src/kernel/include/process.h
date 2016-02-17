@@ -35,6 +35,11 @@ void init_multitasking();
   */
 process_t *create_process(char *name);
 
+/**
+  * Fork the process.
+  */
+int fork();
+
 extern int read_eip();
 
 #endif

@@ -87,3 +87,7 @@ proc_next_null:
     mov [eax], ecx
 
     jmp switch_context_label
+
+[global fork_push_state]
+fork_push_state:
+    ret
