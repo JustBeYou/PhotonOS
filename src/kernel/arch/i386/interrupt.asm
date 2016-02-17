@@ -104,12 +104,6 @@ isr_common_stub:
     push fs
     push gs
 
-    mov ax, 0x10
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-
     mov eax, cr2
     push eax
 
@@ -118,6 +112,12 @@ isr_common_stub:
 
     lea eax, [esp]
     push eax
+
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
 
     call irq_handler
 
@@ -164,12 +164,6 @@ irq_common_stub:
     push fs
     push gs
 
-    mov ax, 0x10
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-
     mov eax, cr2
     push eax
 
@@ -178,6 +172,12 @@ irq_common_stub:
 
     lea eax, [esp]
     push eax
+
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
 
     call irq_handler
 
