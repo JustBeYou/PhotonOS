@@ -35,6 +35,7 @@ drivers/keyboard.o \
 drivers/io.o \
 drivers/vga.o \
 drivers/fdc.o \
+drivers/initrd.o \
 init/main.o \
 system/system.o \
 system/time.o \
@@ -44,6 +45,7 @@ system/ui.o \
 system/shell.o \
 system/stack_protector.o \
 system/syscalls.o \
+system/vfs.o \
 
 CRTI_OBJ:=$(ARCHDIR)/crti.o
 CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=crtbegin.o)
