@@ -67,6 +67,7 @@ typedef void* type_t;
 #include <vfs.h>
 #include <fdc.h>
 #include <syscalls.h>
+#include <initrd.h>
 
 /* Kernel defines */
 #define OS_Name "PhotonOS"
