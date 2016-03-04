@@ -14,14 +14,18 @@ typedef struct initrd_super_block {
     uint32_t magic;
     uint32_t sb_struct_size;
     uint32_t fh_struct_size;
+    uint32_t files;
 } initrd_super_block_t;
 
 typedef struct initrd_file_header {
+    uint32_t magic;
     uint32_t inode;
+    uint32_t flags;
     char name[32];
     uint32_t length;
 } initrd_file_header_t;
 
+void initrd_load(uint32_t location);
 int initrd_read(struct inode *node, size_t sz, int n, char *buf);
 int initrd_open(struct inode *node, uint32_t flags);
 int initrd_close(struct inode *node);
