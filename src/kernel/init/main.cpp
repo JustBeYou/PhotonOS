@@ -27,6 +27,7 @@ extern uint32_t kernel_init_stack;
 extern multiboot *kernel_mboot;
 
 extern uint32_t phys_ram_mb;
+extern uint32_t placement_addr;
 
 extern uint32_t nframes;
 extern uint32_t init_esp;
@@ -41,12 +42,16 @@ void* stdin;
 volatile int in_cursor;
 uint32_t user_stack;
 uint8_t inbuffer[STDIO_SIZE];
+uint32_t initrd_start;
+uint32_t initrd_end;
 
 void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 {
     kernel_init_stack = init_stack;
     kernel_mboot = mboot_ptr;
-
+    initrd_start = *((uint32_t*) mboot_ptr->mods_addr);
+    initrd_end = *(uint32_t*) (mboot_ptr->mods_addr + 4);
+    placement_addr = initrd_end;
 
     cli();
     init_esp = kernel_init_stack;
@@ -125,10 +130,19 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     printk("Testing C++. Kernel Class: %s %d.    ", mainKernelClass.getVersion(), mainKernelClass.getID());
     wstr_color("[OK]\n", COLOR_GREEN);
 
+    printk("Loading initrd.    ");
+    initrd_load(initrd_start);
+    wstr_color("[OK]\n", COLOR_GREEN);
+
+    printk("Install VFS.    ");
+    init_vfs();
+    wstr_color("[OK]\n", COLOR_GREEN);
+
+    printk("Initialize task switching.    ");
     init_multitasking();
+    wstr_color("[OK]\n", COLOR_GREEN);
 
     wstr_color("\nDONE!", COLOR_GREEN);
-
     jmp_to_usermode();
 }
 
