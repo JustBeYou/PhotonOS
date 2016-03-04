@@ -7,23 +7,54 @@
 /*** REMOVED BECAUSE IS UNSTABLE ***/
 /*** TODO: GET STABLE VFS ***/
 
-char *virtual_disk;
-
-FILE *kernel_fd[MAX_KERNEL_FD];
 graph_node_t *vfs_root;
 super_block_t *vfs_super_block;
 inode_t *vfs_root_inode;
 Llist_t *inode_cache;
 Llist_t *directory_cache;
 
+// Initrd
+extern initrd_super_block_t *sb;
+extern initrd_file_header_t *fheader;
+extern inode_t *initrd_nodes;
+
 void init_vfs()
 {
-    for (int i = 0; i < MAX_KERNEL_FD; i++) {
-        kernel_fd[i] = NULL;
-    }
+    vfs_root = graph_create(NULL);
+    vfs_super_block = (super_block_t*) kmalloc(sizeof(super_block_t), 0, 0);
+    vfs_root_inode = initrd_nodes;
+    inode_cache = NULL;
+    directory_cache = NULL;
 
-    /* Virtual Disk Init */
-    
+    vfs_super_block->device = NULL;
+    vfs_super_block->inode = initrd_nodes;
+    vfs_super_block->block = 0;
+    vfs_super_block->fs_type = NULL;
+    vfs_super_block->fs_data = (void*) sb;
+
+    vfs_root->data = (void*) vfs_root_inode;
+    for (int i = 1; i < sb->files; i++) {
+        graph_node_t *f = graph_create((void*) &initrd_nodes[i]);
+        graph_add_node(vfs_root, f);
+    }
+}
+
+int inode_init(struct inode *node, uint32_t flags, uint32_t id, uint32_t length,
+                uint32_t nblocks, uint32_t blocksz, uint32_t block)
+{
+    node->flags = flags;
+    node->inode = id;
+    node->length = length;
+    node->nblocks = nblocks;
+    node->blocksz = blocksz;
+    node->block = block;
+    node->lock = 0;
+    node->offset = 0;
+    node->open_flags = 0;
+    node->link = NULL;
+    node->refcount = 0;
+    node->nlink = 0;
+    return 0;
 }
 
 int inode_read(inode_t *node, size_t sz, int n, char *buf)

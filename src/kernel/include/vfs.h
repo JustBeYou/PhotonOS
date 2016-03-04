@@ -58,7 +58,8 @@ typedef struct inode {
     uint32_t inode;       // Node ID
     size_t length;        // Node content length
     uint32_t nblocks;     // Number of blocks
-    uint32_t block;       // Block size
+    uint32_t blocksz;     // Block size
+    uint32_t block;       // Phys. block
     uint32_t open_flags;  // Flags for open
     uint32_t lock;        // Inode is locked or not
     size_t offset;        // Cursor position
@@ -127,6 +128,8 @@ struct stat {
 };
 
 void init_vfs();
+int inode_init(struct inode *node, uint32_t flags, uint32_t id, uint32_t length,
+                uint32_t nblocks, uint32_t blocksz, uint32_t block);
 int inode_read(struct inode *node, size_t sz, int n, char *buf);
 int inode_write(struct inode *node, size_t sz, int n, char *buf);
 int inode_rewind(struct inode *node);
