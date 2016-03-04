@@ -1,0 +1,8 @@
+Commands help:
+-> hw - print hardware info
+-> time - display the time
+-> free - display info about memory
+-> clear - clear screen
+-> reboot - reboot the PC
+-> shutdown - shutdown the PC
+-> top - print processes info
