@@ -17,7 +17,7 @@ uint32_t phys_ram_bytes;
 uint32_t phys_ram_kb;
 uint32_t phys_ram_mb;
 uint32_t phys_ram_gb;
-uint32_t placement_addr = (uint32_t) &kernel_end;
+uint32_t placement_addr;
 int paging_enabled = 0;
 
 #ifdef BITMAP_FRAME_ALLOCATOR
