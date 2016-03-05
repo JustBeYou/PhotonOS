@@ -28,12 +28,6 @@ LIBK_CPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 FREEOBJS:=\
 $(ARCH_FREEOBJS) \
-stdio/getch.o \
-stdio/getchar.o \
-stdio/gets.o \
-stdio/printf.o \
-stdio/putchar.o \
-stdio/puts.o \
 stdlib/abort.o \
 stdlib/intlen.o \
 stdlib/atoi.o \
@@ -58,6 +52,12 @@ phapi/graph.o \
 HOSTEDOBJS:=\
 $(ARCH_HOSTEDOBJS) \
 stdlib/exit.o \
+stdio/getch.o \
+stdio/getchar.o \
+stdio/gets.o \
+stdio/printf.o \
+stdio/putchar.o \
+stdio/puts.o \
 
 OBJS:=\
 $(FREEOBJS) \
@@ -85,7 +85,7 @@ libk.a: $(LIBK_OBJS)
 
 %.o: %.S
 	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
-	
+
 %.o: %.asm
 	$(NAS) -felf32 $< -o $@
 
@@ -94,7 +94,7 @@ libk.a: $(LIBK_OBJS)
 
 %.libk.o: %.S
 	$(CC) -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
-	
+
 %.libk.o: %.asm
 	$(NAS) -felf32 $< -o $@
 

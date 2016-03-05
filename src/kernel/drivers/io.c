@@ -90,14 +90,13 @@ void print_regs(registers_t *regs)
     );
 }
 
-int write_char(const char c)
+int vga_write_char(const char c)
 {
-    // TODO: implement write_char using FILE
     vga_putchar(c);
     return 0;
 }
 
-char read_char ()
+char kb_read_char()
 {
     while (true) {
         if (((uint8_t*)stdin)[in_cursor] != 0) {
@@ -109,18 +108,52 @@ char read_char ()
     return c;
 }
 
-int write(const char *buf, size_t len)
+int vga_write(const char *buf, size_t len)
 {
     for ( size_t i = 0; i < len; i++ )
-        write_char((int) ((const char*) buf)[i]);
+        vga_write_char((int) ((const char*) buf)[i]);
     return 0;
 }
 
-int read(char *buf, size_t len)
+int kb_read(char *buf, size_t len)
 {
     for (size_t i = 0; i < len; i++)
-        buf[i] = read_char();
+        buf[i] = kb_read_char();
     return 0;
+}
+
+int getchark()
+{
+    int c = kb_read_char();
+    vga_write_char(c);
+
+    return c;
+}
+
+char *getsk(char *str)
+{
+    int c = kb_read_char();
+    int i = 0;
+    while (c != '\n') {
+        if (c != '\b') {
+            str[i++] = c;
+            vga_write_char(c);
+        } else if (c == '\b' && i > 0) {
+            str[--i] = 0;
+            vga_write_char(c);
+        }
+        c = kb_read_char();
+    }
+    str[i] = '\0';
+    vga_write_char('\n');
+    return str;
+}
+
+int putsk(const char* string)
+{
+    for (int i = 0; string[i] != '\0'; i++) {
+        vga_write_char(string[i]);
+    }
 }
 
 int printk(const char* format, ...)
@@ -138,7 +171,7 @@ int printk(const char* format, ...)
             amount = 1;
             while ( format[amount] && format[amount] != '%' )
                 amount++;
-            write(format, amount);
+            vga_write(format, amount);
             format += amount;
             written += amount;
             continue;
@@ -158,20 +191,20 @@ int printk(const char* format, ...)
         if ( *format == 'c' ) {
             format++;
             char c = (char) va_arg(parameters, int /* char promotes to int */);
-            write(&c, sizeof(c));
+            vga_write(&c, sizeof(c));
         } else if ( *format == 's' ) {
             format++;
             const char* s = va_arg(parameters, const char*);
-            write(s, strlen(s));
+            vga_write(s, strlen(s));
         } else if ( *format == 'd' ) {
             format++;
             int n = va_arg(parameters, int);
             if (n) {
                 char s[intlen(n, 10)];
                 itoa(s, n, 10);
-                write(s, strlen(s));
+                vga_write(s, strlen(s));
             } else {
-                putchar('0');
+                vga_write_char('0');
             }
         } else if ( *format == 'x') {
             format++;
@@ -179,7 +212,7 @@ int printk(const char* format, ...)
             if (n) {
                 char s[intlen(n, 16)];
                 itoa(s, n, 16);
-                write(s, strlen(s));
+                vga_write(s, strlen(s));
             } else {
                 printk("0x0");
             }

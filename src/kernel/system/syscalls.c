@@ -5,8 +5,8 @@
 #include <phapi.h>
 
 void *syscalls[] = {
-	&write,
-    &read
+	&vga_write,
+    &kb_read
 };
 int num_syscalls = 2;
 

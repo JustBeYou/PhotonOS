@@ -12,7 +12,7 @@ void prompt() {
 	while (true) {
 		memset(cmd, 0, 1023);
 		printk("%s@%s:$ ", user, machine);
-		gets(cmd);
+		getsk(cmd);
 		if (cmd[0] != 0) {
 		    if(shell(cmd)) {
 		        printk("Command '%s' not found.\n", cmd);
@@ -52,7 +52,7 @@ void welcome() {
 
     printk("                                                        by Feraru Mihail");
 
-    getch();
+    kb_read_char();
     vga_setcolor(COLOR_LIGHT_GREY, COLOR_BLACK);
     clear_vga();
 }
@@ -76,8 +76,8 @@ void login()
     logo();
     printk("Log in please.\n");
     printk("Username: ");
-    gets(user);
+    getsk(user);
     printk("Machine: ");
-    gets(machine);
+    getsk(machine);
     printk("Loged in!\n");
 }

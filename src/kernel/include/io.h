@@ -28,17 +28,26 @@ uint32_t inl(uint32_t ad);
 /* print registers */
 void print_regs(registers_t *regs);
 
-/* write char to stdout */
-int write_char(const char c);
+/* write char to vga */
+int vga_write_char(const char c);
 
-/* read char from stdin */
-char read_char();
+/* read char from keyboard */
+char kb_read_char();
 
-/* write string to stdout */
-int write(const char *buf, size_t len);
+/* write string to vga */
+int vga_write(const char *buf, size_t len);
 
-/* read string from stdin */
-int read(char *buf, size_t len);
+/* read string from keyboard */
+int kb_read(char *buf, size_t len);
+
+/* get char from keyboard */
+int getchark();
+
+/* get line from keyboard */
+char *getsk(char *str);
+
+/* put string to vga */
+int putsk(const char* string);
 
 /* formatted printing for kernel mode */
 int printk(const char* format, ...);

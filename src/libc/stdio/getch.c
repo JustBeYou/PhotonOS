@@ -6,5 +6,6 @@
 
 int getch()
 {
-    return read_char();
+    // to be implemented with syscalls
+    return -1;
 }
