@@ -46,7 +46,7 @@ typedef void* type_t;
 /* Kernel defines */
 #define OS_Name "PhotonOS"
 #define Version "v0.0.2"
-#define Relase_Date "6 March 2016"
+#define Relase_Date "7 March 2016"
 #define Author "Feraru Mihail"
 
 #define sti() asm volatile("sti")
