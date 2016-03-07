@@ -6,5 +6,6 @@
 
 int puts(const char* string)
 {
-    return printf("%s\n", string);
+    // to be implemented with syscalls
+    return -1;
 }

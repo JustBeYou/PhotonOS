@@ -6,8 +6,6 @@
 
 int getchar()
 {
-    int c = getch();
-    putchar(c);
-    
-    return c;
+    // to be implemented with syscalls
+    return -1;
 }

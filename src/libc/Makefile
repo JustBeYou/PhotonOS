@@ -1,23 +1,9 @@
-HOST?=$(shell ../default-host.sh)
-HOSTARCH:=$(shell ../target-triplet-to-arch.sh $(HOST))
+CFLAGS= -O2 -g -Wall -Wextra -Iinclude -I../include -I../kernel
+CPPFLAGS= -D__is_photon_libc -Iinclude -I../include -I../kernel
+LIBK_CFLAGS= -ffreestanding -Iinclude -I../include -I../kernel
+LIBK_CPPFLAGS= -D__is_photon_kernel -Iinclude -I../include -I../kernel
 
-CFLAGS?=-O2 -g
-CPPFLAGS?=
-LDFLAGS?=
-LIBS?=
-
-DESTDIR?=
-PREFIX?=/usr/local
-EXEC_PREFIX?=$(PREFIX)
-INCLUDEDIR?=$(PREFIX)/include
-LIBDIR?=$(EXEC_PREFIX)/lib
-
-CFLAGS:=$(CFLAGS) -Wall -Wextra
-CPPFLAGS:=$(CPPFLAGS) -D__is_photon_libc -Iinclude
-LIBK_CFLAGS:=$(CFLAGS) -ffreestanding
-LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_photon_kernel
-
-ARCHDIR:=arch/$(HOSTARCH)
+ARCHDIR= arch/i386
 
 include $(ARCHDIR)/make.config
 
@@ -28,12 +14,6 @@ LIBK_CPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 FREEOBJS:=\
 $(ARCH_FREEOBJS) \
-stdio/getch.o \
-stdio/getchar.o \
-stdio/gets.o \
-stdio/printf.o \
-stdio/putchar.o \
-stdio/puts.o \
 stdlib/abort.o \
 stdlib/intlen.o \
 stdlib/atoi.o \
@@ -58,6 +38,12 @@ phapi/graph.o \
 HOSTEDOBJS:=\
 $(ARCH_HOSTEDOBJS) \
 stdlib/exit.o \
+stdio/getch.o \
+stdio/getchar.o \
+stdio/gets.o \
+stdio/printf.o \
+stdio/putchar.o \
+stdio/puts.o \
 
 OBJS:=\
 $(FREEOBJS) \
@@ -85,7 +71,7 @@ libk.a: $(LIBK_OBJS)
 
 %.o: %.S
 	$(CC) -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
-	
+
 %.o: %.asm
 	$(NAS) -felf32 $< -o $@
 
@@ -94,19 +80,15 @@ libk.a: $(LIBK_OBJS)
 
 %.libk.o: %.S
 	$(CC) -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
-	
+
 %.libk.o: %.asm
 	$(NAS) -felf32 $< -o $@
 
 clean:
 	rm -f $(BINARIES) $(OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o
 
-install: install-headers install-libs
-
-install-headers:
-	mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	cp -RTv include $(DESTDIR)$(INCLUDEDIR)
-
-install-libs: $(BINARIES)
-	mkdir -p $(DESTDIR)$(LIBDIR)
-	cp $(BINARIES) $(DESTDIR)$(LIBDIR)
+install:
+	# cp libc.a ../sysroot/usr/lib
+	cp libg.a ../sysroot/usr/lib
+	cp libk.a ../sysroot/usr/lib
+	cp -r include/* ../sysroot/usr/include

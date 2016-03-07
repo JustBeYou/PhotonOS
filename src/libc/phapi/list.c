@@ -33,7 +33,7 @@ list_t place_list(void *addr, uint32_t max_size, lessthan_pred_t lessthan)
 
 void destroy_list(list_t *array)
 {
-    kfree(array->array);
+    free(array->array);
 }
 
 void insert_list(type_t item, list_t *array)
@@ -43,7 +43,7 @@ void insert_list(type_t item, list_t *array)
     while (iterator < array->size && array->lessthan(array->array[iterator], item)) {
         iterator++;
     }
-    
+
     if (iterator == array->size) {
         array->array[array->size++] = item;
     } else {

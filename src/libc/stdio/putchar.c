@@ -5,6 +5,7 @@
 #include <sys/cdefs.h>
 
 void putchar(char c)
-{    
-    write_char(c);
+{
+    // to be implemented with syscalls
+    return ;
 }
