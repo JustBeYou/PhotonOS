@@ -1,6 +1,6 @@
 .PHONY: all clean install
 
-all: install
+all: initrd_creator
 
 initrd_creator:
 	gcc initrd_creator.c -o initrd_creator
