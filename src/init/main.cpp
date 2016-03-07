@@ -157,9 +157,9 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     init_vfs();
     wstr_color("[OK]\n", COLOR_GREEN);
 
-    /*printk("Initialize task switching.    ");
+    printk("Initialize task switching.    ");
     init_multitasking();
-    wstr_color("[OK]\n", COLOR_GREEN); DISABLED*/
+    wstr_color("[OK]\n", COLOR_GREEN);
 
     wstr_color("\nDONE!", COLOR_GREEN);
     jmp_to_usermode();
@@ -169,7 +169,7 @@ extern int switch_on;
 
 void kernel_main()
 {
-    //switch_on = 1; DISABLED
+    switch_on = 1;
     welcome();
     login();
     prompt();

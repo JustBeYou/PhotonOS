@@ -13,6 +13,7 @@
 #include <string.h>
 #include <phapi.h>
 
+#include <i386/gdt.h>
 #include <kernel/heap.h>
 #include <kernel/process.h>
 

@@ -18,6 +18,7 @@
 #include <i386/handlers.h>
 #include <kernel/io.h>
 #include <kernel/multiboot.h>
+#include <kernel/heap.h>
 
 uint32_t phys_ram_bytes;
 uint32_t phys_ram_kb;

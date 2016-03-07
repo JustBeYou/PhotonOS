@@ -6,6 +6,8 @@
 
 #include <fs/vfs.h>
 #include <fs/initrd.h>
+#include <kernel/heap.h>
+#include <kernel/io.h>
 
 /*** REMOVED BECAUSE IS UNSTABLE ***/
 /*** TODO: GET STABLE VFS ***/

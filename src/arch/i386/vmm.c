@@ -9,6 +9,7 @@
 #include <i386/handlers.h>
 #include <kernel/io.h>
 #include <kernel/multiboot.h>
+#include <kernel/heap.h>
 
 extern uint32_t placement_addr;
 extern uint32_t paging_enabled;
