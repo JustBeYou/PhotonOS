@@ -35,3 +35,4 @@ install:
 	cp libkernel.a ../sysroot/usr/lib
 	mkdir -p ../sysroot/usr/include/kernel
 	cp ../include/kernel/*.* ../sysroot/usr/include/kernel
+	cp ./*.h ../sysroot/usr/include

@@ -23,3 +23,4 @@ clean:
 	rm -rf $(OBJS)
 
 install:
+	cp ./*.h ../sysroot/usr/include
