@@ -18,10 +18,4 @@
 #define O_SYNC 0x1000
 #define O_ACCMODE 0x2000
 
-typedef unsigned short mode_t;
-
-int creat(const char *, mode_t);
-int fcntl(int, int, ...);
-int open(const char *, int, ...);
-
 #endif
