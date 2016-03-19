@@ -42,6 +42,8 @@ typedef void (*isr_t)(registers_t*);
 void register_interrupt_handler(uint8_t n, isr_t handler);
 
 typedef void* type_t;
+typedef unsigned short mode_t;
+typedef long long loff_t;
 
 /* Kernel defines */
 #define OS_Name "PhotonOS"
