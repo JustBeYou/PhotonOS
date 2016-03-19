@@ -52,6 +52,10 @@ int putsk(const char* string);
 /* formatted printing for kernel mode */
 int printk(const char* format, ...);
 
+int kopen(const char *pathname, int flags);
+size_t kread(int fd, void *buf, size_t count);
+int kclose(int fd);
+
 /**
   * Allow C code to call system.
   */

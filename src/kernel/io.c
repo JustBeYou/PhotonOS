@@ -17,9 +17,12 @@
 #include <kernel/vga.h>
 #include <kernel/io.h>
 #include <drivers/keyboard.h>
+#include <fs/vfs.h>
 
 extern void *stdin;
 extern volatile uint32_t in_cursor;
+extern struct file_operations fops;
+extern Llist_t *opened_files;
 
 /* output byte */
 void outb(uint32_t ad, uint8_t v)
@@ -233,3 +236,47 @@ int printk(const char* format, ...)
     va_end(parameters);
     return written;
 }
+
+int kopen(const char *pathname, int flags)
+{
+    file *f = kmalloc(sizeof(file), 0, 0);
+    f->f_dentry = get_dentry_by_path(pathname);
+    f->f_op = &fops;
+    f->f_mode = (mode_t) flags;
+    f->f_pos = 0;
+    f->f_uid = 0;
+    f->f_gid = 0;
+    f->f_version = 0;
+    f->f_dentry->inode->open_flags = flags;
+
+    return f->f_op->open(f->f_dentry->inode, f);
+}
+
+size_t kread(int fd, void *buf, size_t count)
+{
+    int i = 0;
+    Llist_t *elem = opened_files;
+    while (elem != NULL) {
+        if (i == fd) {
+
+            if (elem->data == NULL) {
+                return -1;
+            }
+
+            file *f = (file*) elem->data;
+            loff_t off = (loff_t) f->f_dentry->inode->offset;
+            return f->f_op->read(f, buf, count, &off);
+        }
+
+        elem = elem->next;
+        i++;
+    }
+    return -1;
+}
+
+int kclose(int fd)
+{
+
+}
+
+// TODO: add open, read, close for process space
