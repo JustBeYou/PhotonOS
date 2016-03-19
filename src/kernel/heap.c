@@ -21,22 +21,22 @@ extern uint32_t placement_addr;
 
 int kheap_initialized = 0;
 mem_heap_t *kernel_heap;
-Llist_t *kernel_free_mem_head;
-mem_chunk_t *free_mem_chunk_head;
+Llist_t *kernel_mem_head;
+mem_chunk_t *mem_chunk_head;
 
 void init_heap ()
 {
     kernel_heap = kmalloc(sizeof(mem_heap_t), 0, 0);
-    kernel_free_mem_head = kmalloc(sizeof(Llist_t), 0, 0);
-    free_mem_chunk_head = kmalloc(sizeof(mem_chunk_t), 0, 0);
+    kernel_mem_head = kmalloc(sizeof(Llist_t), 0, 0);
+    mem_chunk_head = kmalloc(sizeof(mem_chunk_t), 0, 0);
 
     kernel_heap->magic = 0xbeefbeef;
-    kernel_heap->head = kernel_free_mem_head;
+    kernel_heap->head = kernel_mem_head;
     kernel_heap->head->prev = NULL;
     kernel_heap->head->next = NULL;
-    kernel_heap->head->data = (void*) free_mem_chunk_head;
-    free_mem_chunk_head->used = 0;
-    free_mem_chunk_head->size = KERNEL_HEAP_SIZE;
+    kernel_heap->head->data = (void*) mem_chunk_head;
+    mem_chunk_head->used = 0;
+    mem_chunk_head->size = KERNEL_HEAP_SIZE;
     kernel_heap->mem_size = KERNEL_HEAP_SIZE;
     kernel_heap->mem_free = KERNEL_HEAP_SIZE;
     kernel_heap->mem_used = 0;
@@ -53,9 +53,6 @@ void *kmalloc(size_t size, int align, uint32_t *phys)
         }
 
         void *ret_p = (void*) ((size_t) mem_chunk + MEM_HEADER_SIZE);
-
-        kernel_heap->mem_used += size;
-        kernel_heap->mem_free -= size;
         return ret_p;
     } else {
         if (align && (placement_addr & 0xFFFFF000)) {
@@ -101,8 +98,6 @@ void kfree(void *p)
         mem_chunk_t *data = (mem_chunk_t*) chunk->data;
         size_t size = data->size;
 
-        kernel_heap->mem_used += size;
-        kernel_heap->mem_free -= size;
         free_mem_chunk(kernel_heap, chunk);
 	} else {
 	    return;
@@ -210,8 +205,8 @@ Llist_t *alloc_mem_chunk(mem_heap_t *heap, size_t size)
 
     if (chunk_data->size == size) {
         chunk_data->used = 1;
-        heap->mem_free -= size;
-        heap->mem_used += size;
+        heap->mem_free -= (size + MEM_HEADER_SIZE);
+        heap->mem_used += (size + MEM_HEADER_SIZE);
 
         return free_chunk;
     } else {
@@ -236,8 +231,8 @@ void free_mem_chunk(mem_heap_t *heap, Llist_t *mem)
 {
     mem_chunk_t *data = (mem_chunk_t*) mem->data;
     data->used = 0;
-    heap->mem_free += data->size;
-    heap->mem_used -= data->size;
+    heap->mem_free += (data->size + MEM_HEADER_SIZE);
+    heap->mem_used -= (data->size + MEM_HEADER_SIZE);
 
     if (mem->prev != NULL) {
         mem_chunk_t *prev_data = (mem_chunk_t*) mem->prev->data;
