@@ -11,6 +11,8 @@
 #include <kernel/ui.h>
 #include <kernel/vga.h>
 #include <kernel/heap.h>
+#include <fs/fcntl.h>
+#include <fs/vfs.h>
 
 extern int detect_cpu();
 
@@ -39,6 +41,7 @@ void cmd_help()
 -> reboot - reboot the PC\n \
 -> shutdown - shutdown the PC\n \
 -> top - print processes info\n \
+-> read - test read function\n \
 """);
 }
 
@@ -113,7 +116,27 @@ void cmd_top()
     }
 }
 
-int cmd_limit = 9;
+void cmd_test_read()
+{
+    int fd1 = kopen("/f1.txt", O_RDONLY);
+    int fd2 = kopen("/f2.txt", O_RDONLY);
+    int fd3 = kopen("/help.txt", O_RDONLY);
+
+    char buf[512];
+    memset(buf, 0, 512);
+
+    kread(fd1, buf, 512);
+    printk("f1.txt: %s\n", buf);
+    memset(buf, 0, 512);
+    kread(fd2, buf, 512);
+    printk("f2.txt: %s\n", buf);
+    memset(buf, 0, 512);
+    kread(fd3, buf, 512);
+    printk("help.txt: %s\n", buf);
+    memset(buf, 0, 512);
+}
+
+int cmd_limit = 10;
 
 shell_cmd_t cmd_table[] = {
     {"help",  cmd_help},
@@ -124,7 +147,8 @@ shell_cmd_t cmd_table[] = {
     {"reboot", cmd_reboot},
     {"dbg", cmd_dbg},
     {"shutdown", cmd_shutdown},
-    {"top", cmd_top}
+    {"top", cmd_top},
+    {"test_read", cmd_test_read}
 };
 
 int shell(char *cmd)
