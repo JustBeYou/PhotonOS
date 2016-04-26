@@ -15,27 +15,27 @@
 /* Kernel Data Structures */
 typedef struct registers
 {
-    uint32_t cr3;
-    uint32_t cr2;
-    uint32_t gs;
-    uint32_t fs;
-    uint32_t es;
-    uint32_t ds;
-    uint32_t edi;
-    uint32_t esi;
-    uint32_t ebp;
-    uint32_t kesp;
-    uint32_t ebx;
-    uint32_t edx;
-    uint32_t ecx;
-    uint32_t eax;
-    uint32_t int_no;
-    uint32_t err_code;
-    uint32_t eip;
-    uint32_t cs;
-    uint32_t eflags;
-    uint32_t uesp;
-    uint32_t ss;
+    uint32_t cr3; // +0 bytes
+    uint32_t cr2; // +4 bytes
+    uint32_t gs; // +8 bytes
+    uint32_t fs; // +12 bytes
+    uint32_t es; // +16 bytes
+    uint32_t ds; // +20 bytes
+    uint32_t edi; // +24 bytes
+    uint32_t esi; // +28 bytes
+    uint32_t ebp; // +32 bytes
+    uint32_t kesp; // +36 bytes
+    uint32_t ebx; // +40 bytes
+    uint32_t edx; // +44 bytes
+    uint32_t ecx; // +48 bytes
+    uint32_t eax; // +52 bytes
+    uint32_t int_no; // +56 bytes
+    uint32_t err_code; // +60 bytes
+    uint32_t eip; // +64 bytes
+    uint32_t eflags;// +68 bytes
+    uint32_t cs; // +72 bytes
+    uint32_t uesp; // +76 bytes
+    uint32_t ss; // +80 bytes
 } registers_t; // registers for interrupts
 
 typedef void (*isr_t)(registers_t*);
@@ -79,6 +79,7 @@ extern void switch_context();
 extern void save_context();
 extern void switch_mm();
 extern void switch_to();
+extern void syscall_handler(registers_t *regs);
 
 /* Kernel system functions */
 void panic(const char *msg, int line, char *file);

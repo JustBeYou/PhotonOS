@@ -18,7 +18,8 @@ pit.o \
 pmm.o \
 regs.o \
 userspace.o \
-vmm.o
+vmm.o \
+syscall.o 
 
 all: libarch.a boot/boot.o
 

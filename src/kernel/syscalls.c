@@ -7,19 +7,17 @@
 #include <i386/handlers.h>
 #include <kernel/io.h>
 
+void say_hello()
+{
+    char buf[] = "Hello!\n";
+    size_t len = strlen(buf);
+    vga_write(buf, len);
+}
+
 void *syscalls[] = {
 	&vga_write,
-    &kb_read
+    &kb_read,
+    &say_hello
 };
-int num_syscalls = 2;
 
-void syscall_handler(registers_t *regs)
-{
-	/*if (regs->eax > (uint32_t) num_syscalls)
-		return;
-
-	void *location = syscalls[regs->eax - 1];
-
-    int ret;*/
-    // TODO: rewrite this function in asm
-}
+int num_syscalls = 3;

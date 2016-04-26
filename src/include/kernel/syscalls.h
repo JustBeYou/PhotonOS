@@ -9,9 +9,14 @@
 
 #include <i386/handlers.h>
 
-/**
-  * System calls handler.
-  */
-void syscall_handler(registers_t *regs);
+#define syscall(eax, ebx, ecx, edx, esi, edi) \
+        asm volatile ("movl %0, %%eax;" \
+        "movl %1, %%ebx;" \
+        "movl %2, %%ecx;" \
+        "movl %3, %%edx;" \
+        "movl %4, %%esi;" \
+        "movl %5, %%edi;" \
+        "int $0x80;" \
+        : : "r" (eax) , "r" (ebx) , "r" (ecx) , "r" (edx) , "r" (esi) , "r" (edi))
 
 #endif
