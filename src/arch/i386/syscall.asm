@@ -1,6 +1,23 @@
 extern num_syscalls
 extern syscalls
 
+[global syscall]
+syscall:
+    push ebp
+    mov ebp, esp
+    
+    mov eax, [ebp + 8]
+    mov ebx, [ebp + 12]
+    mov ecx, [ebp + 16]
+    mov edx, [ebp + 20]
+    mov esi, [ebp + 24]
+    mov edi, [ebp + 28]
+    
+    int 0x80
+    
+    pop ebp
+    ret
+
 [global syscall_handler]
 syscall_handler:
     ; save registers
@@ -32,19 +49,28 @@ syscall_handler:
     pop eax             ; load *regs
 
     ; call function
-    push word [eax + 28] ; arguments (esi)
-    push word [eax + 24] ; (edi)
-    push word [eax + 44] ; (edx)
-    push word [eax + 48] ; (ecx)
-    push word [eax + 40] ; (ebx)
+    push eax            ; save *regs
+    
+    mov ecx, [eax + 28] ; arguments (esi)
+    push ecx
+
+    mov ecx, [eax + 24] ; (edi)
+    push ecx
+
+    mov ecx, [eax + 44] ; (edx)
+    push ecx
+
+    mov ecx, [eax + 48] ; (ecx)
+    push ecx
+
+    mov ecx, [eax + 40] ; (ebx)
+    push ecx
 
     call ebx
 
-    pop word eax
-    pop word eax
-    pop word eax
-    pop word eax
-    pop word eax
+    add esp, 20
+    pop ebx             ; load *regs
+    mov [ebx + 52], eax ; store return value in regs->eax
 
     ; clean
     jmp syscall_clean
@@ -53,7 +79,7 @@ syscall_handler:
 
 syscall_clean:
     ; restore registers
-    push edx
+    pop edx
     pop ecx
     pop ebx
     pop eax
