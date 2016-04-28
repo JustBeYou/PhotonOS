@@ -93,9 +93,6 @@ esac
 # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
 
 case "${host_cpu}" in
-  i[3-7]86-*-photonos*)
-	sys_dir=photonos
-	;;
   a29k)
 	machine_dir=a29k
 	;;
@@ -379,6 +376,9 @@ esac
 # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
 
 case "${host}" in
+  i[3-7]86-*-photonos*)
+	sys_dir=photonos
+	;;
   *-*-cygwin*)
 	posix_dir=posix
 	stdio64_dir=stdio64
