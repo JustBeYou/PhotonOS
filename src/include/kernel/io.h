@@ -56,17 +56,4 @@ int kopen(const char *pathname, int flags);
 size_t kread(int fd, void *buf, size_t count);
 int kclose(int fd);
 
-/**
-  * Allow C code to call system.
-  */
-#define syscall(eax, ebx, ecx, edx, esi, edi) \
-        asm volatile ("movl %0, %%eax;" \
-        "movl %1, %%ebx;" \
-        "movl %2, %%ecx;" \
-        "movl %3, %%edx;" \
-        "movl %4, %%esi;" \
-        "movl %5, %%edi;" \
-        "int $0x80;" \
-        : : "r" (eax) , "r" (ebx) , "r" (ecx) , "r" (edx) , "r" (esi) , "r" (edi))
-
 #endif
