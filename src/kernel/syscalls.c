@@ -7,17 +7,20 @@
 #include <i386/handlers.h>
 #include <kernel/io.h>
 
-void say_hello()
+void useless(void)
 {
-    char buf[] = "Hello!\n";
-    size_t len = strlen(buf);
-    vga_write(buf, len);
+    return ;
 }
 
 void *syscalls[] = {
-	&vga_write,
-    &kb_read,
-    &say_hello
+    &useless, // USELESS
+    NULL, // exit
+    NULL, // fork
+    NULL, // read
+    NULL, // write
+    NULL, // open
+    NULL, // close
+    NULL  // getpid
 };
 
-int num_syscalls = 3;
+int num_syscalls = 8;
