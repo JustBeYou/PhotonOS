@@ -11,6 +11,7 @@
 #include <kernel/ui.h>
 #include <kernel/vga.h>
 #include <kernel/heap.h>
+#include <kernel/syscalls.h>
 #include <fs/fcntl.h>
 #include <fs/vfs.h>
 
@@ -136,7 +137,14 @@ void cmd_test_read()
     memset(buf, 0, 512);
 }
 
-int cmd_limit = 10;
+void cmd_test_syscall()
+{
+    printk("System calls test\n");
+    uint32_t ret = syscall(2, 0, 0, 0, 0, 0);
+    printk("Syscall returned: %d == %d (%d)\n", ret, 0, ret == 0);
+}
+
+int cmd_limit = 11;
 
 shell_cmd_t cmd_table[] = {
     {"help",  cmd_help},
@@ -148,7 +156,8 @@ shell_cmd_t cmd_table[] = {
     {"dbg", cmd_dbg},
     {"shutdown", cmd_shutdown},
     {"top", cmd_top},
-    {"test_read", cmd_test_read}
+    {"test_read", cmd_test_read},
+    {"test_syscall", cmd_test_syscall}
 };
 
 int shell(char *cmd)
