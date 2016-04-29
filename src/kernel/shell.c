@@ -140,7 +140,7 @@ void cmd_test_read()
 void cmd_test_syscall()
 {
     printk("System calls test\n");
-    uint32_t ret = syscall(2, 0, 0, 0, 0, 0);
+    uint32_t ret = syscall(4, 0, 0, 0, 0, 0);
     printk("Syscall returned: %d == %d (%d)\n", ret, 0, ret == 0);
 }
 
