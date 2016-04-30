@@ -8,6 +8,7 @@
 #include <fs/initrd.h>
 #include <kernel/heap.h>
 #include <kernel/io.h>
+#include <kernel/process.h>
 
 /*** REMOVED BECAUSE IS UNSTABLE ***/
 /*** TODO: GET STABLE VFS ***/
@@ -15,10 +16,15 @@
 graph_node_t *vfs_root;
 super_block_t *vfs_super_block;
 inode_t *vfs_root_inode;
+
 struct dentry *dlist;
-Llist_t *opened_files;
+struct file **opened_files;
+int file_table_size;
+
 Llist_t *inode_cache;
 Llist_t *directory_cache;
+
+char kernel_space_open;
 
 // Initrd
 extern initrd_super_block_t *sb;
@@ -26,31 +32,49 @@ extern initrd_file_header_t *fheader;
 extern initrd_file_header_t *initrd_headers;
 extern inode_t *initrd_nodes;
 
+extern process_t *current_process;
+
 int file_open(struct inode *inode, struct file *f)
 {
-    Llist_t *file_list = opened_files;
-    Llist_t *new_file = kmalloc(sizeof(Llist_t), 0, 0);
-    if (file_list->data == NULL) {
-        kfree(new_file);
-        file_list->data = (void*) f;
-        return 0;
+    int fd = -1;
+    char found = 0;
+    struct file **op_f;
+    int f_tbl_size;
+    
+    if (kernel_space_open) {
+        op_f = opened_files;
+        f_tbl_size = file_table_size;
+    } else {
+        op_f = current_process->opened_files;
+        f_tbl_size = current_process->file_table_size;
     }
-
-    int fd = 1;
-    while (file_list->next != NULL) {
-        file_list = file_list->next;
-        fd++;
+    
+    for (fd = 0; fd < f_tbl_size; fd++) {
+        if (op_f[fd] == NULL) {
+            op_f[fd] = f;
+            found = 1;
+            break;
+            }
     }
-
-    file *temp = (file*)file_list->data;
-
-    file_list->next = new_file;
-    new_file->prev = file_list;
-    new_file->next = NULL;
-    new_file->data = (void*) f;
-
-    f->f_dentry = get_dentry_by_inode(inode);
-
+        
+    if (!found) {
+        f_tbl_size *= 2;
+        for (int i = f_tbl_size; i < f_tbl_size; i++) {
+            op_f[i] = NULL;
+        }
+        fd = f_tbl_size / 2;
+        found = 1;
+    }
+    
+    if (kernel_space_open) {
+        file_table_size = f_tbl_size;
+    } else {
+        current_process->file_table_size = f_tbl_size;
+    }
+    
+    if (found)
+        f->f_dentry = get_dentry_by_inode(inode);
+    
     return fd;
 }
 
@@ -101,7 +125,13 @@ void init_vfs()
         graph_add_node(vfs_root, f);
     }
 
-    opened_files = Llist_create(NULL);
+    opened_files = kmalloc(sizeof(struct file) * DEFAULT_F_TBL_SIZE, 0, 0);
+    file_table_size = DEFAULT_F_TBL_SIZE;
+    
+    for (int i = 0; i < file_table_size; i++) {
+        opened_files[i] = NULL;
+    }
+    kernel_space_open = 1;
 
     char path[] = "/f1.txt";
     struct dentry *de = get_dentry_by_path(path);
