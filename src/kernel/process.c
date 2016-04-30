@@ -49,6 +49,8 @@ void init_multitasking()
     user_stack = start_process->user_stack;
     set_kernel_stack(start_process->kern_stack);
     start_process->cr3 = 0;
+    start_process->opened_files = kmalloc(sizeof(struct file) * DEFAULT_F_TBL_SIZE, 0, 0);
+    start_process->file_table_size = DEFAULT_F_TBL_SIZE;
 
     time_to_run = 0;
 
@@ -67,6 +69,8 @@ process_t *create_process(char *name)
     new_process->prior = 0;
     memcpy(new_process->name, name, strlen(name) + 1);
 	new_process->next = NULL;
+	new_process->opened_files = kmalloc(sizeof(struct file) * DEFAULT_F_TBL_SIZE, 0, 0);
+	new_process->file_table_size = DEFAULT_F_TBL_SIZE;
 
     /* Here I should load the file and create a context for the new process. */
 
