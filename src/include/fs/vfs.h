@@ -20,7 +20,7 @@
 #define FS_MOUNTPOINT 0x20
 #define FS_META       0x40
 
-#define MAX_KERNEL_FD 256
+#define DEFAULT_F_TBL_SIZE 8
 
 struct super_block;
 struct inode;
