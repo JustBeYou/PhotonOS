@@ -12,15 +12,20 @@ void useless(void)
     return ;
 }
 
+int not_implemented_syscall(void)
+{
+    return 0xDEADBEEF;
+}
+
 void *syscalls[] = {
-    &useless, // USELESS
-    NULL, // exit
-    NULL, // fork
-    NULL, // read
-    NULL, // write
-    NULL, // open
-    NULL, // close
-    NULL  // getpid
+    &useless,                   // USELESS
+    &not_implemented_syscall,   // exit
+    &not_implemented_syscall,   // fork
+    &read,                      // read
+    &write,                     // write (not implemented)
+    &open,                      // open
+    &close,                     // close
+    &not_implemented_syscall    // getpid
 };
 
 int num_syscalls = 8;
