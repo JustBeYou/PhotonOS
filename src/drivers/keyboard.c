@@ -38,29 +38,18 @@ KF1, KF2, KF3, KF4, KF5, KF6, KF7, KF8, KF9, KF10, 0, 0,
 KHOME, KUP, KPGUP, '-', KLEFT, '5', KRIGHT, '+', KEND, KDOWN, KPGDN, KINS, KDEL, 0, 0, 0, KF11, KF12 };
 
 uint8_t kb_buffer[KEYBOARD_BUFFER_SIZE];
-int last;
+int kb_buf_pos;
 int shift;
 char *ascii_s;
 char *ascii_S;
 
-extern void *stdin;
-extern uint32_t in_cursor;
-
 void install_keyboard()
 {
-    in_cursor = 0;
-
     ascii_s = USasciiNonShift;
     ascii_S = USasciiShift;
-    last = 0;
+    kb_buf_pos = 0;
 
-    keyboard_set_handler(&read_kb_buff);
     register_interrupt_handler(IRQ1, &keyboard_interrupt_handler);
-}
-
-void keyboard_set_handler(void (*callback)(uint8_t *buf, uint16_t size))
-{
-    keyboard_handler = callback;
 }
 
 void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
@@ -81,22 +70,34 @@ void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
         }
 
         if (shift) {
-            kb_buffer[last++] = ascii_S[scancode];
+            kb_buffer[kb_buf_pos++] = ascii_S[scancode];
         } else {
-            kb_buffer[last++] = ascii_s[scancode];
+            kb_buffer[kb_buf_pos++] = ascii_s[scancode];
         }
 
-        if (special != 1) {
-            keyboard_handler(kb_buffer, last);
+        if (special) {
+            uint8_t key = kb_buffer[--kb_buf_pos];
+            kb_buffer[kb_buf_pos] = 0;
+            
+            // something useless to remove the 'unused' warn
+            key -= key;
+            key += key;
+            // do special key work
         }
 
-        if (last == KEYBOARD_BUFFER_SIZE) {
-            last = 0;
+        if (kb_buf_pos == KEYBOARD_BUFFER_SIZE) {
+            kb_buf_pos = 0;
         }
     }
 }
 
-void read_kb_buff(uint8_t *buf, uint16_t size)
+char kb_getchar()
 {
-    ((uint8_t*) stdin)[in_cursor] = buf[size - 1];
+    volatile int pos_now = kb_buf_pos;
+    while (1) {
+        if (pos_now != kb_buf_pos)
+            break;
+    }
+    
+    return (char) kb_buffer[kb_buf_pos - 1];
 }
