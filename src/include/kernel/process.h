@@ -2,6 +2,8 @@
 #define _process_h
 
 #include <system.h>
+#include <fs/vfs.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,6 +24,9 @@ typedef struct process {
     uint32_t ready; // ready or not?
     uint32_t prior; // priority
     char name[32]; // name of process
+    
+    struct file **opened_files;
+    int file_table_size;
     struct process *next; // next process in list
 } process_t;
 
