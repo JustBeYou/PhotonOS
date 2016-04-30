@@ -119,22 +119,26 @@ void cmd_top()
 
 void cmd_test_read()
 {
-    int fd1 = kopen("/f1.txt", O_RDONLY);
-    int fd2 = kopen("/f2.txt", O_RDONLY);
-    int fd3 = kopen("/help.txt", O_RDONLY);
+    int fd1 = open("/f1.txt", O_RDONLY);
+    int fd2 = open("/f2.txt", O_RDONLY);
+    int fd3 = open("/help.txt", O_RDONLY);
 
     char buf[512];
     memset(buf, 0, 512);
 
-    kread(fd1, buf, 512);
-    printk("f1.txt: %s\n", buf);
+    read(fd1, buf, 512);
+    printk("f1.txt (%d): %s\n", fd1, buf);
     memset(buf, 0, 512);
-    kread(fd2, buf, 512);
-    printk("f2.txt: %s\n", buf);
+    read(fd2, buf, 512);
+    printk("f2.txt (%d): %s\n", fd2, buf);
     memset(buf, 0, 512);
-    kread(fd3, buf, 512);
-    printk("help.txt: %s\n", buf);
+    read(fd3, buf, 512);
+    printk("help.txt (%d): %s\n", fd3, buf);
     memset(buf, 0, 512);
+    
+    close(fd1);
+    close(fd2);
+    close(fd3);
 }
 
 void cmd_test_syscall()
