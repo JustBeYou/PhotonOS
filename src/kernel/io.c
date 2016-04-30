@@ -16,13 +16,17 @@
 #include <i386/handlers.h>
 #include <kernel/vga.h>
 #include <kernel/io.h>
+#include <kernel/process.h>
 #include <drivers/keyboard.h>
 #include <fs/vfs.h>
 
 extern void *stdin;
 extern volatile uint32_t in_cursor;
 extern struct file_operations fops;
-extern Llist_t *opened_files;
+extern struct file **opened_files;
+extern int file_table_size;
+extern char kernel_space_open;
+extern process_t *current_process;
 
 /* output byte */
 void outb(uint32_t ad, uint8_t v)
@@ -202,7 +206,7 @@ int printk(const char* format, ...)
         }
         if ( *format == 'c' ) {
             format++;
-            char c = (char) va_arg(parameters, int /* char promotes to int */);
+            char c = (char) va_arg(parameters, int);
             vga_write(&c, sizeof(c));
         } else if ( *format == 's' ) {
             format++;
@@ -237,8 +241,11 @@ int printk(const char* format, ...)
     return written;
 }
 
+// Kernel space file functions
 int kopen(const char *pathname, int flags)
 {
+    kernel_space_open = 1;
+    
     file *f = kmalloc(sizeof(file), 0, 0);
     f->f_dentry = get_dentry_by_path(pathname);
     f->f_op = &fops;
@@ -254,29 +261,83 @@ int kopen(const char *pathname, int flags)
 
 size_t kread(int fd, void *buf, size_t count)
 {
-    int i = 0;
-    Llist_t *elem = opened_files;
-    while (elem != NULL) {
-        if (i == fd) {
-
-            if (elem->data == NULL) {
-                return -1;
-            }
-
-            file *f = (file*) elem->data;
-            loff_t off = (loff_t) f->f_dentry->inode->offset;
-            return f->f_op->read(f, buf, count, &off);
-        }
-
-        elem = elem->next;
-        i++;
+    if (fd >= file_table_size || buf == NULL) {
+        return -1;
     }
-    return -1;
+    
+    file *f = opened_files[fd];
+    
+    if (f == NULL) {
+        return -1;
+    }
+    
+    loff_t off = (loff_t) f->f_dentry->inode->offset;
+    return f->f_op->read(f, buf, count, &off);
 }
 
 int kclose(int fd)
 {
-
+    if (fd >= file_table_size) {
+        return -1;
+    }
+    
+    file *f = opened_files[fd];
+    opened_files[fd] = NULL;
+    inode_rewind(f->f_dentry->inode);
+    kfree(f);
+    
+    return 0;
 }
 
-// TODO: add open, read, close for process space
+// User space file functions
+int open(const char *pathname, int flags)
+{
+    kernel_space_open = 0;
+    
+    file *f = kmalloc(sizeof(file), 0, 0);
+    f->f_dentry = get_dentry_by_path(pathname);
+    f->f_op = &fops;
+    f->f_mode = (mode_t) flags;
+    f->f_pos = 0;
+    f->f_uid = 0;
+    f->f_gid = 0;
+    f->f_version = 0;
+    f->f_dentry->inode->open_flags = flags;
+
+    return f->f_op->open(f->f_dentry->inode, f);
+}
+
+int read(int fd, char *buf, size_t count)
+{
+    if (fd >= current_process->file_table_size || buf == NULL) {
+        return -1;
+    }
+    
+    file *f = current_process->opened_files[fd];
+    
+    if (f == NULL) {
+        return -1;
+    }
+    
+    loff_t off = (loff_t) f->f_dentry->inode->offset;
+    return f->f_op->read(f, buf, count, &off);
+}
+
+int write(int fd, char *buf, size_t count)
+{
+    return -1;
+}
+
+int close(int fd)
+{
+    if (fd >= current_process->file_table_size) {
+        return -1;
+    }
+    
+    file *f = current_process->opened_files[fd];
+    current_process->opened_files[fd] = NULL;
+    inode_rewind(f->f_dentry->inode);
+    kfree(f);
+    
+    return 0;
+}
