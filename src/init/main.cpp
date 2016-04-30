@@ -27,6 +27,7 @@ extern "C" {
 #include <kernel/vga.h>
 #include <kernel/io.h>
 #include <kernel/ui.h>
+#include <kernel/syscalls.h>
 #include <i386/pmm.h>
 #include <i386/vmm.h>
 #include <i386/pit.h>
@@ -57,10 +58,7 @@ extern mem_heap_t *kernel_heap;
 extern char user[20];
 extern char machine[30];
 
-void* stdin;
-volatile int in_cursor;
 uint32_t user_stack;
-uint8_t inbuffer[STDIO_SIZE];
 uint32_t initrd_start;
 uint32_t initrd_end;
 
@@ -127,15 +125,6 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
 
     printk("Total system memory: %d MiB in %d frames.\n", phys_ram_mb,
            nframes);
-
-    printk("Initialize stdio (allow using of stdio header).   ");
-
-    stdin = (uint8_t*) inbuffer;
-
-    for (int i = 0; i < STDIO_SIZE; i++) {
-        inbuffer[i] = 0;
-    }
-    wstr_color("[OK]\n", COLOR_GREEN);
 
     printk("Initialize kernel heap.    ");
     init_heap();
