@@ -20,8 +20,6 @@
 #include <drivers/keyboard.h>
 #include <fs/vfs.h>
 
-extern void *stdin;
-extern volatile uint32_t in_cursor;
 extern struct file_operations fops;
 extern struct file **opened_files;
 extern int file_table_size;
@@ -108,16 +106,9 @@ int vga_write_char(const char c)
     return 0;
 }
 
-char kb_read_char ()
+char kb_read_char()
 {
-    while (true) {
-        if (((uint8_t*)stdin)[in_cursor] != 0) {
-            in_cursor++;
-            break;
-        }
-    }
-    int c = ((uint8_t*)stdin)[in_cursor - 1];
-    return c;
+    return kb_getchar();   
 }
 
 int vga_write(const char *buf, size_t len)
