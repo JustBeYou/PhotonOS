@@ -52,8 +52,20 @@ int putsk(const char* string);
 /* formatted printing for kernel mode */
 int printk(const char* format, ...);
 
+// Kernel space file functions
 int kopen(const char *pathname, int flags);
+
 size_t kread(int fd, void *buf, size_t count);
+
 int kclose(int fd);
+
+// User space file functions
+int open(const char *pathname, int flags);
+
+int read(int fd, char *buf, size_t count);
+
+int write(int fd, char *buf, size_t count);
+
+int close(int fd);
 
 #endif
