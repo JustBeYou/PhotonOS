@@ -34,6 +34,7 @@ phapi/list.o \
 phapi/linked_list.o \
 phapi/bitmap.o \
 phapi/graph.o \
+phapi/stack.o \
 
 HOSTEDOBJS:=\
 $(ARCH_HOSTEDOBJS) \
