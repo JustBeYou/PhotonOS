@@ -21,6 +21,7 @@
 #define FS_META       0x40
 
 #define DEFAULT_F_TBL_SIZE 8
+#define DEFAULT_DLIST_SIZE 256
 
 struct super_block;
 struct inode;
@@ -166,8 +167,10 @@ typedef struct path_tokens {
 } path_tokens;
 
 void init_vfs();
+void add_dentry(struct dentry *de);
 struct dentry *get_dentry_by_inode(inode_t *inode);
 struct dentry *get_dentry_by_path(char *path);
+graph_node_t *get_node_by_tokens(path_tokens *tokens);
 struct dentry *get_dentry_by_tokens(path_tokens *tokens);
 path_tokens *tokenize_path(char *path);
 
