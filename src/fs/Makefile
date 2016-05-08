@@ -8,7 +8,9 @@ INCLUDE= -I./ -I../include -I../kernel -I../libc/include
 
 OBJS=\
 vfs.o \
-initrd.o
+initrd.o \
+procfs.o \
+mount.o
 
 all: libfs.a
 
