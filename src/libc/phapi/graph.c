@@ -17,10 +17,35 @@ graph_node_t *graph_create(void *data)
     return g;
 }
 
-graph_node_t *graph_find(__attribute__((unused)) graph_node_t *base)
+graph_node_t *graph_find(graph_node_t *base, void *data, int (*cmp)(void*, void*))
 {
-    // TODO: implement graph find
-    return NULL;
+    graph_node_t *found_g = NULL;
+    STACK nodes_stack = stack_init(NULL, NULL);
+    stack_push(nodes_stack, (void*) base);
+    
+    while (stack_empty(nodes_stack) == STACK_NOT_EMPTY) {
+        graph_node_t *node = (graph_node_t*) stack_head(nodes_stack);
+        stack_pop(nodes_stack);
+        
+        if (!node->visited) {
+            node->visited = 1;
+            
+            if (cmp(node->data, data)) {
+                found_g = node;
+                break;
+            }
+            
+            Llist_t *temp_l = node->nodes;
+            while (temp_l != NULL) {
+                graph_node_t *temp_n = (graph_node_t*) temp_l->data;
+                stack_push(nodes_stack, (void*) temp_n);
+                temp_l = temp_l->next;
+            }
+        }
+    }
+    
+    stack_delete(&nodes_stack);
+    return found_g;
 }
 
 int graph_add_node(graph_node_t *parent, graph_node_t *child)
