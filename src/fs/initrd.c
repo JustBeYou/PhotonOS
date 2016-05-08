@@ -9,25 +9,28 @@
 #include <kernel/io.h>
 #include <fs/initrd.h>
 #include <fs/vfs.h>
+#include <fs/mount.h>
 
-initrd_super_block_t *sb;
+initrd_super_block_t *initrd_sb;
 initrd_file_header_t *fheader;
 initrd_file_header_t *initrd_headers;
 inode_t *initrd_nodes;
 
+extern mnt_table_t mounted_fs[256];
+
 /* Initrd File System */
 void initrd_load(uint32_t location)
 {
-    sb = (initrd_super_block_t*) location;
+    initrd_sb = (initrd_super_block_t*) location;
     fheader = NULL;
-    initrd_nodes = kmalloc(sizeof(inode_t) * sb->files, 0, 0);
-    initrd_headers = kmalloc(sizeof(initrd_file_header_t) * sb->files, 0, 0);
+    initrd_nodes = kmalloc(sizeof(inode_t) * initrd_sb->files, 0, 0);
+    initrd_headers = kmalloc(sizeof(initrd_file_header_t) * initrd_sb->files, 0, 0);
 
-    location += sb->sb_struct_size;
-    for (int i = 0; i < sb->files; i++) {
+    location += initrd_sb->sb_struct_size;
+    for (int i = 0; i < initrd_sb->files; i++) {
         fheader = (initrd_file_header_t*) location;
         memcpy(&(initrd_headers[i]), fheader, sizeof(initrd_file_header_t));
-        uint32_t block_addr = (uint32_t) fheader + sb->fh_struct_size;
+        uint32_t block_addr = (uint32_t) fheader + initrd_sb->fh_struct_size;
         inode_init(&initrd_nodes[i], fheader->flags, fheader->inode,
                     fheader->length, 0, 0, block_addr);
         initrd_nodes[i].open = &initrd_open;
@@ -37,6 +40,28 @@ void initrd_load(uint32_t location)
 
         location += (uint32_t) sizeof(initrd_file_header_t);
         location += (uint32_t) fheader->length;
+    }
+}
+
+void initrd_mount(super_block_t *sb, int index, char *path)
+{
+    struct dentry *de = get_dentry_by_path(path);
+    if (de == NULL) {
+        return;
+    }
+    
+    initrd_super_block_t *sb_data = (initrd_super_block_t*) sb->fs_data;
+    struct inode *node = de->inode;
+    
+    mounted_fs[index].de = de;
+    mounted_fs[index].sb = sb;
+    
+    for (int i = 0; i < sb_data->files; i++) {
+        struct dentry *temp_de = get_dentry_by_inode(&initrd_nodes[i]);
+        uint32_t addr = (uint32_t) temp_de;
+        inode_write(node, sizeof(uint32_t), 1, (char*) &addr);
+        
+        graph_node_t *temp_g = NULL;
     }
 }
 
