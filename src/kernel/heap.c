@@ -86,8 +86,8 @@ void *krealloc(void *p, size_t size)
     }
     kfree(p);
 
-    kernel_heap->mem_used += size;
-    kernel_heap->mem_free -= size;
+    kernel_heap->mem_used += size - chunk_size;
+    kernel_heap->mem_free -= size - chunk_size;
     return new_p;
 }
 
