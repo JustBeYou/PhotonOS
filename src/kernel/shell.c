@@ -119,23 +119,23 @@ void cmd_top()
 
 void cmd_test_read()
 {
-    int fd1 = open("/f1.txt", O_RDONLY);
-    int fd2 = open("/f2.txt", O_RDONLY);
-    int fd3 = open("/help.txt", O_RDONLY);
+    int fd1 = open("/mnt/initrd/f1.txt", O_RDONLY);
+    int fd2 = open("/mnt/initrd/f2.txt", O_RDONLY);
+    int fd3 = open("/mnt/initrd/help.txt", O_RDONLY);
 
     char buf[512];
     memset(buf, 0, 512);
 
     read(fd1, buf, 512);
-    printk("f1.txt (%d): %s\n", fd1, buf);
+    printk("/mnt/initrd/f1.txt (%d): %s\n", fd1, buf);
     memset(buf, 0, 512);
     read(fd2, buf, 512);
-    printk("f2.txt (%d): %s\n", fd2, buf);
+    printk("/mnt/initrd/f2.txt (%d): %s\n", fd2, buf);
     memset(buf, 0, 512);
     read(fd3, buf, 512);
-    printk("help.txt (%d): %s\n", fd3, buf);
+    printk("/mnt/initrd/help.txt (%d): %s\n", fd3, buf);
     memset(buf, 0, 512);
-    
+
     close(fd1);
     close(fd2);
     close(fd3);
