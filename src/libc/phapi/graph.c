@@ -62,6 +62,7 @@ int graph_add_node(graph_node_t *parent, graph_node_t *child)
         node_list->next->next = NULL;
         node_list->next->prev = node_list;
         node_list->next->data = (void*) child;
+        
         return 0;
     }
     
