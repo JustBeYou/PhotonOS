@@ -16,37 +16,48 @@
 #include <i386/vmm.h>
 #include <i386/pmm.h>
 #include <kernel/heap.h>
+#include <kernel/io.h>
 
-extern uint32_t placement_addr;
-
-int kheap_initialized = 0;
+mem_heap_t *default_heap;
+Llist_t *default_heap_head;
 mem_heap_t *kernel_heap;
-Llist_t *kernel_mem_head;
-mem_chunk_t *mem_chunk_head;
+Llist_t *kernel_heap_head;
 
-void init_heap ()
+extern size_t placement_addr;
+char heap_initialized = 0;
+
+void init_heap(size_t size)
 {
-    kernel_heap = kmalloc(sizeof(mem_heap_t), 0, 0);
-    kernel_mem_head = kmalloc(sizeof(Llist_t), 0, 0);
-    mem_chunk_head = kmalloc(sizeof(mem_chunk_t), 0, 0);
+    default_heap = kmalloc(sizeof(mem_heap_t), 0, 0);
+    default_heap_head = kmalloc(sizeof(Llist_t), 0, 0);
+    mem_chunk_t *temp_chunk = kmalloc(sizeof(mem_chunk_t), 0, 0);
 
-    kernel_heap->magic = 0xbeefbeef;
-    kernel_heap->head = kernel_mem_head;
-    kernel_heap->head->prev = NULL;
-    kernel_heap->head->next = NULL;
-    kernel_heap->head->data = (void*) mem_chunk_head;
-    mem_chunk_head->used = 0;
-    mem_chunk_head->size = KERNEL_HEAP_SIZE;
-    kernel_heap->mem_size = KERNEL_HEAP_SIZE;
-    kernel_heap->mem_free = KERNEL_HEAP_SIZE;
-    kernel_heap->mem_used = 0;
-    kheap_initialized = 1;
+    default_heap->magic = 0xbeefbeef;
+    default_heap->mem_size = size;
+    default_heap->mem_used = 0x0;
+    default_heap->mem_free = size - sizeof(default_heap)
+                            - sizeof(default_heap_head)
+                            - sizeof(temp_chunk);
+    default_heap->head = default_heap_head;
+
+    default_heap_head->prev = NULL;
+    default_heap_head->next = NULL;
+    default_heap_head->data = (void*) temp_chunk;
+
+    temp_chunk->used = 0;
+    temp_chunk->size = default_heap->mem_free;
+
+    kernel_heap = default_heap;
+    kernel_heap_head = default_heap_head;
+
+    heap_initialized = 1;
 }
 
-/* Kernel only allocator */
-void *kmalloc(size_t size, int align, uint32_t *phys)
+
+// Memory management for kernel heap only
+void *kmalloc(size_t size, int align, size_t *phys)
 {
-    if (kheap_initialized) {
+    if (heap_initialized) {
         Llist_t *mem_chunk = alloc_mem_chunk(kernel_heap, size);
         if (mem_chunk == NULL) {
             return NULL;
@@ -57,18 +68,15 @@ void *kmalloc(size_t size, int align, uint32_t *phys)
     } else {
         if (align && (placement_addr & 0xFFFFF000)) {
             placement_addr &= 0xFFFFF000;
-	        placement_addr += 0x1000;
-	    }
+            placement_addr += 0x1000;
+        }
 
-	    if (phys) {
+        if (phys) {
             *phys = placement_addr;
-	    }
-	    uint32_t ret_addr = placement_addr;
+        }
+        size_t ret_addr = placement_addr;
         placement_addr += size;
-	    void *ret_p = (void*) ret_addr;
-
-        kernel_heap->mem_used += size;
-        kernel_heap->mem_free -= size;
+        void *ret_p = (void*) ret_addr;
         return ret_p;
     }
     return NULL;
@@ -76,8 +84,12 @@ void *kmalloc(size_t size, int align, uint32_t *phys)
 
 void *krealloc(void *p, size_t size)
 {
-    void *new_p = kmalloc(size, 0, 0);
     Llist_t *chunk = get_chunk(kernel_heap, p);
+    if (chunk == NULL) {
+        return NULL;
+    }
+
+    void *new_p = kmalloc(size, 0, 0);
     mem_chunk_t *data = (mem_chunk_t*) chunk->data;
     size_t chunk_size = data->size;
 
@@ -93,24 +105,24 @@ void *krealloc(void *p, size_t size)
 
 void kfree(void *p)
 {
-    if (kheap_initialized) {
+    if (heap_initialized) {
         Llist_t *chunk = (Llist_t*) ((size_t) p - MEM_HEADER_SIZE);
         mem_chunk_t *data = (mem_chunk_t*) chunk->data;
         size_t size = data->size;
 
         free_mem_chunk(kernel_heap, chunk);
-	} else {
-	    return;
-	}
+    } else {
+        return;
+    }
 }
-/* ------------------------------------ */
+
 
 Llist_t *get_chunk(mem_heap_t *heap, void *p)
 {
     Llist_t *head = heap->head;
 
     while (head != NULL) {
-        if ((size_t) p == ((size_t) head + MEM_HEADER_SIZE)) {
+        if ((size_t) p == (size_t) (head + MEM_HEADER_SIZE)) {
             return head;
         }
         head = head->next;
@@ -119,21 +131,25 @@ Llist_t *get_chunk(mem_heap_t *heap, void *p)
     return NULL;
 }
 
-Llist_t *split_mem_chunk(Llist_t *chunk, size_t size)
+Llist_t *split_mem_chunk(mem_heap_t *heap, Llist_t *chunk, size_t size)
 {
-    mem_chunk_t *chunk_data = (mem_chunk_t*) chunk->data;
-
+    /***
+    * I. |header-----free memory-----|
+                chunk^
+    * II. |header-used memory||header--free memory--|
+            left chunk^         right chunk^
+    ***/
+    mem_chunk_t *chunk_data = chunk->data;
     Llist_t *next = chunk->next;
 
-    if (size >= chunk_data->size) {
+    if (size >= chunk_data->size - MEM_HEADER_SIZE) {
         return NULL;
     }
 
     size_t new_chunk_size = chunk_data->size - size - MEM_HEADER_SIZE;
-
     chunk_data->size = size;
     chunk->next = (Llist_t*) ((size_t) chunk + MEM_HEADER_SIZE + chunk_data->size);
-    chunk->next->data = (void*) chunk->next + sizeof(int) * 3;
+    chunk->next->data = (void*) chunk->next + sizeof(Llist_t);
 
     mem_chunk_t *new_chunk_data = (mem_chunk_t*) chunk->next->data;
     new_chunk_data->used = chunk_data->used;
@@ -145,45 +161,52 @@ Llist_t *split_mem_chunk(Llist_t *chunk, size_t size)
         next->prev = chunk->next;
     }
 
+    heap->mem_used += MEM_HEADER_SIZE;
+    heap->mem_free -= MEM_HEADER_SIZE;
     return chunk;
 }
 
-void glue_mem_chunk(Llist_t *chunk1, Llist_t *chunk2)
+void glue_mem_chunk(mem_heap_t *heap, Llist_t *l_chunk, Llist_t *r_chunk)
 {
-    Llist_t *next = chunk2->next;
-    Llist_t *prev = chunk1->prev;
+    Llist_t *next = r_chunk->next;
+    Llist_t *prev = l_chunk->prev;
 
-    mem_chunk_t *chunk1_data = (mem_chunk_t*) chunk1->data;
-    mem_chunk_t *chunk2_data = (mem_chunk_t*) chunk2->data;
+    mem_chunk_t *l_chunk_data = (mem_chunk_t*) l_chunk->data;
+    mem_chunk_t *r_chunk_data = (mem_chunk_t*) r_chunk->data;
 
-    size_t new_size = chunk1_data->size + chunk2_data->size + MEM_HEADER_SIZE;
-    chunk1_data->size = new_size;
+    size_t new_size = l_chunk_data->size + r_chunk_data->size + MEM_HEADER_SIZE;
+    l_chunk_data->size = new_size;
 
-    chunk1->next = next;
-    chunk1->prev = prev;
+    l_chunk->next = next;
+    l_chunk->prev = prev;
 
     if (next != NULL) {
-        next->prev = chunk1;
+        next->prev = l_chunk;
     }
 
     if (prev != NULL) {
-        prev->next = chunk1;
+        prev->next = l_chunk;
     }
+
+    heap->mem_used -= MEM_HEADER_SIZE;
+    heap->mem_free += MEM_HEADER_SIZE;
 }
+
 
 Llist_t *find_mem_chunk(mem_heap_t *heap, size_t size)
 {
-    if (heap->mem_free < size) {
+    if (heap->mem_free < size + MEM_HEADER_SIZE) {
         return NULL;
     }
 
     Llist_t *chunk = heap->head;
-    mem_chunk_t *header = (mem_chunk_t*) chunk->data;
+    mem_chunk_t *header = chunk->data;
 
     while (chunk != NULL) {
         if (header->size >= size && header->used == 0) {
             return chunk;
         }
+
         chunk = chunk->next;
 
         if (chunk != NULL) {
@@ -205,20 +228,28 @@ Llist_t *alloc_mem_chunk(mem_heap_t *heap, size_t size)
 
     if (chunk_data->size == size) {
         chunk_data->used = 1;
-        heap->mem_free -= (size + MEM_HEADER_SIZE);
-        heap->mem_used += (size + MEM_HEADER_SIZE);
+        heap->mem_free -= size;
+        heap->mem_used += size;
 
         return free_chunk;
     } else {
-        Llist_t *allocated_chunk = split_mem_chunk(free_chunk, size);
+        if (chunk_data->size <= size + MEM_HEADER_SIZE) {
+            chunk_data->used = 1;
+            heap->mem_free -= size;
+            heap->mem_used += size;
+
+            return free_chunk;
+        }
+
+        Llist_t *allocated_chunk = split_mem_chunk(heap, free_chunk, size);
 
         if (allocated_chunk == NULL) {
             return NULL;
         }
 
         chunk_data = (mem_chunk_t*) allocated_chunk->data;
-        heap->mem_free -= (size + MEM_HEADER_SIZE);
-        heap->mem_used += (size + MEM_HEADER_SIZE);
+        heap->mem_free -= size;
+        heap->mem_used += size;
 
         chunk_data->used = 1;
         return allocated_chunk;
@@ -231,14 +262,14 @@ void free_mem_chunk(mem_heap_t *heap, Llist_t *mem)
 {
     mem_chunk_t *data = (mem_chunk_t*) mem->data;
     data->used = 0;
-    heap->mem_free += (data->size + MEM_HEADER_SIZE);
-    heap->mem_used -= (data->size + MEM_HEADER_SIZE);
+    heap->mem_free += data->size;
+    heap->mem_used -= data->size;
 
     if (mem->prev != NULL) {
         mem_chunk_t *prev_data = (mem_chunk_t*) mem->prev->data;
         if (prev_data->used == 0) {
             Llist_t *new_chunk = mem->prev;
-            glue_mem_chunk(mem->prev, mem);
+            glue_mem_chunk(heap, mem->prev, mem);
             mem = new_chunk;
         }
     }
@@ -246,7 +277,7 @@ void free_mem_chunk(mem_heap_t *heap, Llist_t *mem)
     if (mem->next != NULL) {
         mem_chunk_t *next_data = (mem_chunk_t*) mem->next->data;
         if (next_data->used == 0) {
-            glue_mem_chunk(mem, mem->next);
+            glue_mem_chunk(heap, mem, mem->next);
         }
     }
 }
