@@ -86,4 +86,11 @@ void panic(const char *msg, int line, char *file);
 void reboot();
 void system_wait(int ticks);
 
+// Break point functions
+void break_point_1();
+void break_point_2();
+void break_point_3();
+void break_point_4();
+void break_point_5();
+
 #endif
