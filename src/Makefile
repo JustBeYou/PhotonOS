@@ -1,4 +1,4 @@
-.PHONY: all compile clean install run
+.PHONY: all rm_elf compile clean install run
 
 export NAS=nasm
 export AR=~/opt/cross/bin/i686-elf-ar
@@ -16,7 +16,10 @@ init/kernel_class.o \
 init/main.o \
 arch/i386/boot/boot.o
 
-all: compile photon.elf
+all: rm_elf compile photon.elf
+
+rm_elf:
+	rm -rf photon.elf
 
 photon.elf:
 	$(CPP) -T arch/i386/linker.ld -o $@ $(OBJS) $(CFLAGS) $(LDFLAGS) $(LIBS) libc/libk.a
@@ -46,6 +49,10 @@ clean:
 	cd libc && make clean && cd ../
 
 install:
+	rm -rf sysroot
+	rm -rf isodir
+	rm -f photon.iso
+
 	mkdir -p sysroot
 	mkdir -p sysroot/usr
 	mkdir -p sysroot/usr/lib
