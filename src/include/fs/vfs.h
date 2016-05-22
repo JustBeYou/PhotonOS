@@ -168,6 +168,8 @@ typedef struct path_tokens {
 
 void init_vfs();
 void add_dentry(struct dentry *de);
+int index_dentry(struct dentry *de);
+graph_node_t *get_node_by_path(char *path);
 struct dentry *get_dentry_by_inode(inode_t *inode);
 struct dentry *get_dentry_by_path(char *path);
 graph_node_t *get_node_by_tokens(path_tokens *tokens);
