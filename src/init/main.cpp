@@ -127,7 +127,7 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
            nframes);
 
     printk("Initialize kernel heap.    ");
-    init_heap();
+    init_heap(DEFAULT_HEAP_SIZE);
     wstr_color("[OK]\n", COLOR_GREEN);
     printk("Initialized kernel heap at %x and created main block of %d bytes.\n",
             (size_t) kernel_heap + MEM_HEADER_SIZE, kernel_heap->mem_size);
