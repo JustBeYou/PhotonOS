@@ -49,19 +49,31 @@ void initrd_mount(super_block_t *sb, int index, char *path)
     if (de == NULL) {
         return;
     }
-    
+
     initrd_super_block_t *sb_data = (initrd_super_block_t*) sb->fs_data;
     struct inode *node = de->inode;
-    
+
     mounted_fs[index].de = de;
     mounted_fs[index].sb = sb;
-    
-    for (int i = 0; i < sb_data->files; i++) {
+
+    graph_node_t *path_node = get_node_by_path(path);
+
+    for (int i = 1; i < sb_data->files; i++) {
+        struct dentry *temp_de = kmalloc(sizeof(struct dentry), 0, 0);
+        temp_de->name = kmalloc(sizeof(char) * 32, 0, 0);
+        memcpy(temp_de->name, initrd_headers[i].name, strlen(initrd_headers[i].name));
+        temp_de->parent_dentry = de;
+        temp_de->inode = &initrd_nodes[i];
+        add_dentry(temp_de);
+    }
+
+    for (int i = 1; i < sb_data->files; i++) {
         struct dentry *temp_de = get_dentry_by_inode(&initrd_nodes[i]);
         uint32_t addr = (uint32_t) temp_de;
         inode_write(node, sizeof(uint32_t), 1, (char*) &addr);
-        
-        graph_node_t *temp_g = NULL;
+
+        graph_node_t *temp_node = graph_create((void*) temp_de);
+        graph_add_node(path_node, temp_node);
     }
 }
 
