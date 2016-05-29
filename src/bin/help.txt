@@ -1,8 +1,18 @@
-Commands help:
--> hw - print hardware info
--> time - display the time
--> free - display info about memory
--> clear - clear screen
--> reboot - reboot the PC
--> shutdown - shutdown the PC
--> top - print processes info
+                       ===PHOTONOS SHELL HELP===
+help                                   hw
+Prints the help page.                  Prints hardware informations.
+
+time                                   free
+Prints current time.                   Prints informations about memory usage.
+
+clear                                  reboot
+Clear the screen.                      Reboot the system.
+
+dbg                                    shutdown
+Start a debug procedure.               Shutdown the system.
+
+top                                    test_read
+Prints all running processes.          Tests file reading.
+
+test_write                             test_syscall
+Tests file writing.                    Tests system calls.
