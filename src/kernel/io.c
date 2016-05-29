@@ -15,6 +15,7 @@
 
 #include <i386/handlers.h>
 #include <kernel/vga.h>
+#include <kernel/heap.h>
 #include <kernel/io.h>
 #include <kernel/process.h>
 #include <drivers/keyboard.h>
@@ -442,6 +443,7 @@ int read(int fd, char *buf, size_t count)
 
 int write(int fd, char *buf, size_t count)
 {
+    printk("unused %x %s %x\n", fd, buf, count);
     return -1;
 }
 

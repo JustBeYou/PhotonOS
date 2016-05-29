@@ -331,7 +331,7 @@ void destroy_tokens(path_tokens *tokens)
     kfree(tokens);
 }
 
-path_tokens *tokenize_path(char *path)
+path_tokens *tokenize_path(const char *path)
 {
     path_tokens *tokens = kmalloc(sizeof(path_tokens), 0, 0);
     tokens->n = 0;
@@ -442,7 +442,7 @@ struct dentry *get_dentry_by_tokens(path_tokens *tokens)
     return de;
 }
 
-struct dentry *get_dentry_by_path(char *path)
+struct dentry *get_dentry_by_path(const char *path)
 {
     path_tokens *tokens = tokenize_path(path);
     if (tokens == NULL) {
@@ -453,7 +453,7 @@ struct dentry *get_dentry_by_path(char *path)
     return de;
 }
 
-graph_node_t *get_node_by_path(char *path)
+graph_node_t *get_node_by_path(const char *path)
 {
     path_tokens *tokens = tokenize_path(path);
     if (tokens == NULL) {
@@ -561,7 +561,7 @@ int inode_close(inode_t *node)
     }
     return 0;
 }
-
+/*
 struct dentry *inode_readdir(inode_t *node)
 {
     return NULL;
@@ -586,12 +586,12 @@ int inode_ioctl(inode_t *node, int req, void *argp)
 {
     return 0;
 }
-
+*/
 size_t inode_getsize(inode_t *node)
 {
     return node->length;
 }
-
+/*
 int inode_chmod(inode_t *node, size_t mode)
 {
     return 0;
@@ -610,4 +610,4 @@ int inode_symlink(inode_t *node, struct inode *link)
 int inode_readlink(inode_t *node)
 {
     return 0;
-}
+}*/

@@ -1,5 +1,6 @@
 #include <fs/vfs.h>
 #include <fs/mount.h>
+#include <kernel/io.h>
 
 mnt_table_t mounted_fs[256];
 

@@ -107,9 +107,7 @@ void kfree(void *p)
 {
     if (heap_initialized) {
         Llist_t *chunk = (Llist_t*) ((size_t) p - MEM_HEADER_SIZE);
-        mem_chunk_t *data = (mem_chunk_t*) chunk->data;
-        size_t size = data->size;
-
+        //mem_chunk_t *data = (mem_chunk_t*) chunk->data;
         free_mem_chunk(kernel_heap, chunk);
     } else {
         return;

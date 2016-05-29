@@ -184,12 +184,12 @@ typedef struct path_tokens {
 void init_vfs();
 void add_dentry(struct dentry *de);
 int index_dentry(struct dentry *de);
-graph_node_t *get_node_by_path(char *path);
+graph_node_t *get_node_by_path(const char *path);
 struct dentry *get_dentry_by_inode(inode_t *inode);
-struct dentry *get_dentry_by_path(char *path);
+struct dentry *get_dentry_by_path(const char *path);
 graph_node_t *get_node_by_tokens(path_tokens *tokens);
 struct dentry *get_dentry_by_tokens(path_tokens *tokens);
-path_tokens *tokenize_path(char *path);
+path_tokens *tokenize_path(const char *path);
 void destroy_tokens(path_tokens *tokens);
 
 int inode_init(struct inode *node, size_t flags, size_t id, size_t length,

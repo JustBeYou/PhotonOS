@@ -7,7 +7,6 @@ LIBS= -nostdlib -lgcc
 INCLUDE= -I./ -I../include -I../kernel -I../libc/include
 
 OBJS=\
-fdc.o \
 keyboard.o \
 
 all: libdrivers.a

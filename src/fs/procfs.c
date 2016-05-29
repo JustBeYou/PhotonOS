@@ -40,14 +40,14 @@ struct inode *procfs_alloc_inode(size_t flags, size_t length)
 void procfs_alloc(struct inode *node, size_t length)
 {
     if (!node->block || !node->length) {
-        node->block = kmalloc(length + procfs_sb.fh_struct_size, 0, 0);
+        node->block = (size_t) kmalloc(length + procfs_sb.fh_struct_size, 0, 0);
         node->length = length + procfs_sb.fh_struct_size;
 
         void *addr = (void*) node->block;
         memset(addr, 0, length + procfs_sb.fh_struct_size);
     } else {
         void *addr = (void*) node->block;
-        node->block = krealloc(addr, length + procfs_sb.fh_struct_size);
+        node->block = (size_t) krealloc(addr, length + procfs_sb.fh_struct_size);
         node->length = length + procfs_sb.fh_struct_size;
     }
     procfs_file_header_t *addr = (procfs_file_header_t*) node->block;
@@ -73,9 +73,9 @@ int procfs_create(struct inode *parent, char *name, size_t flags)
     new_de->inode = new_inode;
     add_dentry(new_de);
 
-    size_t addr = &new_de;
+    size_t addr = (size_t) &new_de;
     inode_rewind(parent);
-    size_t temp_addr;
+    size_t temp_addr = 0x0;
     inode_read(parent, sizeof(size_t), 1, (char*) temp_addr);
     while (temp_addr != 0x0) {
         inode_read(parent, sizeof(size_t), 1, (char*) temp_addr);
@@ -125,11 +125,13 @@ int procfs_read(struct inode *node, size_t sz, int n, char *buf)
 
 int procfs_open(struct inode *node, size_t flags)
 {
+    printk("%x %x\n", node, flags);
     return 0;
 }
 
 int procfs_close(struct inode *node)
 {
+    printk("%x\n", node);
     return 0;
 }
 

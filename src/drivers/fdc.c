@@ -7,6 +7,7 @@
 static volatile uint8_t fdc_irq_done = 0;
 int fdd = 0;
 
+
 static void fdc_init_dma()
 {
     outb(0x0a, 0x06);
@@ -101,6 +102,7 @@ uint8_t fdc_read_data()
     if (fdc_read_status() & FDC_MSR_MASK_DATAREG) {
         return inb(FDC_FIFO);
     }
+    return 0;
 }
 
 void fdc_write_ccr(uint8_t val)

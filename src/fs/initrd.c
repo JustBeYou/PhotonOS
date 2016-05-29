@@ -27,7 +27,7 @@ void initrd_load(size_t location)
     initrd_headers = kmalloc(sizeof(initrd_file_header_t) * initrd_sb->files, 0, 0);
 
     location += initrd_sb->sb_struct_size;
-    for (int i = 0; i < initrd_sb->files; i++) {
+    for (size_t i = 0; i < initrd_sb->files; i++) {
         fheader = (initrd_file_header_t*) location;
         memcpy(&(initrd_headers[i]), fheader, sizeof(initrd_file_header_t));
         size_t block_addr = (size_t) fheader + initrd_sb->fh_struct_size;
@@ -58,7 +58,7 @@ void initrd_mount(super_block_t *sb, int index, char *path)
 
     graph_node_t *path_node = get_node_by_path(path);
 
-    for (int i = 1; i < sb_data->files; i++) {
+    for (size_t i = 1; i < sb_data->files; i++) {
         struct dentry *temp_de = kmalloc(sizeof(struct dentry), 0, 0);
         temp_de->name = kmalloc(sizeof(char) * 32, 0, 0);
         memcpy(temp_de->name, initrd_headers[i].name, strlen(initrd_headers[i].name));
@@ -67,7 +67,7 @@ void initrd_mount(super_block_t *sb, int index, char *path)
         add_dentry(temp_de);
     }
 
-    for (int i = 1; i < sb_data->files; i++) {
+    for (size_t i = 1; i < sb_data->files; i++) {
         struct dentry *temp_de = get_dentry_by_inode(&initrd_nodes[i]);
         size_t addr = (size_t) temp_de;
         inode_write(node, sizeof(size_t), 1, (char*) &addr);
@@ -92,11 +92,13 @@ int initrd_read(struct inode *node, size_t sz, int n, char *buf)
 
 int initrd_open(struct inode *node, size_t flags)
 {
+    printk("unused %x %x\n", node, flags);
     return -1;
 }
 
 int initrd_close(struct inode *node)
 {
+    printk("unused %x\n", node);
     return -1;
 }
 

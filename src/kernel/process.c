@@ -30,8 +30,6 @@ int switch_on = 0;
 
 void init_multitasking()
 {
-    size_t cr3 = read_cr3();
-
 	pid = 2;
 
     start_process = (process_t*) kmalloc(sizeof(process_t), 0, 0);
@@ -44,11 +42,11 @@ void init_multitasking()
 
     start_process->esp = 0;
     start_process->ss = 0x13;
-    start_process->kern_stack = kmalloc(PROC_KERN_STACK, 1, 0) + PROC_KERN_STACK;
-    start_process->user_stack = kmalloc(PROC_USER_STACK, 1, 0) + PROC_USER_STACK;
+    start_process->kern_stack = (size_t) kmalloc(PROC_KERN_STACK, 1, 0) + PROC_KERN_STACK;
+    start_process->user_stack = (size_t) kmalloc(PROC_USER_STACK, 1, 0) + PROC_USER_STACK;
     user_stack = start_process->user_stack;
     set_kernel_stack(start_process->kern_stack);
-    start_process->cr3 = 0;
+    start_process->cr3 = read_cr3();
     start_process->opened_files = kmalloc(sizeof(struct file) * DEFAULT_F_TBL_SIZE, 0, 0);
     start_process->file_table_size = DEFAULT_F_TBL_SIZE;
 
@@ -60,8 +58,6 @@ void init_multitasking()
 /* Useless until there is a file system. */
 process_t *create_process(char *name)
 {
-    size_t cr3 = read_cr3();
-
 	process_t *new_process = (process_t*) kmalloc(sizeof(process_t), 0, 0);
 	new_process->pid = pid;
     new_process->time_to_run = 10;
