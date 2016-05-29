@@ -32,7 +32,7 @@ void initrd_load(uint32_t location)
         memcpy(&(initrd_headers[i]), fheader, sizeof(initrd_file_header_t));
         uint32_t block_addr = (uint32_t) fheader + initrd_sb->fh_struct_size;
         inode_init(&initrd_nodes[i], fheader->flags, fheader->inode,
-                    fheader->length, 0, 0, block_addr);
+                    fheader->length, 0, 0, block_addr, INITRD_TYPE);
         initrd_nodes[i].open = &initrd_open;
         initrd_nodes[i].read = &initrd_read;
         initrd_nodes[i].rewind = &initrd_rewind;
@@ -92,12 +92,12 @@ int initrd_read(struct inode *node, size_t sz, int n, char *buf)
 
 int initrd_open(struct inode *node, uint32_t flags)
 {
-
+    return -1;
 }
 
 int initrd_close(struct inode *node)
 {
-
+    return -1;
 }
 
 int initrd_rewind(struct inode *node)
