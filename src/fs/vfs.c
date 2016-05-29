@@ -97,7 +97,7 @@ size_t file_read(struct file *f, char *buf, size_t sz, loff_t *off)
         return -1;
 
     inode_t *inode = f->f_dentry->inode;
-    inode->offset = (uint32_t) *off;
+    inode->offset = (size_t) *off;
     return inode->read(inode, sz, 1, buf);
 }
 
@@ -108,7 +108,7 @@ size_t file_write(struct file *f, const char *buf, size_t sz, loff_t *off)
     }
 
     inode_t *inode = f->f_dentry->inode;
-    inode->offset = (uint32_t) *off;
+    inode->offset = (size_t) *off;
     return inode->write(inode, sz, 1, (char*)buf);
 }
 
@@ -116,14 +116,14 @@ struct dentry *file_readdir(struct file *f, DIR *context)
 {
     inode_t *inode = f->f_dentry->inode;
     int pos = context->pos++;
-    uint32_t old_off = inode->offset;
+    size_t old_off = inode->offset;
 
     inode_rewind(inode);
     int i = 0;
-    uint32_t addr;
-    inode_read(inode, sizeof(uint32_t), 1, (char*) &addr);
+    size_t addr;
+    inode_read(inode, sizeof(size_t), 1, (char*) &addr);
     while (i < pos && addr != 0x0) {
-        inode_read(inode, sizeof(uint32_t), 1, (char*) &addr);
+        inode_read(inode, sizeof(size_t), 1, (char*) &addr);
         i++;
     }
 
@@ -217,7 +217,7 @@ void init_vfs()
     }
     struct dentry *temp_de = kmalloc(sizeof(struct dentry), 0, 0);
     graph_node_t *temp_g = NULL;
-    uint32_t addr = 0;
+    size_t addr = 0;
 
     temp_de->name = kmalloc(sizeof(char) * 2, 0, 0);
     memcpy(temp_de->name, "/\0", 2);
@@ -234,8 +234,8 @@ void init_vfs()
     add_dentry(temp_de);
     temp_g = graph_create((void*) temp_de);
     graph_add_node(vfs_root, temp_g);
-    addr = (uint32_t) temp_de;
-    inode_write(root_inode, sizeof(uint32_t), 1, (char*) &addr);
+    addr = (size_t) temp_de;
+    inode_write(root_inode, sizeof(size_t), 1, (char*) &addr);
 
     temp_de = kmalloc(sizeof(struct dentry), 0, 0);
     temp_de->name = kmalloc(sizeof(char) * 5, 0, 0);
@@ -245,8 +245,8 @@ void init_vfs()
     add_dentry(temp_de);
     temp_g = graph_create((void*) temp_de);
     graph_add_node(vfs_root, temp_g);
-    addr = (uint32_t) temp_de;
-    inode_write(root_inode, sizeof(uint32_t), 1, (char*) &addr);
+    addr = (size_t) temp_de;
+    inode_write(root_inode, sizeof(size_t), 1, (char*) &addr);
 
     temp_de = kmalloc(sizeof(struct dentry), 0, 0);
     temp_de->name = kmalloc(sizeof(char) * 7, 0, 0);
@@ -259,8 +259,8 @@ void init_vfs()
     graph_node_t *mnt_node = get_node_by_path("/mnt");
     graph_add_node(mnt_node, temp_g);
 
-    addr = (uint32_t) temp_de;
-    inode_write(mnt_inode, sizeof(uint32_t), 1, (char*) &addr);
+    addr = (size_t) temp_de;
+    inode_write(mnt_inode, sizeof(size_t), 1, (char*) &addr);
     super_block_t *initrd_gsb = (super_block_t*) kmalloc(sizeof(super_block_t), 0, 0);
 
     initrd_gsb->device = NULL;
@@ -465,8 +465,8 @@ graph_node_t *get_node_by_path(char *path)
     return gn;
 }
 
-int inode_init(struct inode *node, uint32_t flags, uint32_t id, uint32_t length,
-                uint32_t nblocks, uint32_t blocksz, uint32_t block, uint32_t fsid)
+int inode_init(struct inode *node, size_t flags, size_t id, size_t length,
+                size_t nblocks, size_t blocksz, size_t block, size_t fsid)
 {
     node->fsid = fsid;
     node->flags = flags;
@@ -520,7 +520,7 @@ int inode_rewind(inode_t *node)
     return 0;
 }
 
-int inode_open(inode_t *node, uint32_t flags)
+int inode_open(inode_t *node, size_t flags)
 {
     if (!node)
         return -1;
@@ -572,12 +572,12 @@ struct inode *inode_finddir(inode_t *node, char *name)
     return NULL;
 }
 
-int inode_create(inode_t *node, char *name, uint32_t flags)
+int inode_create(inode_t *node, char *name, size_t flags)
 {
     return 0;
 }
 
-int inode_mkdir(inode_t *node, char *name, uint32_t flags)
+int inode_mkdir(inode_t *node, char *name, size_t flags)
 {
     return 0;
 }
@@ -592,7 +592,7 @@ size_t inode_getsize(inode_t *node)
     return node->length;
 }
 
-int inode_chmod(inode_t *node, uint32_t mode)
+int inode_chmod(inode_t *node, size_t mode)
 {
     return 0;
 }

@@ -29,11 +29,11 @@
 #define FRAME_SIZE 0x1000
 #define PAGE_ALIGN(x) (x & 0xFFFFF000)
 // Minimum size of memory is 16 Mib (Heap) + kernel&BIOS size + 1 MiB (for safety)
-#define MIN_MEM_NEED 0x1000000 + 0x10000 + (uint32_t) &kernel_end
+#define MIN_MEM_NEED 0x1000000 + 0x10000 + (size_t) &kernel_end
 
-void init_pmm(uint32_t mem_size);
-uint32_t find_frame();
-uint32_t alloc_frame();
-void free_frame(uint32_t address);
+void init_pmm(size_t mem_size);
+size_t find_frame();
+size_t alloc_frame();
+void free_frame(size_t address);
 
 #endif

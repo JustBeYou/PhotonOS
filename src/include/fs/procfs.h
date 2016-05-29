@@ -16,30 +16,30 @@
 #define KERNEL_DIRECTORY  4
 
 typedef struct procfs_super_block {
-    uint32_t sb_struct_size;
-    uint32_t fh_struct_size;
+    size_t sb_struct_size;
+    size_t fh_struct_size;
 } procfs_super_block_t;
 
 typedef struct procfs_file_header {
-    uint32_t inode;
-    uint32_t flags;
+    size_t inode;
+    size_t flags;
     char name[32];
-    uint32_t length;
-    uint32_t type;
+    size_t length;
+    size_t type;
 
     union {
-        uint32_t pid;
-        uint32_t module_conf;
+        size_t pid;
+        size_t module_conf;
     };
 } procfs_file_header_t;
 
 void procfs_init();
-struct inode *procfs_alloc_inode(uint32_t flags, uint32_t length);
-void procfs_alloc(struct inode *node, uint32_t length);
-int procfs_create(struct inode *parent, char *name, uint32_t flags);
+struct inode *procfs_alloc_inode(size_t flags, size_t length);
+void procfs_alloc(struct inode *node, size_t length);
+int procfs_create(struct inode *parent, char *name, size_t flags);
 int procfs_write(struct inode *node, size_t sz, int n, char *buf);
 int procfs_read(struct inode *node, size_t sz, int n, char *buf);
-int procfs_open(struct inode *node, uint32_t flags);
+int procfs_open(struct inode *node, size_t flags);
 int procfs_close(struct inode *node);
 int procfs_rewind(struct inode *node);
 

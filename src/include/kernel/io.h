@@ -10,22 +10,22 @@
 #include <fs/vfs.h>
 
 /* output byte */
-void outb(uint32_t ad, uint8_t v);
+void outb(size_t ad, uint8_t v);
 
 /* output word */
-void outw(uint32_t ad, uint16_t v);
+void outw(size_t ad, uint16_t v);
 
 /* output word */
-void outl(uint32_t ad, uint32_t v);
+void outl(size_t ad, size_t v);
 
 /* input byte */
-uint8_t inb(uint32_t ad);
+uint8_t inb(size_t ad);
 
 /* input word */
-uint16_t inw(uint32_t ad);
+uint16_t inw(size_t ad);
 
 /* input word */
-uint32_t inl(uint32_t ad);
+size_t inl(size_t ad);
 
 /* print registers */
 void print_regs(registers_t *regs);

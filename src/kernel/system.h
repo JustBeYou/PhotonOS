@@ -15,27 +15,27 @@
 /* Kernel Data Structures */
 typedef struct registers
 {
-    uint32_t cr3; // +0 bytes
-    uint32_t cr2; // +4 bytes
-    uint32_t gs; // +8 bytes
-    uint32_t fs; // +12 bytes
-    uint32_t es; // +16 bytes
-    uint32_t ds; // +20 bytes
-    uint32_t edi; // +24 bytes
-    uint32_t esi; // +28 bytes
-    uint32_t ebp; // +32 bytes
-    uint32_t kesp; // +36 bytes
-    uint32_t ebx; // +40 bytes
-    uint32_t edx; // +44 bytes
-    uint32_t ecx; // +48 bytes
-    uint32_t eax; // +52 bytes
-    uint32_t int_no; // +56 bytes
-    uint32_t err_code; // +60 bytes
-    uint32_t eip; // +64 bytes
-    uint32_t eflags;// +68 bytes
-    uint32_t cs; // +72 bytes
-    uint32_t uesp; // +76 bytes
-    uint32_t ss; // +80 bytes
+    size_t cr3; // +0 bytes
+    size_t cr2; // +4 bytes
+    size_t gs; // +8 bytes
+    size_t fs; // +12 bytes
+    size_t es; // +16 bytes
+    size_t ds; // +20 bytes
+    size_t edi; // +24 bytes
+    size_t esi; // +28 bytes
+    size_t ebp; // +32 bytes
+    size_t kesp; // +36 bytes
+    size_t ebx; // +40 bytes
+    size_t edx; // +44 bytes
+    size_t ecx; // +48 bytes
+    size_t eax; // +52 bytes
+    size_t int_no; // +56 bytes
+    size_t err_code; // +60 bytes
+    size_t eip; // +64 bytes
+    size_t eflags;// +68 bytes
+    size_t cs; // +72 bytes
+    size_t uesp; // +76 bytes
+    size_t ss; // +80 bytes
 } registers_t; // registers for interrupts
 
 typedef void (*isr_t)(registers_t*);
@@ -57,23 +57,23 @@ typedef long long loff_t;
 #define keep_running() while(true) { hlt(); }
 
 /* Kernel ASM variables */
-extern uint32_t stack_top;
-extern uint32_t stack_bottom;
-extern uint32_t kernel_end;
-extern uint32_t kernel_start;
+extern size_t stack_top;
+extern size_t stack_bottom;
+extern size_t kernel_end;
+extern size_t kernel_start;
 
 /* Kernel ASM functions */
 extern void enable_A20();
 extern int detect_cpu(void);
 extern void write_cr3();
 extern void write_cr0();
-extern uint32_t read_cr3();
-extern uint32_t read_cr2();
-extern uint32_t read_cr0();
-extern uint32_t read_eflags();
-extern uint32_t read_ss();
-extern uint32_t read_cs();
-extern uint32_t read_ebp();
+extern size_t read_cr3();
+extern size_t read_cr2();
+extern size_t read_cr0();
+extern size_t read_eflags();
+extern size_t read_ss();
+extern size_t read_cs();
+extern size_t read_ebp();
 extern void jmp_to_usermode();
 extern void switch_context();
 extern void save_context();

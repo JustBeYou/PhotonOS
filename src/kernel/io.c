@@ -30,38 +30,38 @@ extern char cwd[4096];
 extern struct dentry *cwd_de;
 
 /* output byte */
-void outb(uint32_t ad, uint8_t v)
+void outb(size_t ad, uint8_t v)
 {
     asm volatile("outb %%al, %%dx" :: "d" (ad), "a" (v));;
 }
 /* output word */
-void outw(uint32_t ad, uint16_t v)
+void outw(size_t ad, uint16_t v)
 {
     asm volatile("outw %%ax, %%dx" :: "d" (ad), "a" (v));
 }
 /* output word */
-void outl(uint32_t ad, uint32_t v)
+void outl(size_t ad, size_t v)
 {
     asm volatile("outl %%eax, %%dx" : : "d" (ad), "a" (v));
 }
 /* input byte */
-uint8_t inb(uint32_t ad)
+uint8_t inb(size_t ad)
 {
     uint8_t _v;
     asm volatile("inb %%dx, %%al" : "=a" (_v) : "d" (ad));
     return _v;
 }
 /* input word */
-uint16_t inw(uint32_t ad)
+uint16_t inw(size_t ad)
 {
     uint16_t _v;
     asm volatile("inw %%dx, %%ax" : "=a" (_v) : "d" (ad));
     return _v;
 }
 /* input word */
-uint32_t inl(uint32_t ad)
+size_t inl(size_t ad)
 {
-    uint32_t _v;
+    size_t _v;
     asm volatile("inl %%dx, %%eax" : "=a" (_v) : "d" (ad));
     return _v;
 }

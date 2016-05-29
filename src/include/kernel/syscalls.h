@@ -9,7 +9,7 @@
 
 #include <i386/handlers.h>
 
-extern uint32_t syscall(uint32_t eax, uint32_t ebx, uint32_t ecx,
-                        uint32_t edx, uint32_t esi, uint32_t edi);
+extern size_t syscall(size_t eax, size_t ebx, size_t ecx,
+                        size_t edx, size_t esi, size_t edi);
                         
 #endif

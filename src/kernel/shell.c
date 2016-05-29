@@ -19,17 +19,17 @@ char cmd_args[4096];
 
 extern int detect_cpu();
 
-extern uint32_t free_frames;
-extern uint32_t mapped_pages;
+extern size_t free_frames;
+extern size_t mapped_pages;
 extern mem_heap_t *kernel_heap;
-extern uint32_t nframes;
+extern size_t nframes;
 
-uint32_t get_memory()
+size_t get_memory()
 {
     return ((nframes * 4) / 1024);
 }
 
-uint32_t get_mapped_mem()
+size_t get_mapped_mem()
 {
     return ((mapped_pages * 4) / 1024);
 }
@@ -163,7 +163,7 @@ void cmd_test_write()
 void cmd_test_syscall()
 {
     printk("System calls test\n");
-    uint32_t ret = syscall(0, 0, 0, 0, 0, 0);
+    size_t ret = syscall(0, 0, 0, 0, 0, 0);
     printk("Syscall returned: %d == %d (%d)\n", ret, 123456789, ret == 123456789);
 }
 

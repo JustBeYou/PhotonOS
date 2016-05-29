@@ -43,31 +43,31 @@ extern "C" {
 
 extern int start_tasking;
 
-extern uint32_t kernel_init_stack;
+extern size_t kernel_init_stack;
 extern multiboot *kernel_mboot;
 
-extern uint32_t phys_ram_mb;
-extern uint32_t placement_addr;
+extern size_t phys_ram_mb;
+extern size_t placement_addr;
 
-extern uint32_t nframes;
-extern uint32_t init_esp;
-extern uint32_t kernel_init_stack;
+extern size_t nframes;
+extern size_t init_esp;
+extern size_t kernel_init_stack;
 extern multiboot *kernel_mboot;
 extern mem_heap_t *kernel_heap;
 
 extern char user[20];
 extern char machine[30];
 
-uint32_t user_stack;
-uint32_t initrd_start;
-uint32_t initrd_end;
+size_t user_stack;
+size_t initrd_start;
+size_t initrd_end;
 
-void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
+void kernel_init(multiboot *mboot_ptr, size_t init_stack)
 {
     kernel_init_stack = init_stack;
     kernel_mboot = mboot_ptr;
-    initrd_start = *((uint32_t*) mboot_ptr->mods_addr);
-    initrd_end = *(uint32_t*) (mboot_ptr->mods_addr + 4);
+    initrd_start = *((size_t*) mboot_ptr->mods_addr);
+    initrd_end = *(size_t*) (mboot_ptr->mods_addr + 4);
     placement_addr = initrd_end;
 
     cli();

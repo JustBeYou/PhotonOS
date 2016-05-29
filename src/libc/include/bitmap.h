@@ -13,16 +13,16 @@
 /**
  * Set bit as used.
  */
-void use_bit(uint32_t *bitmap, uint32_t bit);
+void use_bit(size_t *bitmap, size_t bit);
 
 /**
  * Set bit as free.
  */
-void free_bit(uint32_t *bitmap, uint32_t bit);
+void free_bit(size_t *bitmap, size_t bit);
 
 /**
  * Test if bit is free or not.
  */
-uint32_t test_bit(uint32_t *bitmap, uint32_t bit);
+size_t test_bit(size_t *bitmap, size_t bit);
 
 #endif

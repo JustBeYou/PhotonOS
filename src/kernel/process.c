@@ -22,15 +22,15 @@
 /*** TODO: GET STABLE processING ***/
 
 extern int time_to_run;
-extern uint32_t user_stack;
+extern size_t user_stack;
 process_t *current_process;
 process_t *start_process;
-uint32_t pid;
+size_t pid;
 int switch_on = 0;
 
 void init_multitasking()
 {
-    uint32_t cr3 = read_cr3();
+    size_t cr3 = read_cr3();
 
 	pid = 2;
 
@@ -60,7 +60,7 @@ void init_multitasking()
 /* Useless until there is a file system. */
 process_t *create_process(char *name)
 {
-    uint32_t cr3 = read_cr3();
+    size_t cr3 = read_cr3();
 
 	process_t *new_process = (process_t*) kmalloc(sizeof(process_t), 0, 0);
 	new_process->pid = pid;
@@ -74,7 +74,7 @@ process_t *create_process(char *name)
 
     /* Here I should load the file and create a context for the new process. */
 
-	if (pid != (uint32_t) 1) {
+	if (pid != (size_t) 1) {
 		process_t *tmp_process = start_process;
 		while (tmp_process->next)
 			tmp_process = tmp_process->next;

@@ -9,7 +9,7 @@ int8_t std_lessthan_pred(type_t a, type_t b)
     return (a < b) ? 1 : 0;
 }
 
-list_t create_list(uint32_t max_size, lessthan_pred_t lessthan)
+list_t create_list(size_t max_size, lessthan_pred_t lessthan)
 {
     list_t ret;
     ret.array = malloc(max_size * sizeof(type_t));
@@ -20,7 +20,7 @@ list_t create_list(uint32_t max_size, lessthan_pred_t lessthan)
     return ret;
 }
 
-list_t place_list(void *addr, uint32_t max_size, lessthan_pred_t lessthan)
+list_t place_list(void *addr, size_t max_size, lessthan_pred_t lessthan)
 {
     list_t ret;
     ret.array = (type_t*) addr;
@@ -39,7 +39,7 @@ void destroy_list(list_t *array)
 void insert_list(type_t item, list_t *array)
 {
     ASSERT(array->lessthan);
-    uint32_t iterator = 0;
+    size_t iterator = 0;
     while (iterator < array->size && array->lessthan(array->array[iterator], item)) {
         iterator++;
     }
@@ -59,13 +59,13 @@ void insert_list(type_t item, list_t *array)
     }
 }
 
-type_t lookup_list(uint32_t i, list_t *array)
+type_t lookup_list(size_t i, list_t *array)
 {
     ASSERT(i < array->size);
     return array->array[i];
 }
 
-void remove_list(uint32_t i, list_t *array)
+void remove_list(size_t i, list_t *array)
 {
     while (i < array->size) {
         array->array[i] = array->array[i + 1];
