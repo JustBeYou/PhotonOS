@@ -109,6 +109,16 @@ void vga_putchar(char c)
 {
     #ifdef _TEXTMODE
     switch (c) {
+        /**
+         * \n  - new line
+         * \t  - tab
+         * \b  - backspace
+         * \r  - return
+         * `   - debug shell
+         * ~   - halt system
+         * \0  - nothing
+         * \17 - wait for key
+         */
         case '\n':
             row++;
             col = -1;
@@ -133,7 +143,9 @@ void vga_putchar(char c)
             cmd_dbg();
             break;
         case 0:
-            printk("!000!");
+            break;
+        case '\17':
+            kb_read_char();
             break;
         default:
             vga_putentryat(c, make_color(default_fg, default_bg), col, row);
