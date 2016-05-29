@@ -335,16 +335,20 @@ path_tokens *tokenize_path(const char *path)
 {
     path_tokens *tokens = kmalloc(sizeof(path_tokens), 0, 0);
     tokens->n = 0;
+    char temp_path[4096];
+    memset(temp_path, 0, 4096);
 
     int tokens_n = 0;
     if (path[0] == '/') {
         tokens_n = 1;
+        strcpy(temp_path, path);
     } else {
-        kfree(tokens);
-        return NULL;
+        strcpy(temp_path, cwd);
+        strcat(temp_path, path);
+        tokens_n = 1;
     }
-    for (int i = 0; path[i] != '\0'; i++) {
-        if (path[i] == PATH_SEPARATOR && path[i + 1] != '\0') {
+    for (int i = 0; temp_path[i] != '\0'; i++) {
+        if (temp_path[i] == PATH_SEPARATOR && temp_path[i + 1] != '\0') {
             tokens_n++;
         }
     }
@@ -363,27 +367,27 @@ path_tokens *tokenize_path(const char *path)
     word[0] = '\0';
     int i, j, k;
 
-    for (i = 1, j = 0, k = 1; path[i] != '\0'; i++) {
-        if (path[i + 1] == '\0') {
-            word[j] = path[i];
+    for (i = 1, j = 0, k = 1; temp_path[i] != '\0'; i++) {
+        if (temp_path[i + 1] == '\0') {
+            word[j] = temp_path[i];
             j++;
             word[j] = '\0';
             memcpy(tokens->tokens[k], word, j);
-        } else if (path[i] == PATH_SEPARATOR && in_word) {
+        } else if (temp_path[i] == PATH_SEPARATOR && in_word) {
             word[j] = '\0';
             memcpy(tokens->tokens[k], word, j);
             k++;
             j = 0;
             word[0] = '\0';
             in_word = 0;
-        } else if (path[i] == PATH_SEPARATOR && !in_word) {
+        } else if (temp_path[i] == PATH_SEPARATOR && !in_word) {
             destroy_tokens(tokens);
             return NULL;
-        } else if (path[i] != PATH_SEPARATOR && in_word) {
-            word[j] = path[i];
+        } else if (temp_path[i] != PATH_SEPARATOR && in_word) {
+            word[j] = temp_path[i];
             j++;
         } else {
-            word[j] = path[i];
+            word[j] = temp_path[i];
             j++;
             in_word = 1;
         }
