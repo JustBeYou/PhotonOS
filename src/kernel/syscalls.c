@@ -7,9 +7,9 @@
 #include <i386/handlers.h>
 #include <kernel/io.h>
 
-void useless(void)
+int useless(void)
 {
-    return ;
+    return 123456789;
 }
 
 int not_implemented_syscall(void)
