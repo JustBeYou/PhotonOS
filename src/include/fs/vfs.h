@@ -23,6 +23,10 @@
 #define DEFAULT_F_TBL_SIZE 8
 #define DEFAULT_DLIST_SIZE 256
 
+#define PROCFS_TYPE 0
+#define INITRD_TYPE 1
+#define CHARDEV_TYPE 2
+
 struct super_block;
 struct inode;
 struct dentry;
@@ -48,6 +52,7 @@ typedef int (*inode_readlink_t)(struct inode *node);
 
 typedef struct inode {
     void *device;         // Device where node is found
+    uint32_t fsid;        // Filesystem type id
     uint32_t mask;        // Node mask
     uint32_t uid;         // User ID
     uint32_t gid;         // Group ID
@@ -108,6 +113,13 @@ struct dentry {
     inode_t *inode;
 };
 
+struct dir_context {
+    int fd;
+    int pos;
+};
+
+#define DIR struct dir_context
+
 typedef struct file {
     struct dentry *f_dentry;
     //struct vfsmount *f_vfsmnt;
@@ -119,6 +131,9 @@ typedef struct file {
     unsigned long f_version;
 } file;
 
+typedef int (*filldir_t)(struct dir_context *, const char *, int, loff_t,
+                        size_t, unsigned);
+
 struct file_operations {
         //struct module *owner;
         loff_t (*llseek) (struct file *, loff_t, int);
@@ -126,7 +141,7 @@ struct file_operations {
         //size_t (*aio_read) (struct kiocb *, char *, size_t, loff_t);
         size_t (*write) (struct file *, const char *, size_t, loff_t *);
         //size_t (*aio_write) (struct kiocb *, const char *, size_t, loff_t);
-        //int (*readdir) (struct file *, void *, filldir_t);
+        struct dentry *(*readdir) (struct file *, DIR *);
         //unsigned int (*poll) (struct file *, struct poll_table_struct *);
         int (*ioctl) (struct inode *, struct file *, unsigned int, unsigned long);
         //int (*mmap) (struct file *, struct vm_area_struct *);
@@ -175,9 +190,10 @@ struct dentry *get_dentry_by_path(char *path);
 graph_node_t *get_node_by_tokens(path_tokens *tokens);
 struct dentry *get_dentry_by_tokens(path_tokens *tokens);
 path_tokens *tokenize_path(char *path);
+void destroy_tokens(path_tokens *tokens);
 
 int inode_init(struct inode *node, uint32_t flags, uint32_t id, uint32_t length,
-                uint32_t nblocks, uint32_t blocksz, uint32_t block);
+                uint32_t nblocks, uint32_t blocksz, uint32_t block, uint32_t fsid);
 int inode_read(struct inode *node, size_t sz, int n, char *buf);
 int inode_write(struct inode *node, size_t sz, int n, char *buf);
 int inode_rewind(struct inode *node);

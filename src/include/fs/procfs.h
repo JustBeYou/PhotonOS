@@ -26,7 +26,7 @@ typedef struct procfs_file_header {
     char name[32];
     uint32_t length;
     uint32_t type;
-    
+
     union {
         uint32_t pid;
         uint32_t module_conf;
@@ -34,8 +34,9 @@ typedef struct procfs_file_header {
 } procfs_file_header_t;
 
 void procfs_init();
-struct inode *procfs_create(uint32_t flags, uint32_t length);
+struct inode *procfs_alloc_inode(uint32_t flags, uint32_t length);
 void procfs_alloc(struct inode *node, uint32_t length);
+int procfs_create(struct inode *parent, char *name, uint32_t flags);
 int procfs_write(struct inode *node, size_t sz, int n, char *buf);
 int procfs_read(struct inode *node, size_t sz, int n, char *buf);
 int procfs_open(struct inode *node, uint32_t flags);
