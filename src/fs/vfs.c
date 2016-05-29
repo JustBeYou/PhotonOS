@@ -7,6 +7,7 @@
 #include <fs/vfs.h>
 #include <fs/initrd.h>
 #include <fs/mount.h>
+#include <fs/fcntl.h>
 #include <fs/procfs.h>
 #include <kernel/heap.h>
 #include <kernel/io.h>
@@ -28,6 +29,9 @@ Llist_t *inode_cache;
 Llist_t *directory_cache;
 
 char kernel_space_open;
+
+char cwd[4096];
+struct dentry *cwd_de;
 
 // Initrd
 extern initrd_super_block_t *initrd_sb;
@@ -108,10 +112,32 @@ size_t file_write(struct file *f, const char *buf, size_t sz, loff_t *off)
     return inode->write(inode, sz, 1, (char*)buf);
 }
 
+struct dentry *file_readdir(struct file *f, DIR *context)
+{
+    inode_t *inode = f->f_dentry->inode;
+    int pos = context->pos++;
+    uint32_t old_off = inode->offset;
+
+    inode_rewind(inode);
+    int i = 0;
+    uint32_t addr;
+    inode_read(inode, sizeof(uint32_t), 1, (char*) &addr);
+    while (i < pos && addr != 0x0) {
+        inode_read(inode, sizeof(uint32_t), 1, (char*) &addr);
+        i++;
+    }
+
+    struct dentry *de = (struct dentry*) addr;
+    inode->offset = old_off;
+
+    return de;
+}
+
 struct file_operations fops = {
    .read  = file_read,
    .write = file_write,
-   .open  = file_open
+   .open  = file_open,
+   .readdir = file_readdir
 };
 
 void init_vfs()
@@ -131,7 +157,7 @@ void init_vfs()
     */
     procfs_init();
     // Root directory
-    struct inode *root_inode = procfs_create(FS_DIRECTORY, sizeof(void*) * 10);
+    struct inode *root_inode = procfs_alloc_inode(FS_DIRECTORY, sizeof(void*) * 10);
     procfs_file_header_t *root_header = (procfs_file_header_t*) root_inode->block;
     root_header->inode = root_inode->inode;
     root_header->flags = FS_DIRECTORY;
@@ -151,7 +177,7 @@ void init_vfs()
     vfs_super_block->fs_data = (void*) NULL;
 
     // mnt directory
-    struct inode *mnt_inode = procfs_create(FS_DIRECTORY, sizeof(void*) * 10);
+    struct inode *mnt_inode = procfs_alloc_inode(FS_DIRECTORY, sizeof(void*) * 10);
     procfs_file_header_t *mnt_header = (procfs_file_header_t*) mnt_inode->block;
     mnt_header->inode = mnt_inode->inode;
     mnt_header->flags = FS_DIRECTORY;
@@ -159,7 +185,7 @@ void init_vfs()
     mnt_header->type = KERNEL_DIRECTORY;
 
     // proc directory
-    struct inode *proc_inode = procfs_create(FS_DIRECTORY, sizeof(void*) * 10);
+    struct inode *proc_inode = procfs_alloc_inode(FS_DIRECTORY, sizeof(void*) * 10);
     procfs_file_header_t *proc_header = (procfs_file_header_t*) proc_inode->block;
     proc_header->inode = proc_inode->inode;
     proc_header->flags = FS_DIRECTORY;
@@ -167,7 +193,7 @@ void init_vfs()
     proc_header->type = KERNEL_DIRECTORY;
 
     // initrd inode
-    struct inode *initrd_inode = procfs_create(FS_DIRECTORY, sizeof(void*) * 10);
+    struct inode *initrd_inode = procfs_alloc_inode(FS_DIRECTORY, sizeof(void*) * 10);
     procfs_file_header_t *initrd_header = (procfs_file_header_t*) initrd_inode->block;
     initrd_header->inode = initrd_inode->inode;
     initrd_header->flags = FS_DIRECTORY;
@@ -208,19 +234,20 @@ void init_vfs()
     add_dentry(temp_de);
     temp_g = graph_create((void*) temp_de);
     graph_add_node(vfs_root, temp_g);
-
     addr = (uint32_t) temp_de;
     inode_write(root_inode, sizeof(uint32_t), 1, (char*) &addr);
+
     temp_de = kmalloc(sizeof(struct dentry), 0, 0);
     temp_de->name = kmalloc(sizeof(char) * 5, 0, 0);
+    memcpy(temp_de->name, "proc\0", 5);
     temp_de->parent_dentry = dlist[0];
     temp_de->inode = proc_inode;
     add_dentry(temp_de);
     temp_g = graph_create((void*) temp_de);
     graph_add_node(vfs_root, temp_g);
-
     addr = (uint32_t) temp_de;
     inode_write(root_inode, sizeof(uint32_t), 1, (char*) &addr);
+
     temp_de = kmalloc(sizeof(struct dentry), 0, 0);
     temp_de->name = kmalloc(sizeof(char) * 7, 0, 0);
     memcpy(temp_de->name, "initrd\0", 7);
@@ -242,6 +269,8 @@ void init_vfs()
     initrd_gsb->fs_type = NULL;
     initrd_gsb->fs_data = (void*) initrd_sb;
     mount_fs(initrd_gsb, "/mnt/initrd", initrd_mount);
+    memcpy(cwd, "/\0", 2);
+    cwd_de = dlist[0];
 }
 
 void add_dentry(struct dentry *de)
@@ -293,54 +322,73 @@ struct dentry *get_dentry_by_inode(inode_t *inode)
     return de;
 }
 
+void destroy_tokens(path_tokens *tokens)
+{
+    for (int i = 0; i < tokens->n; i++) {
+        kfree(tokens->tokens[i]);
+    }
+    kfree(tokens->tokens);
+    kfree(tokens);
+}
+
 path_tokens *tokenize_path(char *path)
 {
-    if (path == NULL)
-        return NULL;
-
     path_tokens *tokens = kmalloc(sizeof(path_tokens), 0, 0);
-    size_t len = strlen(path);
+    tokens->n = 0;
+
     int tokens_n = 0;
-    for (size_t i = 0; i < len; i++) {
-        if (path[i] == PATH_SEPARATOR) {
+    if (path[0] == '/') {
+        tokens_n = 1;
+    } else {
+        kfree(tokens);
+        return NULL;
+    }
+    for (int i = 0; path[i] != '\0'; i++) {
+        if (path[i] == PATH_SEPARATOR && path[i + 1] != '\0') {
             tokens_n++;
         }
     }
     tokens->n = tokens_n;
+
     tokens->tokens = kmalloc(sizeof(char*) * tokens_n, 0, 0);
-    memset(tokens->tokens, 0, sizeof(char*) * tokens_n);
-    for (size_t i = 0; i <= tokens_n; i++) {
-        tokens->tokens[i] = kmalloc(sizeof(char) * 32, 0, 0);
-        memset(tokens->tokens[i], 0, 32);
+    for (int i = 0; i < tokens_n; i++) {
+        tokens->tokens[i] = kmalloc(sizeof(char) * 256, 0, 0);
+        memset(tokens->tokens[i], 0, sizeof(char) * 256);
     }
-    int i = 0;
-    int j = 0;
-    int token_i = 0;
-    int in_word = 1;
-    if (path[0] == '/'/* || path[0] == '~'*/) {
-        tokens->tokens[0][0] = path[0];
-        token_i++;
-        i++;
-    }
-    for (; i < len; i++) {
-        if (!in_word && path[i] != PATH_SEPARATOR) {
+
+    tokens->tokens[0][0] = '/';
+
+    char in_word = 1;
+    char word[256];
+    word[0] = '\0';
+    int i, j, k;
+
+    for (i = 1, j = 0, k = 1; path[i] != '\0'; i++) {
+        if (path[i + 1] == '\0') {
+            word[j] = path[i];
+            j++;
+            word[j] = '\0';
+            memcpy(tokens->tokens[k], word, j);
+        } else if (path[i] == PATH_SEPARATOR && in_word) {
+            word[j] = '\0';
+            memcpy(tokens->tokens[k], word, j);
+            k++;
+            j = 0;
+            word[0] = '\0';
+            in_word = 0;
+        } else if (path[i] == PATH_SEPARATOR && !in_word) {
+            destroy_tokens(tokens);
+            return NULL;
+        } else if (path[i] != PATH_SEPARATOR && in_word) {
+            word[j] = path[i];
+            j++;
+        } else {
+            word[j] = path[i];
+            j++;
             in_word = 1;
         }
-
-        if (in_word && path[i] != PATH_SEPARATOR) {
-            tokens->tokens[token_i][j++] = path[i];
-        } else if (in_word && path[i] == PATH_SEPARATOR) {
-            token_i++;
-            j = 0;
-            in_word = 0;
-        } else if (!in_word && path[i] == PATH_SEPARATOR) {
-            for (size_t fi = 0; fi < tokens_n; fi++) {
-                kfree(tokens->tokens[fi]);
-            }
-            kfree(tokens->tokens);
-            return NULL;
-        }
     }
+
     return tokens;
 }
 
@@ -351,10 +399,14 @@ graph_node_t *get_node_by_tokens(path_tokens *tokens)
     if (!strcmp(tokens->tokens[0], "/")) {
         found_node = vfs_root;
         node = vfs_root;
+
+        if (tokens->n == 1) {
+            return found_node;
+        }
     } else {
         return NULL;
     }
-    for (int i = 1; i <= tokens->n; i++) {
+    for (int i = 1; i < tokens->n; i++) {
         int has_dentry = 0;
         struct dentry *temp_dentry = NULL;
         graph_node_t *gnode = NULL;
@@ -362,7 +414,6 @@ graph_node_t *get_node_by_tokens(path_tokens *tokens)
         while (nodes != NULL) {
             gnode = (graph_node_t*) nodes->data;
             temp_dentry = (struct dentry*) gnode->data;
-
             if (!strcmp(temp_dentry->name, tokens->tokens[i])) {
                 found_node = gnode;
                 node = gnode;
@@ -377,6 +428,7 @@ graph_node_t *get_node_by_tokens(path_tokens *tokens)
             return NULL;
         }
     }
+
     return found_node;
 }
 
@@ -397,10 +449,7 @@ struct dentry *get_dentry_by_path(char *path)
         return NULL;
     }
     struct dentry *de = get_dentry_by_tokens(tokens);
-    for (size_t fi = 0; fi < tokens->n; fi++) {
-        kfree(tokens->tokens[fi]);
-    }
-    kfree(tokens->tokens);
+    destroy_tokens(tokens);
     return de;
 }
 
@@ -411,17 +460,15 @@ graph_node_t *get_node_by_path(char *path)
         return NULL;
     }
     graph_node_t *gn = get_node_by_tokens(tokens);
-    for (size_t fi = 0; fi < tokens->n; fi++) {
-        kfree(tokens->tokens[fi]);
-    }
-    kfree(tokens->tokens);
+    destroy_tokens(tokens);
 
     return gn;
 }
 
 int inode_init(struct inode *node, uint32_t flags, uint32_t id, uint32_t length,
-                uint32_t nblocks, uint32_t blocksz, uint32_t block)
+                uint32_t nblocks, uint32_t blocksz, uint32_t block, uint32_t fsid)
 {
+    node->fsid = fsid;
     node->flags = flags;
     node->inode = id;
     node->length = length;
