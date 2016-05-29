@@ -7,6 +7,8 @@
 #include <string.h>
 #include <phapi.h>
 
+#include <fs/vfs.h>
+
 /* output byte */
 void outb(uint32_t ad, uint8_t v);
 
@@ -55,9 +57,19 @@ int printk(const char* format, ...);
 // Kernel space file functions
 int kopen(const char *pathname, int flags);
 
+int kwrite(int fd, char *buf, size_t count);
+
 size_t kread(int fd, void *buf, size_t count);
 
 int kclose(int fd);
+
+int krewind(int fd);
+
+DIR *kopendir(char *pathname);
+
+int kclosedir(DIR *d);
+
+struct dentry *kreaddir(DIR *d);
 
 // User space file functions
 int open(const char *pathname, int flags);
