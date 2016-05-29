@@ -15,6 +15,8 @@
 #include <fs/fcntl.h>
 #include <fs/vfs.h>
 
+char cmd_args[4096];
+
 extern int detect_cpu();
 
 extern uint32_t free_frames;
@@ -34,16 +36,14 @@ uint32_t get_mapped_mem()
 
 void cmd_help()
 {
-    printk("""Help:\n \
--> hw - print hardware info\n \
--> time - display the time\n \
--> free - display info about memory\n \
--> clear - clear screen\n \
--> reboot - reboot the PC\n \
--> shutdown - shutdown the PC\n \
--> top - print processes info\n \
--> read - test read function\n \
-""");
+    int fd = open("/mnt/initrd/help.txt", O_RDONLY);
+    char buf[1024];
+    memset(buf, 0, 1024);
+
+    while (read(fd, buf, 1024) != 0) {
+        printk(buf);
+        memset(buf, 0, 1024);
+    }
 }
 
 void cmd_hw()
@@ -119,16 +119,16 @@ void cmd_top()
 
 void cmd_test_read()
 {
-    int fd1 = open("/mnt/initrd/f1.txt", O_RDONLY);
+    //int fd1 = open("/mnt/initrd/f1.txt", O_RDONLY);
     int fd2 = open("/mnt/initrd/f2.txt", O_RDONLY);
     int fd3 = open("/mnt/initrd/help.txt", O_RDONLY);
 
     char buf[512];
     memset(buf, 0, 512);
 
-    read(fd1, buf, 512);
-    printk("/mnt/initrd/f1.txt (%d): %s\n", fd1, buf);
-    memset(buf, 0, 512);
+    //read(fd1, buf, 512);
+    //printk("/mnt/initrd/f1.txt (%d): %s\n", fd1, buf);
+    //memset(buf, 0, 512);
     read(fd2, buf, 512);
     printk("/mnt/initrd/f2.txt (%d): %s\n", fd2, buf);
     memset(buf, 0, 512);
@@ -136,19 +136,111 @@ void cmd_test_read()
     printk("/mnt/initrd/help.txt (%d): %s\n", fd3, buf);
     memset(buf, 0, 512);
 
-    close(fd1);
+    //close(fd1);
     close(fd2);
     close(fd3);
+}
+
+void cmd_test_write()
+{
+    int fd = kopen("/test_file.txt", O_RDWR);
+
+    char buf[512];
+    memset(buf, 0, 512);
+    memcpy(buf, "This is a message.\0", strlen("This is a message.\0") + 1);
+
+    printk("Buffer: \"%s\" will be written to the file.\n");
+    kwrite(fd, buf, strlen(buf));
+    krewind(fd);
+
+    memset(buf, 0, 512);
+    kread(fd, buf, 512);
+    printk("File was written with: %s\n", buf);
+    krewind(fd);
+    kclose(fd);
 }
 
 void cmd_test_syscall()
 {
     printk("System calls test\n");
-    uint32_t ret = syscall(4, 0, 0, 0, 0, 0);
-    printk("Syscall returned: %d == %d (%d)\n", ret, 0, ret == 0);
+    uint32_t ret = syscall(0, 0, 0, 0, 0, 0);
+    printk("Syscall returned: %d == %d (%d)\n", ret, 123456789, ret == 123456789);
 }
 
-int cmd_limit = 11;
+extern char cwd[4096];
+
+void cmd_ls()
+{
+    char target[4096];
+
+    if (cmd_args[0] == '\0') {
+        memcpy(target, cwd, strlen(cwd) + 1);
+    } else {
+        memcpy(target, cmd_args, strlen(cmd_args) + 1);
+    }
+
+    DIR *d = kopendir(target);
+    struct dentry *de = kreaddir(d);
+
+    while (de != NULL) {
+        printk("%s ", de->name);
+        de = kreaddir(d);
+    }
+    printk("\n");
+    kclosedir(d);
+}
+
+void cmd_cd()
+{
+
+}
+
+void cmd_mkdir()
+{
+
+}
+
+void cmd_touch()
+{
+
+}
+
+void cmd_write()
+{
+
+}
+
+void cmd_echo()
+{
+    printk("%s\n", cmd_args);
+}
+
+void cmd_test_drivers()
+{
+
+}
+
+void cmd_test_fs()
+{
+
+}
+
+void cmd_test_kernel()
+{
+
+}
+
+void cmd_test_libc()
+{
+
+}
+
+void cmd_test_os()
+{
+
+}
+
+int cmd_limit = 23;
 
 shell_cmd_t cmd_table[] = {
     {"help",  cmd_help},
@@ -157,17 +249,49 @@ shell_cmd_t cmd_table[] = {
     {"free",  cmd_free},
     {"clear", cmd_clear},
     {"reboot", cmd_reboot},
-    {"dbg", cmd_dbg},
+    {"dbg", cmd_dbg}, // not implemented
     {"shutdown", cmd_shutdown},
     {"top", cmd_top},
+    {"ls", cmd_ls}, // not implemented
+    {"cd", cmd_cd}, // not implemented
+    {"mkdir", cmd_mkdir}, // not implemented
+    {"touch", cmd_touch}, // not implemented
+    {"write", cmd_write}, // not implemented
+    {"echo", cmd_echo},
     {"test_read", cmd_test_read},
-    {"test_syscall", cmd_test_syscall}
+    {"test_write", cmd_test_write},
+    {"test_syscall", cmd_test_syscall},
+    {"test_drivers", cmd_test_drivers}, // not implemented
+    {"test_fs", cmd_test_fs}, // not implemented
+    {"test_kernel", cmd_test_kernel}, // not implemented
+    {"test_libc", cmd_test_libc}, // not implemented
+    {"test_os", cmd_test_os} // not implemented
 };
 
 int shell(char *cmd)
 {
+    cmd_args[0] = '\0';
+    char word[256];
+    memset(word, 0, 256);
+
+    int i;
+    char c;
+    for (i = 0, c = cmd[i]; c != '\0' && c != ' '; i++) {
+        c = cmd[i];
+    }
+    memcpy(word, cmd, i - 1);
+    word[i] = '\0';
+
+    if (cmd[i] != '\0') {
+        size_t len = strlen((cmd + i));
+        memcpy(cmd_args, (cmd + i), len);
+        cmd_args[len] = '\0';
+    } else {
+        cmd_args[0] = '\0';
+    }
+
     for (int i = 0; i < cmd_limit; i++) {
-        if (!strcmp(cmd, cmd_table[i].name)) {
+        if (!strcmp(word, cmd_table[i].name)) {
             cmd_table[i].func();
             return 0;
         }
