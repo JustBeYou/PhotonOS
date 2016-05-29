@@ -30,6 +30,8 @@ string/memsetw.o \
 string/strcmp.o \
 string/strlen.o \
 string/strrev.o \
+string/strcat.o \
+string/strcpy.o \
 phapi/list.o \
 phapi/linked_list.o \
 phapi/bitmap.o \

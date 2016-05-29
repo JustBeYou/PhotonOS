@@ -18,6 +18,16 @@ size_t strlen(const char* str);
 char *strrev(char *string);
 
 /**
+  * Copy strings.
+  */
+char *strcpy(char *s1, const char *s2);
+
+/**
+  * Concate strings.
+  */
+char *strcat(char *dest, const char *src);
+
+/**
   * Fill a block of memory.
   */
 void* memset(void* bufptr, int value, size_t size);
