@@ -37,12 +37,19 @@ size_t get_mapped_mem()
 void cmd_help()
 {
     int fd = open("/mnt/initrd/help.txt", O_RDONLY);
-    char buf[1024];
-    memset(buf, 0, 1024);
+    char c;
 
-    while (read(fd, buf, 1024) != 0) {
-        printk(buf);
-        memset(buf, 0, 1024);
+    int newlines = 0;
+    while (read(fd, &c, 1) != 0) {
+        printk("%c", c);
+        if (c == '\n') {
+            newlines++;
+        }
+
+        if (newlines >= 10) {
+            kb_read_char();
+            newlines = 0;
+        }
     }
 }
 
