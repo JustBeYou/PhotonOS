@@ -182,6 +182,8 @@ typedef struct path_tokens {
 } path_tokens;
 
 void init_vfs();
+void set_cwd(char *s);
+char *get_cwd();
 void add_dentry(struct dentry *de);
 int index_dentry(struct dentry *de);
 graph_node_t *get_node_by_path(const char *path);

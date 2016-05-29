@@ -273,6 +273,18 @@ void init_vfs()
     cwd_de = dlist[0];
 }
 
+void set_cwd(char *s)
+{
+    memset(cwd, 0, 4096);
+    strcpy(cwd, s);
+    cwd_de = get_dentry_by_path(s);
+}
+
+char *get_cwd()
+{
+    return cwd;
+}
+
 void add_dentry(struct dentry *de)
 {
     char found = 0;
