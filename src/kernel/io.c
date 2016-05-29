@@ -19,12 +19,15 @@
 #include <kernel/process.h>
 #include <drivers/keyboard.h>
 #include <fs/vfs.h>
+#include <fs/fcntl.h>
 
 extern struct file_operations fops;
 extern struct file **opened_files;
 extern int file_table_size;
 extern char kernel_space_open;
 extern process_t *current_process;
+extern char cwd[4096];
+extern struct dentry *cwd_de;
 
 /* output byte */
 void outb(uint32_t ad, uint8_t v)
@@ -108,7 +111,7 @@ int vga_write_char(const char c)
 
 char kb_read_char()
 {
-    return kb_getchar();   
+    return kb_getchar();
 }
 
 int vga_write(const char *buf, size_t len)
@@ -233,12 +236,72 @@ int printk(const char* format, ...)
 }
 
 // Kernel space file functions
+int kcreate(const char *pathname, int flags)
+{
+    char path[strlen(pathname) + 1];
+    memcpy(path, pathname, strlen(pathname) + 1);
+
+    path_tokens *tokens = tokenize_path(path);
+    tokens->n -= 1;
+
+    struct dentry *de = get_dentry_by_tokens(tokens);
+    if (de == NULL) {
+        return -1;
+    }
+    inode_t *inode = de->inode;
+    if (inode->flags != FS_DIRECTORY) {
+        return -1;
+    }
+    if (inode->create == NULL ) {
+        return -1;
+    }
+
+    for (int i = strlen(path) - 1; i >= 0; i--) {
+        if (path[i] == '/' && i == 0) {
+            path[1] = '\0';
+            break;
+        } else if (path[i] == '/') {
+            path[i] = '\0';
+            break;
+        }
+    }
+
+    char save_cwd[4096];
+    memcpy(save_cwd, cwd, strlen(cwd) + 1);
+
+    memcpy(cwd, path, strlen(path) + 1);
+    cwd_de = get_dentry_by_path(cwd);
+
+    int ret = inode->create(inode, tokens->tokens[tokens->n], flags);
+    destroy_tokens(tokens);
+
+    memcpy(cwd, save_cwd, strlen(save_cwd) + 1);
+    cwd_de = get_dentry_by_path(cwd);
+
+    return ret;
+}
+
 int kopen(const char *pathname, int flags)
 {
     kernel_space_open = 1;
-    
+
     file *f = kmalloc(sizeof(file), 0, 0);
     f->f_dentry = get_dentry_by_path(pathname);
+
+    if (f->f_dentry == NULL) {
+        if (flags == O_WRONLY || flags == O_RDWR) {
+            int ret = kcreate(pathname, flags);
+            if (ret == -1) {
+                kfree(f);
+                return -1;
+            }
+            f->f_dentry = get_dentry_by_path(pathname);
+        } else {
+            kfree(f);
+            return -1;
+        }
+    }
+
     f->f_op = &fops;
     f->f_mode = (mode_t) flags;
     f->f_pos = 0;
@@ -246,8 +309,22 @@ int kopen(const char *pathname, int flags)
     f->f_gid = 0;
     f->f_version = 0;
     f->f_dentry->inode->open_flags = flags;
-
     return f->f_op->open(f->f_dentry->inode, f);
+}
+
+int kwrite(int fd, char *buf, size_t count)
+{
+    if (fd >= file_table_size || buf == NULL) {
+        return -1;
+    }
+    file *f = opened_files[fd];
+
+    if (f == NULL) {
+        return -1;
+    }
+
+    loff_t off = (loff_t) f->f_dentry->inode->offset;
+    return f->f_op->write(f, buf, count, &off);
 }
 
 size_t kread(int fd, void *buf, size_t count)
@@ -255,13 +332,13 @@ size_t kread(int fd, void *buf, size_t count)
     if (fd >= file_table_size || buf == NULL) {
         return -1;
     }
-    
+
     file *f = opened_files[fd];
-    
+
     if (f == NULL) {
         return -1;
     }
-    
+
     loff_t off = (loff_t) f->f_dentry->inode->offset;
     return f->f_op->read(f, buf, count, &off);
 }
@@ -271,20 +348,69 @@ int kclose(int fd)
     if (fd >= file_table_size) {
         return -1;
     }
-    
+
     file *f = opened_files[fd];
     opened_files[fd] = NULL;
     inode_rewind(f->f_dentry->inode);
     kfree(f);
-    
+
     return 0;
+}
+
+int krewind(int fd)
+{
+    if (fd >= file_table_size) {
+        return -1;
+    }
+
+    file *f = opened_files[fd];
+    inode_rewind(f->f_dentry->inode);
+
+    return 0;
+}
+
+DIR *kopendir(char *pathname)
+{
+    int fd = kopen(pathname, O_RDWR);
+    if (fd == -1) {
+        return NULL;
+    }
+
+    struct file *f = opened_files[fd];
+    inode_t *inode = f->f_dentry->inode;
+
+    if (inode->flags != FS_DIRECTORY) {
+        return NULL;
+    }
+
+    DIR *d = kmalloc(sizeof(DIR), 0, 0);
+    d->fd = fd;
+    d->pos = 0;
+
+    return d;
+}
+
+int kclosedir(DIR *d)
+{
+    kclose(d->fd);
+    kfree(d);
+
+    return 0;
+}
+
+struct dentry *kreaddir(DIR *d)
+{
+    struct file *f = opened_files[d->fd];
+    struct dentry *de = f->f_op->readdir(f, d);
+
+    return de;
 }
 
 // User space file functions
 int open(const char *pathname, int flags)
 {
     kernel_space_open = 0;
-    
+
     file *f = kmalloc(sizeof(file), 0, 0);
     f->f_dentry = get_dentry_by_path(pathname);
     f->f_op = &fops;
@@ -303,13 +429,13 @@ int read(int fd, char *buf, size_t count)
     if (fd >= current_process->file_table_size || buf == NULL) {
         return -1;
     }
-    
+
     file *f = current_process->opened_files[fd];
-    
+
     if (f == NULL) {
         return -1;
     }
-    
+
     loff_t off = (loff_t) f->f_dentry->inode->offset;
     return f->f_op->read(f, buf, count, &off);
 }
@@ -324,11 +450,11 @@ int close(int fd)
     if (fd >= current_process->file_table_size) {
         return -1;
     }
-    
+
     file *f = current_process->opened_files[fd];
     current_process->opened_files[fd] = NULL;
     inode_rewind(f->f_dentry->inode);
     kfree(f);
-    
+
     return 0;
 }
