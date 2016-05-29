@@ -343,6 +343,20 @@ void destroy_tokens(path_tokens *tokens)
     kfree(tokens);
 }
 
+void relative_to_absolute(char *path)
+{
+    char temp_path[4096];
+    memset(temp_path, 0, 4096);
+
+    strcpy(temp_path, cwd);
+    size_t cwd_len = strlen(cwd);
+    if (cwd[cwd_len - 1] != '/') {
+        strcat(temp_path, "/");
+    }
+    strcat(temp_path, path);
+    memcpy(path, temp_path, 4096);
+}
+
 path_tokens *tokenize_path(const char *path)
 {
     path_tokens *tokens = kmalloc(sizeof(path_tokens), 0, 0);
@@ -355,8 +369,8 @@ path_tokens *tokenize_path(const char *path)
         tokens_n = 1;
         strcpy(temp_path, path);
     } else {
-        strcpy(temp_path, cwd);
-        strcat(temp_path, path);
+        strcpy(temp_path, path);
+        relative_to_absolute(temp_path);
         tokens_n = 1;
     }
     for (int i = 0; temp_path[i] != '\0'; i++) {

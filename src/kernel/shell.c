@@ -204,7 +204,19 @@ void cmd_ls()
 
 void cmd_cd()
 {
-
+    if (cmd_args[0] == '\0' || (cmd_args[0] == '/' && cmd_args[1] == '\0')) {
+        set_cwd("/");
+    } else {
+        struct dentry *temp_de = get_dentry_by_path(cmd_args);
+        if (temp_de == NULL || temp_de->inode->flags != FS_DIRECTORY) {
+            printk("Path: '%s' doesn't exist or isn't a directory.\n", cmd_args);
+            return ;
+        }
+        if (cmd_args[0] != '/') {
+            relative_to_absolute(cmd_args);
+        }
+        set_cwd(cmd_args);
+    }
 }
 
 void cmd_mkdir()
@@ -265,7 +277,7 @@ shell_cmd_t cmd_table[] = {
     {"shutdown", cmd_shutdown},
     {"top", cmd_top},
     {"ls", cmd_ls},
-    {"cd", cmd_cd}, // not implemented
+    {"cd", cmd_cd},
     {"mkdir", cmd_mkdir}, // not implemented
     {"touch", cmd_touch}, // not implemented
     {"write", cmd_write}, // not implemented
