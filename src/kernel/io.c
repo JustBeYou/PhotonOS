@@ -372,7 +372,7 @@ int krewind(int fd)
 
 DIR *kopendir(char *pathname)
 {
-    int fd = kopen(pathname, O_RDWR);
+    int fd = kopen(pathname, O_RDONLY);
     if (fd == -1) {
         return NULL;
     }

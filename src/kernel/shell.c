@@ -187,6 +187,11 @@ void cmd_ls()
     }
 
     DIR *d = kopendir(target);
+    if (d == NULL) {
+        printk("This isn't a directory.\n");
+        return ;
+    }
+
     struct dentry *de = kreaddir(d);
 
     while (de != NULL) {
@@ -259,7 +264,7 @@ shell_cmd_t cmd_table[] = {
     {"dbg", cmd_dbg}, // not implemented
     {"shutdown", cmd_shutdown},
     {"top", cmd_top},
-    {"ls", cmd_ls}, // not implemented
+    {"ls", cmd_ls},
     {"cd", cmd_cd}, // not implemented
     {"mkdir", cmd_mkdir}, // not implemented
     {"touch", cmd_touch}, // not implemented
