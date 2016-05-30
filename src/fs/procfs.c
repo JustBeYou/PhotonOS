@@ -73,16 +73,16 @@ int procfs_create(struct inode *parent, char *name, size_t flags)
     new_de->inode = new_inode;
     add_dentry(new_de);
 
-    size_t addr = (size_t) &new_de;
+    size_t addr = (size_t) new_de;
     inode_rewind(parent);
     size_t temp_addr = 0x0;
-    inode_read(parent, sizeof(size_t), 1, (char*) temp_addr);
+    inode_read(parent, sizeof(size_t), 1, (char*) &temp_addr);
     while (temp_addr != 0x0) {
-        inode_read(parent, sizeof(size_t), 1, (char*) temp_addr);
+        inode_read(parent, sizeof(size_t), 1, (char*) &temp_addr);
     }
-    parent->offset += sizeof(size_t);
+    parent->offset -= sizeof(size_t);
 
-    inode_write(parent, sizeof(size_t), 1, (char*) addr);
+    inode_write(parent, sizeof(size_t), 1, (char*) &addr);
 
     graph_node_t *new_node = graph_create((void*) new_de);
     graph_node_t *parent_node = get_node_by_path(cwd);
