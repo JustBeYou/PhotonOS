@@ -33,6 +33,7 @@ struct inode *procfs_alloc_inode(size_t flags, size_t length)
     node->open = &procfs_open;
     node->close = &procfs_close;
     node->create = &procfs_create;
+    node->mkdir = &procfs_mkdir;
 
     return node;
 }
@@ -48,7 +49,11 @@ void procfs_alloc(struct inode *node, size_t length)
     } else {
         void *addr = (void*) node->block;
         node->block = (size_t) krealloc(addr, length + procfs_sb.fh_struct_size);
+        size_t old_length = node->length;
         node->length = length + procfs_sb.fh_struct_size;
+
+        addr = (void*) node->block;
+        memset(addr + old_length, 0, old_length);
     }
     procfs_file_header_t *addr = (procfs_file_header_t*) node->block;
     addr->length = length;
@@ -89,6 +94,11 @@ int procfs_create(struct inode *parent, char *name, size_t flags)
     graph_add_node(parent_node, new_node);
 
     return 0;
+}
+
+int procfs_mkdir(struct inode *parent, char *name)
+{
+    return procfs_create(parent, name, FS_DIRECTORY);
 }
 
 int procfs_write(struct inode *node, size_t sz, int n, char *buf)

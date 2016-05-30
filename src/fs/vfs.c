@@ -441,9 +441,14 @@ graph_node_t *get_node_by_tokens(path_tokens *tokens)
         struct dentry *temp_dentry = NULL;
         graph_node_t *gnode = NULL;
         Llist_t *nodes = node->nodes;
+
         while (nodes != NULL) {
             gnode = (graph_node_t*) nodes->data;
+            if (gnode == NULL)
+                break;
             temp_dentry = (struct dentry*) gnode->data;
+            if (temp_dentry == NULL)
+                break;
             if (!strcmp(temp_dentry->name, tokens->tokens[i])) {
                 found_node = gnode;
                 node = gnode;
