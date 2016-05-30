@@ -221,7 +221,30 @@ void cmd_cd()
 
 void cmd_mkdir()
 {
+    if (cmd_args[0] == '\0') {
+        printk("You must specify a file name.\n");
+        return ;
+    }
 
+    DIR *d = kopendir(cmd_args);
+    if (d != NULL) {
+        printk("Directory already exists.\n");
+        kclosedir(d);
+        return ;
+    }
+
+    int fd = kopen(cmd_args, O_RDONLY);
+    if (fd != -1) {
+        printk("There is a file with same name.\n");
+        kclose(fd);
+        return ;
+    }
+
+    int ret = kmkdir(cmd_args);
+    if (ret == -1) {
+        printk("An error occured.\n");
+        return ;
+    }
 }
 
 void cmd_touch()

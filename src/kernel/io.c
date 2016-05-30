@@ -286,6 +286,55 @@ int kcreate(const char *pathname, int flags)
     return ret;
 }
 
+int kmkdir(const char *pathname)
+{
+    char path[4096];
+    memset(path, 0, 4096);
+    strcpy(path, pathname);
+
+    if (path[0] != '/') {
+        relative_to_absolute(path);
+    }
+    path_tokens *tokens = tokenize_path(path);
+    tokens->n -= 1;
+
+    struct dentry *de = get_dentry_by_tokens(tokens);
+    if (de == NULL) {
+        return -1;
+    }
+    inode_t *inode = de->inode;
+    if (inode->flags != FS_DIRECTORY) {
+        return -1;
+    }
+    if (inode->create == NULL ) {
+        return -1;
+    }
+
+    for (int i = strlen(path) - 1; i >= 0; i--) {
+        if (path[i] == '/' && i == 0) {
+            path[1] = '\0';
+            break;
+        } else if (path[i] == '/') {
+            path[i] = '\0';
+            break;
+        }
+    }
+
+    char save_cwd[4096];
+    memcpy(save_cwd, cwd, strlen(cwd) + 1);
+
+    memcpy(cwd, path, strlen(path) + 1);
+    cwd_de = get_dentry_by_path(cwd);
+
+    int ret = inode->mkdir(inode, tokens->tokens[tokens->n]);
+    destroy_tokens(tokens);
+
+    memcpy(cwd, save_cwd, strlen(save_cwd) + 1);
+    cwd_de = get_dentry_by_path(cwd);
+
+    return ret;
+}
+
 int kopen(const char *pathname, int flags)
 {
     kernel_space_open = 1;
