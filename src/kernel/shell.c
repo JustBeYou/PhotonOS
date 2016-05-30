@@ -279,6 +279,11 @@ void cmd_write()
         }
     }
 
+    if (space_pos == 0) {
+        printk("You must enter a text message to write.\n");
+        return ;
+    }
+
     char filename[256];
     cmd_args[space_pos] = '\0';
 
