@@ -48,6 +48,7 @@ void install_keyboard()
     ascii_s = USasciiNonShift;
     ascii_S = USasciiShift;
     kb_buf_pos = 0;
+    memset(kb_buffer, 0, KEYBOARD_BUFFER_SIZE);
 
     register_interrupt_handler(IRQ1, &keyboard_interrupt_handler);
 }
@@ -78,7 +79,7 @@ void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
         if (special) {
             uint8_t key = kb_buffer[--kb_buf_pos];
             kb_buffer[kb_buf_pos] = 0;
-            
+
             // something useless to remove the 'unused' warn
             key -= key;
             key += key;
@@ -86,6 +87,7 @@ void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
         }
 
         if (kb_buf_pos == KEYBOARD_BUFFER_SIZE) {
+            memset(kb_buffer, 0, KEYBOARD_BUFFER_SIZE);
             kb_buf_pos = 0;
         }
     }
@@ -95,9 +97,9 @@ char kb_getchar()
 {
     volatile int pos_now = kb_buf_pos;
     while (1) {
-        if (pos_now != kb_buf_pos)
+        if (pos_now != kb_buf_pos && kb_buffer[kb_buf_pos - 1])
             break;
     }
-    
+
     return (char) kb_buffer[kb_buf_pos - 1];
 }
