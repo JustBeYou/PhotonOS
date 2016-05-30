@@ -376,8 +376,15 @@ int kwrite(int fd, char *buf, size_t count)
     if (f == NULL) {
         return -1;
     }
+    if (f->f_mode != O_WRONLY && f->f_mode != O_RDWR && f->f_mode != O_APPEND) {
+        return -1;
+    }
 
     loff_t off = (loff_t) f->f_dentry->inode->offset;
+    if (f->f_mode == O_APPEND) {
+        f->f_dentry->inode->offset = f->f_dentry->inode->length;
+        off = (loff_t) f->f_dentry->inode->offset;
+    }
     return f->f_op->write(f, buf, count, &off);
 }
 
@@ -390,6 +397,9 @@ size_t kread(int fd, void *buf, size_t count)
     file *f = opened_files[fd];
 
     if (f == NULL) {
+        return -1;
+    }
+    if (f->f_mode != O_RDONLY && f->f_mode != O_RDWR) {
         return -1;
     }
 

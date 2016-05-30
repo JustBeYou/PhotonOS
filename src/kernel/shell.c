@@ -266,7 +266,97 @@ void cmd_touch()
 
 void cmd_write()
 {
+    if (cmd_args[0] == '\0') {
+        printk("You must specify a file name and a text message.\n");
+        return ;
+    }
 
+    int space_pos = 0;
+    for (int i = 0; cmd_args[i] != '\0'; i++) {
+        if (cmd_args[i] == ' ') {
+            space_pos = i;
+            break;
+        }
+    }
+
+    char filename[256];
+    cmd_args[space_pos] = '\0';
+
+    memset(filename, 0, 256);
+    strcpy(filename, cmd_args);
+
+    char message[2048];
+    memset(message, 0 , 2048);
+    strcpy(message, &cmd_args[space_pos + 1]);
+    size_t message_len = strlen(message);
+    if (message_len == 0) {
+        printk("You must enter a text message to write.\n");
+        return ;
+    }
+
+    int fd = kopen(filename, O_WRONLY);
+    kwrite(fd, message, message_len);
+    kclose(fd);
+}
+
+void cmd_read()
+{
+    if (cmd_args[0] == '\0') {
+        printk("You must specify a file name.\n");
+        return ;
+    }
+
+    int fd = kopen(cmd_args, O_RDONLY);
+    if (fd == -1) {
+        printk("File doesn't exist.\n");
+        return ;
+    }
+    char message[4096];
+    memset(message, 0, 4096);
+
+    while (kread(fd, message, 4096) != 0) {
+        printk("%s", message);
+        memset(message, 0, 4096);
+    }
+    printk("\n");
+    kclose(fd);
+}
+
+void cmd_append()
+{
+    return ;
+
+    if (cmd_args[0] == '\0') {
+        printk("You must specify a file name and a text message.\n");
+        return ;
+    }
+
+    int space_pos = 0;
+    for (int i = 0; cmd_args[i] != '\0'; i++) {
+        if (cmd_args[i] == ' ') {
+            space_pos = i;
+            break;
+        }
+    }
+
+    char filename[256];
+    cmd_args[space_pos] = '\0';
+
+    memset(filename, 0, 256);
+    strcpy(filename, cmd_args);
+
+    char message[2048];
+    memset(message, 0 , 2048);
+    strcpy(message, &cmd_args[space_pos + 1]);
+    size_t message_len = strlen(message);
+    if (message_len == 0) {
+        printk("You must enter a text message to write.\n");
+        return ;
+    }
+
+    int fd = kopen(filename, O_APPEND);
+    kwrite(fd, message, message_len);
+    kclose(fd);
 }
 
 void cmd_echo()
@@ -299,7 +389,7 @@ void cmd_test_os()
 
 }
 
-int cmd_limit = 23;
+int cmd_limit = 25;
 
 shell_cmd_t cmd_table[] = {
     {"help",  cmd_help},
@@ -313,9 +403,11 @@ shell_cmd_t cmd_table[] = {
     {"top", cmd_top},
     {"ls", cmd_ls},
     {"cd", cmd_cd},
-    {"mkdir", cmd_mkdir}, // not implemented
-    {"touch", cmd_touch}, // not implemented
-    {"write", cmd_write}, // not implemented
+    {"mkdir", cmd_mkdir},
+    {"touch", cmd_touch},
+    {"write", cmd_write},
+    {"read", cmd_read},
+    {"append", cmd_append},
     {"echo", cmd_echo},
     {"test_read", cmd_test_read},
     {"test_write", cmd_test_write},
