@@ -37,6 +37,7 @@ void procfs_init();
 struct inode *procfs_alloc_inode(size_t flags, size_t length);
 void procfs_alloc(struct inode *node, size_t length);
 int procfs_create(struct inode *parent, char *name, size_t flags);
+int procfs_mkdir(struct inode *parent, char *name);
 int procfs_write(struct inode *node, size_t sz, int n, char *buf);
 int procfs_read(struct inode *node, size_t sz, int n, char *buf);
 int procfs_open(struct inode *node, size_t flags);

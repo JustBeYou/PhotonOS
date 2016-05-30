@@ -55,6 +55,10 @@ int putsk(const char* string);
 int printk(const char* format, ...);
 
 // Kernel space file functions
+int kcreate(const char *pathname, int flags);
+
+int kmkdir(const char *pathname);
+
 int kopen(const char *pathname, int flags);
 
 int kwrite(int fd, char *buf, size_t count);
