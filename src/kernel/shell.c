@@ -127,8 +127,8 @@ void cmd_top()
 void cmd_test_read()
 {
     //int fd1 = open("/mnt/initrd/f1.txt", O_RDONLY);
-    int fd2 = open("/mnt/initrd/f2.txt", O_RDONLY);
-    int fd3 = open("/mnt/initrd/help.txt", O_RDONLY);
+    int fd2 = kopen("/mnt/initrd/f2.txt", O_RDONLY);
+    int fd3 = kopen("/mnt/initrd/help.txt", O_RDONLY);
 
     char buf[512];
     memset(buf, 0, 512);
@@ -136,16 +136,16 @@ void cmd_test_read()
     //read(fd1, buf, 512);
     //printk("/mnt/initrd/f1.txt (%d): %s\n", fd1, buf);
     //memset(buf, 0, 512);
-    read(fd2, buf, 512);
+    kread(fd2, buf, 512);
     printk("/mnt/initrd/f2.txt (%d): %s\n", fd2, buf);
     memset(buf, 0, 512);
-    read(fd3, buf, 512);
+    kread(fd3, buf, 512);
     printk("/mnt/initrd/help.txt (%d): %s\n", fd3, buf);
     memset(buf, 0, 512);
 
     //close(fd1);
-    close(fd2);
-    close(fd3);
+    kclose(fd2);
+    kclose(fd3);
 }
 
 void cmd_test_write()
@@ -226,7 +226,19 @@ void cmd_mkdir()
 
 void cmd_touch()
 {
+    if (cmd_args[0] == '\0') {
+        printk("You must specify a file name.\n");
+        return ;
+    }
+    int fd = kopen(cmd_args, O_RDONLY);
+    if (fd != -1) {
+        printk("File already exists.\n");
+        kclose(fd);
+        return ;
+    }
 
+    fd = kopen(cmd_args, O_RDWR);
+    kclose(fd);
 }
 
 void cmd_write()

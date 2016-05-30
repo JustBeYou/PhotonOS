@@ -239,9 +239,13 @@ int printk(const char* format, ...)
 // Kernel space file functions
 int kcreate(const char *pathname, int flags)
 {
-    char path[strlen(pathname) + 1];
-    memcpy(path, pathname, strlen(pathname) + 1);
+    char path[4096];
+    memset(path, 0, 4096);
+    strcpy(path, pathname);
 
+    if (path[0] != '/') {
+        relative_to_absolute(path);
+    }
     path_tokens *tokens = tokenize_path(path);
     tokens->n -= 1;
 
@@ -291,7 +295,7 @@ int kopen(const char *pathname, int flags)
 
     if (f->f_dentry == NULL) {
         if (flags == O_WRONLY || flags == O_RDWR) {
-            int ret = kcreate(pathname, flags);
+            int ret = kcreate(pathname, FS_FILE);
             if (ret == -1) {
                 kfree(f);
                 return -1;
