@@ -20,6 +20,9 @@ Create a new directory.                Create a new file.
 write                                  echo
 Write text to a file.                  Write message to shell.
 
+read                                   append
+Read text from a file.                 Append text to a file.
+
 top                                    test_read
 Prints all running processes.          Tests file reading.
 
