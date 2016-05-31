@@ -8,15 +8,16 @@
 #include <kernel/shell.h>
 #include <kernel/ui.h>
 #include <kernel/vga.h>
+#include <fs/vfs.h>
 
 char user[20];
 char machine[30];
 
 void prompt() {
-	char cmd[1024];
+	char cmd[4096];
 	while (true) {
-		memset(cmd, 0, 1023);
-		printk("%s@%s:$ ", user, machine);
+		memset(cmd, 0, 4096);
+		printk("%s@%s:%s# ", user, machine, get_cwd());
 		getsk(cmd);
 		if (cmd[0] != 0) {
 		    if(shell(cmd)) {
