@@ -369,32 +369,274 @@ void cmd_echo()
     printk("%s\n", cmd_args);
 }
 
+extern char custom_prompt;
+extern char prompt_msg[256];
+
+void cmd_prompt()
+{
+    if (cmd_args[0] == '\0')
+        custom_prompt = 0;
+    else {
+        memset(prompt_msg, 0, 256);
+        memcpy(prompt_msg, cmd_args, 255);
+        custom_prompt = 1;
+    }
+}
+
+void cmd_color()
+{
+    int fd = kopen("/mnt/initrd/colors.txt", O_RDONLY);
+    printk("%d\n", fd);
+    char buf[512];
+    memset(buf, 0, 512);
+    while (kread(fd, buf, 512) != 0) {
+        printk("%s", buf);
+        memset(buf, 0, 512);
+        kread(fd, buf, 512);
+    }
+    kclose(fd);
+
+    printk("\n");
+    char color1[3];
+    int color_code1;
+
+    char color2[3];
+    int color_code2;
+
+    printk("Enter foreground color: ");
+    getsk(color1);
+    color_code1 = atoi(color1);
+    if (color_code1 < 0 && color_code1 > 15) {
+        printk("Not valid!\n");
+        return ;
+    }
+
+    printk("Enter background color: ");
+    getsk(color2);
+    color_code2 = atoi(color2);
+    if (color_code2 < 0 && color_code2 > 15) {
+        printk("Not valid!\n");
+        return ;
+    }
+
+    vga_setcolor(color_code1, color_code2);
+    clear_vga();
+}
+
 void cmd_test_drivers()
 {
+    printk("[INFO] KEYBOARD TEST\n");
+    printk("[INFO] Type following characters: 123abcZYX@^*()[]:|\n");
+    char msg[512];
+    memset(msg, 0, 512);
 
+    getsk(msg);
+    if (!strcmp(msg, "123abcZYX@^*()[]:|")) {
+        printk("[DONE] Test passed\n");
+    } else {
+        printk("[ERROR] Strings aren't the same.\n");
+    }
 }
 
 void cmd_test_fs()
 {
+    printk("[INFO] TEST FILESYSTEM.\n");
+    printk("[INFO] Get '/mnt/initrd'\n");
+    struct dentry *de = get_dentry_by_path("/mnt/initrd");
+    if (de != NULL) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Read '/mnt/initrd/testfile.txt'\n");
+    int fd = kopen("/mnt/initrd/testfile.txt", O_RDONLY);
+    char msg[512];
+    memset(msg, 0, 512);
+    kread(fd, msg, 13);
+    kclose(fd);
+    if (!strcmp(msg, "1112223334445")) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Get '/null/null'\n");
+    de = get_dentry_by_path("/null/null");
+    if (de == NULL) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Open '/null/null'\n");
+    fd = kopen("/null/null", O_RDONLY);
+    if (fd == -1) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Open and create 'proc/file.txt'\n");
+    fd = kopen("proc/file.txt", O_WRONLY);
+    kclose(fd);
+    if (fd != -1) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Write file 'proc/file.txt'\n");
+    fd = kopen("proc/file.txt", O_WRONLY);
+    int ret = kwrite(fd, msg, 13);
+    kclose(fd);
+    if (ret == 13) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Read file 'proc/file.txt'\n");
+    fd = kopen("proc/file.txt", O_RDONLY);
+    kread(fd, msg, 13);
+    kclose(fd);
+    if (!strcmp(msg, "1112223334445")) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Make directory 'proc/dir'\n");
+    kmkdir("proc/dir");
+    if (get_dentry_by_path("proc/dir") != NULL) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Make directory 'proc/dir/dir'\n");
+    kmkdir("proc/dir/dir");
+    if (get_dentry_by_path("proc/dir/dir") != NULL) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Make file 'proc/dir/dir/file.txt'\n");
+    fd = kopen("proc/dir/dir/file.txt", O_RDWR);
+    if (fd != -1) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Write file 'proc/dir/dir/file.txt'\n");
+    ret = kwrite(fd, "aaa", 3);
+    kclose(fd);
+    if (ret == 3) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] List directory 'proc/dir/dir'\n");
+    DIR *d = kopendir("proc/dir/dir");
+    de = kreaddir(d);
+    kclosedir(d);
+    if (de == get_dentry_by_path("proc/dir/dir/file.txt")) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[DONE] All tests passed.\n");
 
 }
 
 void cmd_test_kernel()
 {
+    printk("[INFO] TEST KERNEL\n");
+    printk("[INFO] Test allocation.\n");
+    int *a = kmalloc(sizeof(int), 0, 0);
+    char *msg = kmalloc(512, 0, 0);
+    *a = 5;
+    if (*a == 5 && msg != NULL) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
 
+    printk("[INFO] Test free.\n");
+    kfree(a);
+    kfree(msg);
+    if (*(a - 0x13) != 1) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[INFO] Test shell.\n");
+    shell("touch aaa.txt");
+    if (get_dentry_by_path("aaa.txt") != NULL) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+
+    printk("[DONE] All tests passed.\n");
 }
 
 void cmd_test_libc()
 {
+    printk("[INFO] TEST LIBC\n");
+    char msg[512];
+    printk("[INFO] Zero string.\n");
+    memset(msg, 0, 512);
+    if (msg[0] == 0) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+    printk("[INFO] Copy 'Hello guys'.\n");
+    strcpy(msg, "Hello guys");
+    if (!strcmp(msg, "Hello guys")) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+    printk("[INFO] Replace first 3 letters with 'abc'.\n");
+    memcpy(msg, "abc", 3);
+    if (!strcmp(msg, "abclo guys")) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+    printk("[INFO] Reverse string.\n");
+    strrev(msg);
+    if (!strcmp(msg, "syug olcba")) {
+        printk("[DONE] Test passed.\n");
+    } else {
+        printk("[ERROR] \n"); return ;
+    } kb_read_char();
+    printk("[INFO] String: %s\n", msg);
 
+    printk("[DONE] All tests passed.\n");
 }
 
 void cmd_test_os()
 {
+    printk("[INFO] Test OS.\n");
 
+    cmd_test_kernel();
+    cmd_test_drivers();
+    cmd_test_fs();
+    cmd_test_libc();
+    cmd_test_syscall();
+
+    printk("[INFO] OS was tested.\n");
 }
 
-int cmd_limit = 25;
+int cmd_limit = 27;
 
 shell_cmd_t cmd_table[] = {
     {"help",  cmd_help},
@@ -414,14 +656,16 @@ shell_cmd_t cmd_table[] = {
     {"read", cmd_read},
     {"append", cmd_append},
     {"echo", cmd_echo},
+    {"prompt", cmd_prompt},
+    {"color", cmd_color},
     {"test_read", cmd_test_read},
     {"test_write", cmd_test_write},
     {"test_syscall", cmd_test_syscall},
-    {"test_drivers", cmd_test_drivers}, // not implemented
-    {"test_fs", cmd_test_fs}, // not implemented
-    {"test_kernel", cmd_test_kernel}, // not implemented
-    {"test_libc", cmd_test_libc}, // not implemented
-    {"test_os", cmd_test_os} // not implemented
+    {"test_drivers", cmd_test_drivers},
+    {"test_fs", cmd_test_fs},
+    {"test_kernel", cmd_test_kernel},
+    {"test_libc", cmd_test_libc},
+    {"test_os", cmd_test_os}
 };
 
 int shell(char *cmd)
