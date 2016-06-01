@@ -23,6 +23,9 @@ Write text to a file.                  Write message to shell.
 read                                   append
 Read text from a file.                 Append text to a file.
 
+color                                  prompt
+Change terminal color.                 Change terminal prompt.
+
 top                                    test_read
 Prints all running processes.          Tests file reading.
 
