@@ -16,6 +16,9 @@
 #include <kernel/io.h>
 #include <kernel/time.h>
 
+int alarm_time = -1;
+char alarm_msg[4096];
+
 int mseconds;
 int seconds;
 int minutes;
@@ -33,6 +36,9 @@ void update_time()
 {
 	mseconds++;
 	if (mseconds == 100) {
+		if (--alarm_time == 0) {
+			printk("\n[ALERT] %s\n", alarm_msg);
+		}
 		seconds++;
 		mseconds = 0;
 	}
