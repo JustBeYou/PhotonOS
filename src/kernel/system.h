@@ -47,8 +47,8 @@ typedef long long loff_t;
 
 /* Kernel defines */
 #define OS_Name "PhotonOS"
-#define Version "v0.0.2"
-#define Relase_Date "7 March 2016"
+#define Version "v0.0.3"
+#define Relase_Date "1 June 2016"
 #define Author "Feraru Mihail"
 
 #define sti() asm volatile("sti")
