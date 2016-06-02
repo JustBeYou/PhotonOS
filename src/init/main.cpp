@@ -151,8 +151,10 @@ void kernel_init(multiboot *mboot_ptr, size_t init_stack)
     wstr_color("[OK]\n", COLOR_GREEN);
 
     shell("mkdir home");
-    
+
     wstr_color("\nDONE!", COLOR_GREEN);
+    kb_read_char();
+
     jmp_to_usermode();
 }
 
