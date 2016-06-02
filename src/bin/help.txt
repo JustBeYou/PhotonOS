@@ -38,5 +38,5 @@ Test drivers module.                   Test filesystem module.
 test_kernel                            test_libc
 Test kernel module.                    Test KERNEL STD C LIB.
 
-test_os
-Test all modules.
+test_os                                info
+Test all modules.                      Show all informations about system.
