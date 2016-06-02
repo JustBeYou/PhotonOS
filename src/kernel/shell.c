@@ -36,11 +36,11 @@ size_t get_mapped_mem()
 
 void cmd_help()
 {
-    int fd = open("/mnt/initrd/help.txt", O_RDONLY);
+    int fd = kopen("/mnt/initrd/help.txt", O_RDONLY);
     char c;
 
     int newlines = 0;
-    while (read(fd, &c, 1) != 0) {
+    while (kread(fd, &c, 1) != 0) {
         printk("%c", c);
         if (c == '\n') {
             newlines++;
@@ -51,6 +51,7 @@ void cmd_help()
             newlines = 0;
         }
     }
+    kclose(fd);
 }
 
 void cmd_hw()
@@ -636,7 +637,45 @@ void cmd_test_os()
     printk("[INFO] OS was tested.\n");
 }
 
-int cmd_limit = 27;
+extern int alarm_time;
+extern char alarm_msg[4096];
+
+void cmd_alarm()
+{
+    if (cmd_args[0] == 0) {
+        printk("You need to supply time.\n");
+    }
+
+    int t = atoi(cmd_args);
+    printk("Enter a message: ");
+    char msg[4096];
+    memset(msg, 0, 4096);
+    getsk(msg);
+
+    alarm_time = t;
+    strcpy(alarm_msg, msg);
+}
+
+void cmd_info()
+{
+    printk("%s %s (%s) by %s. Copyright C 2016 %s. All rights reserved.\n", OS_Name, Version, Relase_Date, Author, Author);
+    kb_read_char();
+    shell("time");
+    kb_read_char();
+    shell("hw");
+    kb_read_char();
+    shell("free");
+    kb_read_char();
+    shell("top");
+    kb_read_char();
+}
+
+void cmd_halt()
+{
+    panic("Kernel exited.\n", __LINE__, __FILE__);
+}
+
+int cmd_limit = 30;
 
 shell_cmd_t cmd_table[] = {
     {"help",  cmd_help},
@@ -665,11 +704,17 @@ shell_cmd_t cmd_table[] = {
     {"test_fs", cmd_test_fs},
     {"test_kernel", cmd_test_kernel},
     {"test_libc", cmd_test_libc},
-    {"test_os", cmd_test_os}
+    {"test_os", cmd_test_os},
+    {"alarm", cmd_alarm},
+    {"info", cmd_info},
+    {"halt", cmd_halt}
 };
 
 int shell(char *cmd)
 {
+    if (cmd[0] == ' ')
+        return -1;
+
     cmd_args[0] = '\0';
     char word[256];
     memset(word, 0, 256);
