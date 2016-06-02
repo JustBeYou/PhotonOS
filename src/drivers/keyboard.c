@@ -40,6 +40,7 @@ KHOME, KUP, KPGUP, '-', KLEFT, '5', KRIGHT, '+', KEND, KDOWN, KPGDN, KINS, KDEL,
 uint8_t kb_buffer[KEYBOARD_BUFFER_SIZE];
 int kb_buf_pos;
 int shift;
+int caps;
 char *ascii_s;
 char *ascii_S;
 
@@ -48,6 +49,7 @@ void install_keyboard()
     ascii_s = USasciiNonShift;
     ascii_S = USasciiShift;
     kb_buf_pos = 0;
+    caps = 0;
     memset(kb_buffer, 0, KEYBOARD_BUFFER_SIZE);
 
     register_interrupt_handler(IRQ1, &keyboard_interrupt_handler);
@@ -64,13 +66,17 @@ void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
             shift = 0;
             special = 1;
         }
+
+        if (scancode == KRCAPS_LOCK) {
+            caps = !caps;
+        }
     } else {
         if (scancode == KRLEFT_SHIFT || scancode == KRRIGHT_SHIFT) {
             shift = 1;
             special = 1;
         }
 
-        if (shift) {
+        if (shift || caps) {
             kb_buffer[kb_buf_pos++] = ascii_S[scancode];
         } else {
             kb_buffer[kb_buf_pos++] = ascii_s[scancode];
