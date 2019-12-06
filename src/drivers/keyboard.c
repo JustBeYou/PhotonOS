@@ -101,6 +101,10 @@ void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs)
 
 char kb_getchar()
 {
+    // BUG
+    // busy waiting because I was so dumb
+    // kernel space and user space code are mixed
+    // so I can't call hlt here
     volatile int pos_now = kb_buf_pos;
     while (1) {
         if (pos_now != kb_buf_pos && kb_buffer[kb_buf_pos - 1])
