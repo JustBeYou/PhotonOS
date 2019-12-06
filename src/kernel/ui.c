@@ -64,7 +64,7 @@ void welcome() {
 
     printk("                                                        by Feraru Mihail");
 
-    kb_read_char();
+    getchark();
     vga_setcolor(COLOR_LIGHT_GREY, COLOR_BLACK);
     clear_vga();
 }
@@ -90,7 +90,7 @@ void logo()
 
 void login()
 {
-    logo();
+    //logo();
     printk("Log in please.\n");
     printk("Username: ");
     getsk(user);
