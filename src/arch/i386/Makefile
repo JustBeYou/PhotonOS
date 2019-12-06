@@ -1,7 +1,7 @@
 .PHONY: all clean install
 
 CFLAGS= -O0 -g -ffreestanding -Wall -Wextra -fstack-protector-all
-CPPFLAGS= -DBITMAP_FRAME_ALLOCATOR -D__is_photon_kernel -D_TEXTMODE
+CPPFLAGS= -DBITMAP_FRAME_ALLOCATOR -D__is_photon_kernel
 LDFLAGS=
 LIBS= -nostdlib -lgcc
 INCLUDE= -I./ -I../../kernel -I../../include -I../../libc/include
