@@ -13,4 +13,4 @@ menuentry "PhotonOS" {
     module /boot/initrd
 }
 EOF
-grub-mkrescue -o photon.iso isodir
+grub2-mkrescue -o photon.iso isodir
