@@ -5,7 +5,14 @@ extern syscalls
 syscall:
     push ebp
     mov ebp, esp
-    
+
+	push eax
+	push ebx
+	push ecx
+	push edx
+	push esi
+	push edi
+
     mov eax, [ebp + 8]
     mov ebx, [ebp + 12]
     mov ecx, [ebp + 16]
@@ -14,6 +21,13 @@ syscall:
     mov edi, [ebp + 28]
     
     int 0x80
+
+	pop edi
+	pop esi
+	pop edx
+	pop ecx
+	pop ebx
+	pop eax
     
     pop ebp
     ret
