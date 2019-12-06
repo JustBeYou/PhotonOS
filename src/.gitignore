@@ -1,0 +1,5 @@
+bin/
+isodir/
+sysroot/
+*.elf
+*.iso
