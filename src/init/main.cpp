@@ -175,6 +175,8 @@ void kernel_init(multiboot *mboot_ptr, size_t init_stack)
 
 extern int switch_on;
 
+char flag1[] = "X-MAS{FLAG 1 SHOULD BE HERE}";
+
 void kernel_main()
 {
     switch_on = 1;
