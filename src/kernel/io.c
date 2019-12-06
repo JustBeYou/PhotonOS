@@ -263,13 +263,12 @@ char *getsk(char *str)
     int c = tty_read_char();
     int i = 0;
     while (c != LF && c != CR) {
-        printk("Read character: %c - %d\n", c, (int)c);
         if (c != DEL) {
             str[i++] = c;
-            //tty_write_char(c);
+            tty_write_char(c);
         } else if (c == DEL && i > 0) {
             str[--i] = 0;
-            //tty_write_char(DEL);
+            tty_write_char(DEL);
         }
         c = tty_read_char();
     }
