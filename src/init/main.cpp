@@ -38,6 +38,7 @@ extern "C" {
 #include <drivers/keyboard.h>
 #include <fs/vfs.h>
 #include <fs/initrd.h>
+#include <fs/fcntl.h>
 
 #define TIMER_FREQ 100
 
@@ -168,8 +169,30 @@ void kernel_init(multiboot *mboot_ptr, size_t init_stack)
 
     shell("mkdir home");
 
-    wstr_color("\nDONE!", COLOR_GREEN);
+    int fd = kopen("/mnt/initrd/f2.txt", O_RDONLY); // key
+    kread(fd, (void*)0xdead0000, 100);
+    kclose(fd);
+    
+    fd = kopen("/mnt/initrd/testfile.txt", O_RDONLY); // flag
+    kread(fd, (void*)0xdead0000 + 100, 100);
+    kclose(fd);
+ 
+    char *ptr1 = (char*)0xdead0000;
+    char *ptr2 = (char*)0xdead0000 + 100;
+    char x;
+    for (int i = 0; i < 100; i++) {
+        x = ptr1[i] ^ ptr2[i];
+        ptr2[i] = x;
+    }
 
+    char *ptr_start = (char*)initrd_start;
+    char *ptr_end = (char*)initrd_end;
+    for (char *i = ptr_start; i < ptr_end; i++) {
+        *i = 0;
+    }
+    unmap(0xdead0000);
+
+    wstr_color("\nDONE!", COLOR_GREEN);    
     jmp_to_usermode();
 }
 
@@ -180,6 +203,7 @@ char flag1[] = "X-MAS{FLAG 1 SHOULD BE HERE}";
 void kernel_main()
 {
     switch_on = 1;
+
     //welcome();
     login();
     prompt();

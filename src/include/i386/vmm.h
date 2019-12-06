@@ -32,7 +32,9 @@ void set_current_directory(page_directory_t *dir);
 void switch_page_directory(page_directory_t *dir);
 void enable_paging();
 void map(size_t va, size_t pa, size_t flags);
+void map_area(uint32_t from_va, uint32_t to_va, uint32_t flags);
 void unmap(size_t va);
 void page_fault_handler(registers_t *regs);
+
 
 #endif

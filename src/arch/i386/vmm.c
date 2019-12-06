@@ -21,7 +21,7 @@ uint32_t kernel_init_stack;
 uint32_t init_esp;
 uint32_t mapped_pages;
 
-static void map_area(uint32_t from_va, uint32_t to_va, uint32_t flags)
+void map_area(uint32_t from_va, uint32_t to_va, uint32_t flags)
 {
     for (uint32_t va = from_va; va < to_va; va += 0x1000) {
         uint32_t pa = alloc_frame();
@@ -47,7 +47,7 @@ void init_vmm()
     // Map kernel + 16 MiB
     uint32_t mem_to_map = (size_t) &kernel_end + 0x1000000;
     map_area(0x0, mem_to_map, PAGE_READ_WRITE | PAGE_PRESENT | PAGE_USER);
-
+    map_area(0xdead0000, 0xdead2000, PAGE_PRESENT | PAGE_READ_WRITE | PAGE_USER); // flag 2 area
     switch_page_directory(kernel_directory);
     enable_paging();
 }
@@ -75,6 +75,7 @@ void map(uint32_t va, uint32_t pa, uint32_t flags)
 {
     uint32_t page_num = (va / 4096) % 1024;
     uint32_t table_num = (va / 4096) / 1024;
+    //printk("map %x -> %x [%d %d]\n", va, pa, table_num, page_num);
 
     if (!current_directory->virt_tables[table_num]) {
         uint32_t phys;
@@ -92,6 +93,7 @@ void unmap(uint32_t va)
 {
     uint32_t page_num = (va / 4096) % 1024;
     uint32_t table_num = (va / 4096) / 1024;
+    //printk("unmap %x -> %x [%d %d]\n", va, current_directory->virt_tables[table_num]->pages[page_num], table_num, page_num);
 
     current_directory->virt_tables[table_num]->pages[page_num] = 0x0;
 
