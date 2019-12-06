@@ -71,4 +71,4 @@ install:
 	./iso.sh
 
 run:
-	qemu-system-i386 -cdrom photon.iso
+	qemu-system-i386 -curses -cdrom photon.iso
