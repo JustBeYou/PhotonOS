@@ -47,7 +47,7 @@ void cmd_help()
         }
 
         if (newlines >= 10) {
-            kb_read_char();
+            getchark();
             newlines = 0;
         }
     }
@@ -448,7 +448,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Read '/mnt/initrd/testfile.txt'\n");
     int fd = kopen("/mnt/initrd/testfile.txt", O_RDONLY);
@@ -460,7 +460,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Get '/null/null'\n");
     de = get_dentry_by_path("/null/null");
@@ -468,7 +468,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Open '/null/null'\n");
     fd = kopen("/null/null", O_RDONLY);
@@ -476,7 +476,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Open and create 'proc/file.txt'\n");
     fd = kopen("proc/file.txt", O_WRONLY);
@@ -485,7 +485,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Write file 'proc/file.txt'\n");
     fd = kopen("proc/file.txt", O_WRONLY);
@@ -495,7 +495,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Read file 'proc/file.txt'\n");
     fd = kopen("proc/file.txt", O_RDONLY);
@@ -505,7 +505,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Make directory 'proc/dir'\n");
     kmkdir("proc/dir");
@@ -513,7 +513,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Make directory 'proc/dir/dir'\n");
     kmkdir("proc/dir/dir");
@@ -521,7 +521,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Make file 'proc/dir/dir/file.txt'\n");
     fd = kopen("proc/dir/dir/file.txt", O_RDWR);
@@ -529,7 +529,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Write file 'proc/dir/dir/file.txt'\n");
     ret = kwrite(fd, "aaa", 3);
@@ -538,7 +538,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] List directory 'proc/dir/dir'\n");
     DIR *d = kopendir("proc/dir/dir");
@@ -548,7 +548,7 @@ void cmd_test_fs()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[DONE] All tests passed.\n");
 
@@ -565,7 +565,7 @@ void cmd_test_kernel()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Test free.\n");
     kfree(a);
@@ -574,7 +574,7 @@ void cmd_test_kernel()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[INFO] Test shell.\n");
     shell("touch aaa.txt");
@@ -582,7 +582,7 @@ void cmd_test_kernel()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
 
     printk("[DONE] All tests passed.\n");
 }
@@ -597,28 +597,28 @@ void cmd_test_libc()
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
     printk("[INFO] Copy 'Hello guys'.\n");
     strcpy(msg, "Hello guys");
     if (!strcmp(msg, "Hello guys")) {
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
     printk("[INFO] Replace first 3 letters with 'abc'.\n");
     memcpy(msg, "abc", 3);
     if (!strcmp(msg, "abclo guys")) {
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
     printk("[INFO] Reverse string.\n");
     strrev(msg);
     if (!strcmp(msg, "syug olcba")) {
         printk("[DONE] Test passed.\n");
     } else {
         printk("[ERROR] \n"); return ;
-    } kb_read_char();
+    } getchark();
     printk("[INFO] String: %s\n", msg);
 
     printk("[DONE] All tests passed.\n");
@@ -659,15 +659,15 @@ void cmd_alarm()
 void cmd_info()
 {
     printk("%s %s (%s) by %s. Copyright C 2016 %s. All rights reserved.\n", OS_Name, Version, Relase_Date, Author, Author);
-    kb_read_char();
+    getchark();
     shell("time");
-    kb_read_char();
+    getchark();
     shell("hw");
-    kb_read_char();
+    getchark();
     shell("free");
-    kb_read_char();
+    getchark();
     shell("top");
-    kb_read_char();
+    getchark();
 }
 
 void cmd_halt()
