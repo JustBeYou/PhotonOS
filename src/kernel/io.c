@@ -67,6 +67,52 @@ size_t inl(size_t ad)
     return _v;
 }
 
+ 
+void init_serial() {
+   outb(COM_PORT + 1, 0x00);    // Disable all interrupts
+   outb(COM_PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
+   outb(COM_PORT + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
+   outb(COM_PORT + 1, 0x00);    //                  (hi byte)
+   outb(COM_PORT + 3, 0x03);    // 8 bits, no parity, one stop bit
+   outb(COM_PORT + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
+   outb(COM_PORT + 4, 0x0B);    // IRQs enabled, RTS/DSR set
+}
+
+int serial_received() {
+   return inb(COM_PORT + 5) & 1;
+}
+
+char serial_read_char() {
+   while (serial_received() == 0);
+
+   return inb(COM_PORT);
+}
+
+int serial_read(char *buf, size_t len)
+{
+    for (size_t i = 0; i < len; i++)
+        buf[i] = serial_read_char();
+    return 0;
+}
+int is_transmit_empty() {
+   return inb(COM_PORT + 5) & 0x20;
+}
+
+int serial_write_char(char a) {
+   while (is_transmit_empty() == 0);
+
+   outb(COM_PORT,a);
+   return 0;
+}
+
+int serial_write(const char *buf, size_t len)
+{
+    for ( size_t i = 0; i < len; i++ )
+        serial_write_char((char) ((const char*) buf)[i]);
+    return 0;
+}
+
+
 void print_regs(registers_t *regs)
 {
     printk("\n\rPushed by CPU:\n\r");
@@ -104,6 +150,81 @@ void print_regs(registers_t *regs)
     );
 }
 
+// TTY should be separated into another module
+// print and read functions should be separated too
+// I/O should contain only port I/Os, but I'm too lazy 
+
+// Generic functions for standard I/O
+// A very bad choice to do this directly :(
+
+// When reading from keyboard, the 'ENTER' key returns the character '\n'
+// When reading from the serial port, it returns the character '\r'
+// When reading over the network is again '\r' what da fac
+// Same problem for other characters like backspace
+
+#if defined(_TEXTMODE)
+#define DEL '\b'
+#elif defined(_SERIALMODE)
+#define DEL '\x7f'
+#endif
+
+#define LF '\n'
+#define CR '\r'
+#define BACK '\x08'
+
+
+int tty_write_char(const char c) {
+#if defined(_TEXTMODE)
+    return vga_write_char(c); 
+#elif defined(_SERIALMODE)
+    // handle special terminal characters
+    if (c == DEL) {    
+        serial_write_char(BACK);
+        serial_write_char(' ');
+        serial_write_char(BACK);
+        return 0;
+    }
+
+    return serial_write_char(c);
+#else
+#error "No terminal mode set."
+#endif
+}
+
+int tty_write(const char *buf, size_t len) {
+#if defined(_TEXTMODE)
+    return vga_write(buf, len);
+#elif defined(_SERIALMODE)
+    return serial_write(buf, len);
+#else
+#error "No terminal mode set."
+#endif
+}
+
+char tty_read_char() {
+#if defined(_TEXTMODE)
+    return kb_read_char(); 
+#elif defined(_SERIALMODE)
+    return serial_read_char();
+#else
+#error "No terminal mode set."
+#endif
+}
+
+int tty_read(char *buf, size_t len) {
+#if defined(_TEXTMODE)
+    return kb_read(buf, len);
+#elif defined(_SERIALMODE)
+    return serial_read(buf, len);
+#else
+#error "No terminal mode set."
+#endif
+}
+
+#if defined(_SERIALMODE) && defined(_TEXTMODE)
+#error "You can't set standard I/O to both serial and VGA text mode."
+#endif
+
 int vga_write_char(const char c)
 {
     vga_putchar(c);
@@ -129,31 +250,31 @@ int kb_read(char *buf, size_t len)
     return 0;
 }
 
-
 int getchark()
 {
-    int c = kb_read_char();
-    vga_write_char(c);
+    int c = tty_read_char();
+    tty_write_char(c);
 
     return c;
 }
 
 char *getsk(char *str)
 {
-    int c = kb_read_char();
+    int c = tty_read_char();
     int i = 0;
-    while (c != '\n') {
-        if (c != '\b') {
+    while (c != LF && c != CR) {
+        printk("Read character: %c - %d\n", c, (int)c);
+        if (c != DEL) {
             str[i++] = c;
-            vga_write_char(c);
-        } else if (c == '\b' && i > 0) {
+            //tty_write_char(c);
+        } else if (c == DEL && i > 0) {
             str[--i] = 0;
-            vga_write_char(c);
+            //tty_write_char(DEL);
         }
-        c = kb_read_char();
+        c = tty_read_char();
     }
     str[i] = '\0';
-    vga_write_char('\n');
+    tty_write_char('\n');
     return str;
 }
 
@@ -161,9 +282,9 @@ int putsk(const char* string)
 {
     int i = 0;
     for (i = 0; string[i] != '\0'; i++) {
-        vga_write_char(string[i]);
+        tty_write_char(string[i]);
     }
-    vga_write_char('\n');
+    tty_write_char('\n');
     return i;
 }
 
@@ -182,7 +303,7 @@ int printk(const char* format, ...)
             amount = 1;
             while ( format[amount] && format[amount] != '%' )
                 amount++;
-            vga_write(format, amount);
+            tty_write(format, amount);
             format += amount;
             written += amount;
             continue;
@@ -202,20 +323,20 @@ int printk(const char* format, ...)
         if ( *format == 'c' ) {
             format++;
             char c = (char) va_arg(parameters, int);
-            vga_write(&c, sizeof(c));
+            tty_write(&c, sizeof(c));
         } else if ( *format == 's' ) {
             format++;
             const char* s = va_arg(parameters, const char*);
-            vga_write(s, strlen(s));
+            tty_write(s, strlen(s));
         } else if ( *format == 'd' ) {
             format++;
             int n = va_arg(parameters, int);
             if (n) {
                 char s[intlen(n, 10)];
                 itoa(s, n, 10);
-                vga_write(s, strlen(s));
+                tty_write(s, strlen(s));
             } else {
-                vga_write_char('0');
+                tty_write_char('0');
             }
         } else if ( *format == 'x') {
             format++;
@@ -223,7 +344,7 @@ int printk(const char* format, ...)
             if (n) {
                 char s[intlen(n, 16)];
                 itoa(s, n, 16);
-                vga_write(s, strlen(s));
+                tty_write(s, strlen(s));
             } else {
                 printk("0x0");
             }

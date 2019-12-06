@@ -8,6 +8,7 @@
 #include <phapi.h>
 
 #include <fs/vfs.h>
+#define COM_PORT 0x3f8   /* COM1 */
 
 /* output byte */
 void outb(size_t ad, uint8_t v);
@@ -26,6 +27,26 @@ uint16_t inw(size_t ad);
 
 /* input word */
 size_t inl(size_t ad);
+
+/* generic terminal I/O */
+int tty_write_char(const char c);
+
+int tty_write(const char *buf, size_t len);
+
+char tty_read_char();
+
+int tty_read(char *buf, size_t len);
+
+/* serial I/O */
+void init_serial();
+
+char serial_read_char();
+
+int serial_read(char *buf, size_t len);
+
+int serial_write_char(char a);
+
+int serial_write(const char *buf, size_t len);
 
 /* print registers */
 void print_regs(registers_t *regs);
