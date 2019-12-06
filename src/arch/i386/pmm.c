@@ -37,11 +37,11 @@ uint32_t free_frames;
 
 void init_pmm(uint32_t mem_size)
 {
-    if (mem_size * 1024 < (uint32_t) MIN_MEM_NEED) {
-        printk("Memory size: %d Needed: %d\n", mem_size, MIN_MEM_NEED);
-        panic("[ERROR] You haven't enough memory.",
-                __LINE__, __FILE__);
-    }
+    //if (mem_size * 1024 < (uint32_t) MIN_MEM_NEED) {
+    //    printk("Memory size: %d Needed: %d\n", mem_size * 1024, MIN_MEM_NEED);
+    //    panic("[ERROR] You haven't enough memory.",
+    //            __LINE__, __FILE__);
+    //}
 
     phys_ram_gb = mem_size / 1024 / 1024;
     phys_ram_mb = mem_size / 1024;
