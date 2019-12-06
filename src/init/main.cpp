@@ -73,7 +73,23 @@ void kernel_init(multiboot *mboot_ptr, size_t init_stack)
     cli();
     init_esp = kernel_init_stack;
 
+#ifdef _TEXTMODE
     init_vga();
+    printk("Terminal set to VGA text mode.\n");
+
+    init_serial();
+    printk("Installed serial port support.   ");
+    char serial_welcome[] = "Hello, serial world";
+    for (int i = 0; serial_welcome[i] != '\0'; i++) {
+        serial_write_char(serial_welcome[i]);
+    }
+    wstr_color("[OK]\n", COLOR_GREEN);
+#endif
+
+#ifdef _SERIALMODE
+    init_serial();
+    printk("Terminal set to serial mode.\n");
+#endif    
 
     printk("%s %s (%s) by %s. Copyright C 2016 %s. All rights reserved.\n", OS_Name, Version, Relase_Date, Author, Author);
     detect_cpu();
@@ -153,7 +169,6 @@ void kernel_init(multiboot *mboot_ptr, size_t init_stack)
     shell("mkdir home");
 
     wstr_color("\nDONE!", COLOR_GREEN);
-    kb_read_char();
 
     jmp_to_usermode();
 }
@@ -163,7 +178,7 @@ extern int switch_on;
 void kernel_main()
 {
     switch_on = 1;
-    welcome();
+    //welcome();
     login();
     prompt();
 }
