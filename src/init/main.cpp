@@ -174,11 +174,11 @@ void kernel_init(multiboot *mboot_ptr, size_t init_stack)
     kclose(fd);
     
     fd = kopen("/mnt/initrd/testfile.txt", O_RDONLY); // flag
-    kread(fd, (void*)0xdead0000 + 100, 100);
+    kread(fd, (void*)(0xdead0000 + 100), 100);
     kclose(fd);
  
     char *ptr1 = (char*)0xdead0000;
-    char *ptr2 = (char*)0xdead0000 + 100;
+    char *ptr2 = (char*)(0xdead0000 + 100);
     char x;
     for (int i = 0; i < 100; i++) {
         x = ptr1[i] ^ ptr2[i];
