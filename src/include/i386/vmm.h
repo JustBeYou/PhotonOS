@@ -19,11 +19,11 @@
 #define PAGE_GLOBAL 0x128
 
 typedef struct page_table {
-    uint32_t pages[1024];
+    size_t pages[1024];
 } page_table_t;
 
 typedef struct page_directory {
-    uint32_t phys_tables[1024];
+    size_t phys_tables[1024];
     page_table_t *virt_tables[1024];
 } page_directory_t;
 
@@ -31,8 +31,8 @@ void init_vmm();
 void set_current_directory(page_directory_t *dir);
 void switch_page_directory(page_directory_t *dir);
 void enable_paging();
-void map(uint32_t va, uint32_t pa, uint32_t flags);
-void unmap(uint32_t va);
+void map(size_t va, size_t pa, size_t flags);
+void unmap(size_t va);
 void page_fault_handler(registers_t *regs);
 
 #endif

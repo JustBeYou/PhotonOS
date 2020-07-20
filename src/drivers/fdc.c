@@ -7,6 +7,7 @@
 static volatile uint8_t fdc_irq_done = 0;
 int fdd = 0;
 
+
 static void fdc_init_dma()
 {
     outb(0x0a, 0x06);
@@ -82,7 +83,7 @@ int fdc_is_busy()
     return 0;
 }
 
-uint32_t fdc_read_status()
+size_t fdc_read_status()
 {
     return inb(FDC_MSR);
 }
@@ -101,6 +102,7 @@ uint8_t fdc_read_data()
     if (fdc_read_status() & FDC_MSR_MASK_DATAREG) {
         return inb(FDC_FIFO);
     }
+    return 0;
 }
 
 void fdc_write_ccr(uint8_t val)
@@ -110,7 +112,7 @@ void fdc_write_ccr(uint8_t val)
 
 void fdc_read_sector_imp (uint8_t head, uint8_t track, uint8_t sector) {
 
-    uint32_t st0, cyl;
+    size_t st0, cyl;
 
     //! set the DMA for read transfer
     fdc_init_dma_read ();
@@ -141,9 +143,9 @@ void fdc_read_sector_imp (uint8_t head, uint8_t track, uint8_t sector) {
     fdc_check_int (&st0,&cyl);
 }
 
-void fdc_drive_data (uint32_t stepr, uint32_t loadt, uint32_t unloadt, bool dma ) {
+void fdc_drive_data (size_t stepr, size_t loadt, size_t unloadt, bool dma ) {
 
-    uint32_t data = 0;
+    size_t data = 0;
 
     fdc_send_command (FDC_CMD_SPECIFY);
 
@@ -154,9 +156,9 @@ void fdc_drive_data (uint32_t stepr, uint32_t loadt, uint32_t unloadt, bool dma 
     fdc_send_command (data);
 }
 
-int fdc_calibrate (uint32_t drive) {
+int fdc_calibrate (size_t drive) {
 
-    uint32_t st0, cyl;
+    size_t st0, cyl;
 
     if (drive >= 4)
         return -2;
@@ -184,7 +186,7 @@ int fdc_calibrate (uint32_t drive) {
     return -1;
 }
 
-void fdc_check_int (uint32_t* st0, uint32_t* cyl) {
+void fdc_check_int (size_t* st0, size_t* cyl) {
 
     fdc_send_command (FDC_CMD_CHECK_INT);
 
@@ -192,9 +194,9 @@ void fdc_check_int (uint32_t* st0, uint32_t* cyl) {
     *cyl = fdc_read_data ();
 }
 
-int fdc_seek ( uint32_t cyl, uint32_t head ) {
+int fdc_seek ( size_t cyl, size_t head ) {
 
-    uint32_t st0, cyl0;
+    size_t st0, cyl0;
 
     if (fdd >= 4)
         return -1;
@@ -230,7 +232,7 @@ void fdc_enable_controller () {
 
 void fdc_reset () {
 
-    uint32_t st0, cyl;
+    size_t st0, cyl;
 
     //! reset the controller
     fdc_disable_controller ();

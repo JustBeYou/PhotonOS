@@ -11,6 +11,7 @@
 #include <linked_list.h>
 #include <bitmap.h>
 #include <graph.h>
+#include <stack.h>
 
 // types & structs of Photon API
 

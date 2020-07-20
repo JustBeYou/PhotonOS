@@ -22,16 +22,14 @@
 /*** TODO: GET STABLE processING ***/
 
 extern int time_to_run;
-extern uint32_t user_stack;
+extern size_t user_stack;
 process_t *current_process;
 process_t *start_process;
-uint32_t pid;
+size_t pid;
 int switch_on = 0;
 
 void init_multitasking()
 {
-    uint32_t cr3 = read_cr3();
-
 	pid = 2;
 
     start_process = (process_t*) kmalloc(sizeof(process_t), 0, 0);
@@ -44,11 +42,13 @@ void init_multitasking()
 
     start_process->esp = 0;
     start_process->ss = 0x13;
-    start_process->kern_stack = kmalloc(PROC_KERN_STACK, 1, 0) + PROC_KERN_STACK;
-    start_process->user_stack = kmalloc(PROC_USER_STACK, 1, 0) + PROC_USER_STACK;
+    start_process->kern_stack = (size_t) kmalloc(PROC_KERN_STACK, 1, 0) + PROC_KERN_STACK;
+    start_process->user_stack = (size_t) kmalloc(PROC_USER_STACK, 1, 0) + PROC_USER_STACK;
     user_stack = start_process->user_stack;
     set_kernel_stack(start_process->kern_stack);
-    start_process->cr3 = 0;
+    start_process->cr3 = read_cr3();
+    start_process->opened_files = kmalloc(sizeof(struct file) * DEFAULT_F_TBL_SIZE, 0, 0);
+    start_process->file_table_size = DEFAULT_F_TBL_SIZE;
 
     time_to_run = 0;
 
@@ -58,8 +58,6 @@ void init_multitasking()
 /* Useless until there is a file system. */
 process_t *create_process(char *name)
 {
-    uint32_t cr3 = read_cr3();
-
 	process_t *new_process = (process_t*) kmalloc(sizeof(process_t), 0, 0);
 	new_process->pid = pid;
     new_process->time_to_run = 10;
@@ -67,10 +65,12 @@ process_t *create_process(char *name)
     new_process->prior = 0;
     memcpy(new_process->name, name, strlen(name) + 1);
 	new_process->next = NULL;
+	new_process->opened_files = kmalloc(sizeof(struct file) * DEFAULT_F_TBL_SIZE, 0, 0);
+	new_process->file_table_size = DEFAULT_F_TBL_SIZE;
 
     /* Here I should load the file and create a context for the new process. */
 
-	if (pid != (uint32_t) 1) {
+	if (pid != (size_t) 1) {
 		process_t *tmp_process = start_process;
 		while (tmp_process->next)
 			tmp_process = tmp_process->next;

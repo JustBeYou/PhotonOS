@@ -15,30 +15,30 @@
 
 typedef struct multiboot
 {
-    uint32_t flags;
-    uint32_t mem_lower;
-    uint32_t mem_upper;
-    uint32_t boot_device;
-    uint32_t cmdline;
-    uint32_t mods_count;
-    uint32_t mods_addr;
-    uint32_t num;
-    uint32_t size;
-    uint32_t addr;
-    uint32_t shndx;
-    uint32_t mmap_length;
-    uint32_t mmap_addr;
-    uint32_t drives_length;
-    uint32_t drives_addr;
-    uint32_t config_table;
-    uint32_t boot_loader_name;
-    uint32_t apm_table;
-    uint32_t vbe_control_info;
-    uint32_t vbe_mode_info;
-    uint32_t vbe_mode;
-    uint32_t vbe_interface_seg;
-    uint32_t vbe_interface_off;
-    uint32_t vbe_interface_len;
+    size_t flags;
+    size_t mem_lower;
+    size_t mem_upper;
+    size_t boot_device;
+    size_t cmdline;
+    size_t mods_count;
+    size_t mods_addr;
+    size_t num;
+    size_t size;
+    size_t addr;
+    size_t shndx;
+    size_t mmap_length;
+    size_t mmap_addr;
+    size_t drives_length;
+    size_t drives_addr;
+    size_t config_table;
+    size_t boot_loader_name;
+    size_t apm_table;
+    size_t vbe_control_info;
+    size_t vbe_mode_info;
+    size_t vbe_mode;
+    size_t vbe_interface_seg;
+    size_t vbe_interface_off;
+    size_t vbe_interface_len;
 } multiboot;
 
 #endif

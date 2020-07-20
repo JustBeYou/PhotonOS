@@ -41,14 +41,14 @@ typedef struct idt_entry_struct idt_entry_t;
 struct idt_ptr_struct
 {
     uint16_t limit;
-    uint32_t base;              
+    size_t base;              
 } __attribute__((packed));
 typedef struct idt_ptr_struct idt_ptr_t;
 
 /**
   * Flush the IDT. Extern function implemented in 'asm_dt.asm'.
   */
-extern void idt_flush(uint32_t);
+extern void idt_flush(size_t);
 
 /**
   * Initialize the IDT.
@@ -58,6 +58,6 @@ void init_idt();
 /**
   * Set parameters of IDT gate.
   */
-void idt_set_gate(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags);
+void idt_set_gate(uint8_t num, size_t base, uint16_t sel, uint8_t flags);
 
 #endif

@@ -30,7 +30,7 @@ void timer_callback (registers_t *regs);
 /**
   * Initialize the PIT.
   */
-void init_timer(uint32_t freq);
+void init_timer(size_t freq);
 
 /**
   * Get current tick of system.

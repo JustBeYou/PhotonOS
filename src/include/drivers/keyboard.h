@@ -80,18 +80,13 @@
 void install_keyboard();
 
 /**
-  * Set handler of keyboard.
-  */
-void keyboard_set_handler(void (*callback)(uint8_t *buf, uint16_t size));
-
-/**
   * Handler of keyboard.
   */
 void keyboard_interrupt_handler(__attribute__ ((unused)) registers_t *regs);
 
 /**
-  * Read keyboard buffer to stdin.
+  * Return a char from keyboard.
   */
-void read_kb_buff(uint8_t *buf, uint16_t size);
+char kb_getchar();
 
 #endif

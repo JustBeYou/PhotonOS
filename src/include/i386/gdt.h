@@ -45,7 +45,7 @@ typedef struct gdt_entry_struct gdt_entry_t;
 struct gdt_ptr_struct
 {
 	uint16_t lim;
-	uint32_t base;
+	size_t base;
 } __attribute__((packed));
 typedef struct gdt_ptr_struct gdt_ptr_t;
 
@@ -54,31 +54,31 @@ typedef struct gdt_ptr_struct gdt_ptr_t;
   */
 struct tss_entry_struct
 {
-	uint32_t prev_tss;   // The previous TSS - if we used hardware task switching this would form a linked list.
-	uint32_t esp0;       // The stack pointer to load when we change to kernel mode.
-	uint32_t ss0;        // The stack segment to load when we change to kernel mode.
-	uint32_t esp1;       // Unused...
-	uint32_t ss1;
-	uint32_t esp2;
-	uint32_t ss2;
-	uint32_t cr3;
-	uint32_t eip;
-	uint32_t eflags;
-	uint32_t eax;
-	uint32_t ecx;
-	uint32_t edx;
-	uint32_t ebx;
-	uint32_t esp;
-	uint32_t ebp;
-	uint32_t esi;
-	uint32_t edi;
-	uint32_t es;         // The value to load into ES when we change to kernel mode.
-	uint32_t cs;         // The value to load into CS when we change to kernel mode.
-	uint32_t ss;         // The value to load into SS when we change to kernel mode.
-	uint32_t ds;         // The value to load into DS when we change to kernel mode.
-	uint32_t fs;         // The value to load into FS when we change to kernel mode.
-	uint32_t gs;         // The value to load into GS when we change to kernel mode.
-	uint32_t ldt;        // Unused...
+	size_t prev_tss;   // The previous TSS - if we used hardware task switching this would form a linked list.
+	size_t esp0;       // The stack pointer to load when we change to kernel mode.
+	size_t ss0;        // The stack segment to load when we change to kernel mode.
+	size_t esp1;       // Unused...
+	size_t ss1;
+	size_t esp2;
+	size_t ss2;
+	size_t cr3;
+	size_t eip;
+	size_t eflags;
+	size_t eax;
+	size_t ecx;
+	size_t edx;
+	size_t ebx;
+	size_t esp;
+	size_t ebp;
+	size_t esi;
+	size_t edi;
+	size_t es;         // The value to load into ES when we change to kernel mode.
+	size_t cs;         // The value to load into CS when we change to kernel mode.
+	size_t ss;         // The value to load into SS when we change to kernel mode.
+	size_t ds;         // The value to load into DS when we change to kernel mode.
+	size_t fs;         // The value to load into FS when we change to kernel mode.
+	size_t gs;         // The value to load into GS when we change to kernel mode.
+	size_t ldt;        // Unused...
 	uint16_t trap;
 	uint16_t iomap_base;
 } __attribute__((packed));
@@ -92,17 +92,17 @@ extern void tss_flush();
 /**
   * Write the TSS. 
   */
-void write_tss(int32_t num, uint16_t ss0, uint32_t esp0);
+void write_tss(int32_t num, uint16_t ss0, size_t esp0);
 
 /**
   * Set current proccess stack.
   */
-void set_kernel_stack(uint32_t stack);
+void set_kernel_stack(size_t stack);
 
 /**
   * Flush the GDT. Extern function implemented in 'asm_dt.asm'.
   */
-extern void gdt_flush(uint32_t);
+extern void gdt_flush(size_t);
 
 /**
   * Initialize the GDT.
@@ -112,6 +112,6 @@ void init_gdt();
 /**
   * Set parametters of a GDT gate.
   */
-void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
+void gdt_set_gate(int32_t num, size_t base, size_t limit, uint8_t access, uint8_t gran);
 
 #endif

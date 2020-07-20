@@ -27,6 +27,7 @@ extern "C" {
 #include <kernel/vga.h>
 #include <kernel/io.h>
 #include <kernel/ui.h>
+#include <kernel/syscalls.h>
 #include <i386/pmm.h>
 #include <i386/vmm.h>
 #include <i386/pit.h>
@@ -42,40 +43,53 @@ extern "C" {
 
 extern int start_tasking;
 
-extern uint32_t kernel_init_stack;
+extern size_t kernel_init_stack;
 extern multiboot *kernel_mboot;
 
-extern uint32_t phys_ram_mb;
-extern uint32_t placement_addr;
+extern size_t phys_ram_mb;
+extern size_t placement_addr;
 
-extern uint32_t nframes;
-extern uint32_t init_esp;
-extern uint32_t kernel_init_stack;
+extern size_t nframes;
+extern size_t init_esp;
+extern size_t kernel_init_stack;
 extern multiboot *kernel_mboot;
 extern mem_heap_t *kernel_heap;
 
 extern char user[20];
 extern char machine[30];
 
-void* stdin;
-volatile int in_cursor;
-uint32_t user_stack;
-uint8_t inbuffer[STDIO_SIZE];
-uint32_t initrd_start;
-uint32_t initrd_end;
+size_t user_stack;
+size_t initrd_start;
+size_t initrd_end;
 
-void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
+void kernel_init(multiboot *mboot_ptr, size_t init_stack)
 {
     kernel_init_stack = init_stack;
     kernel_mboot = mboot_ptr;
-    initrd_start = *((uint32_t*) mboot_ptr->mods_addr);
-    initrd_end = *(uint32_t*) (mboot_ptr->mods_addr + 4);
+    initrd_start = *((size_t*) mboot_ptr->mods_addr);
+    initrd_end = *(size_t*) (mboot_ptr->mods_addr + 4);
     placement_addr = initrd_end;
 
     cli();
     init_esp = kernel_init_stack;
 
+#ifdef _TEXTMODE
     init_vga();
+    printk("Terminal set to VGA text mode.\n");
+
+    init_serial();
+    printk("Installed serial port support.   ");
+    char serial_welcome[] = "Hello, serial world";
+    for (int i = 0; serial_welcome[i] != '\0'; i++) {
+        serial_write_char(serial_welcome[i]);
+    }
+    wstr_color("[OK]\n", COLOR_GREEN);
+#endif
+
+#ifdef _SERIALMODE
+    init_serial();
+    printk("Terminal set to serial mode.\n");
+#endif    
 
     printk("%s %s (%s) by %s. Copyright C 2016 %s. All rights reserved.\n", OS_Name, Version, Relase_Date, Author, Author);
     detect_cpu();
@@ -128,17 +142,8 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     printk("Total system memory: %d MiB in %d frames.\n", phys_ram_mb,
            nframes);
 
-    printk("Initialize stdio (allow using of stdio header).   ");
-
-    stdin = (uint8_t*) inbuffer;
-
-    for (int i = 0; i < STDIO_SIZE; i++) {
-        inbuffer[i] = 0;
-    }
-    wstr_color("[OK]\n", COLOR_GREEN);
-
     printk("Initialize kernel heap.    ");
-    init_heap();
+    init_heap(DEFAULT_HEAP_SIZE);
     wstr_color("[OK]\n", COLOR_GREEN);
     printk("Initialized kernel heap at %x and created main block of %d bytes.\n",
             (size_t) kernel_heap + MEM_HEADER_SIZE, kernel_heap->mem_size);
@@ -161,7 +166,10 @@ void kernel_init(multiboot *mboot_ptr, uint32_t init_stack)
     init_multitasking();
     wstr_color("[OK]\n", COLOR_GREEN);
 
+    shell("mkdir home");
+
     wstr_color("\nDONE!", COLOR_GREEN);
+
     jmp_to_usermode();
 }
 
@@ -170,7 +178,7 @@ extern int switch_on;
 void kernel_main()
 {
     switch_on = 1;
-    welcome();
+    //welcome();
     login();
     prompt();
 }

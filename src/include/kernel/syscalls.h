@@ -9,9 +9,7 @@
 
 #include <i386/handlers.h>
 
-/**
-  * System calls handler.
-  */
-void syscall_handler(registers_t *regs);
-
+extern size_t syscall(size_t eax, size_t ebx, size_t ecx,
+                        size_t edx, size_t esi, size_t edi);
+                        
 #endif

@@ -11,8 +11,8 @@ typedef int8_t (*lessthan_pred_t)(type_t, type_t);
 
 typedef struct {
 	type_t *array;
-	uint32_t size;
-	uint32_t max_size;
+	size_t size;
+	size_t max_size;
 	lessthan_pred_t lessthan;
 } list_t;
 
@@ -25,12 +25,12 @@ int8_t std_lessthan_pred(type_t a, type_t b);
 /**
   * Create an ordered array.
   */
-list_t create_list(uint32_t max_size, lessthan_pred_t lessthan);
+list_t create_list(size_t max_size, lessthan_pred_t lessthan);
 
 /**
   * Place an ordered array at specified location.
   */
-list_t place_list(void *addr, uint32_t max_size, lessthan_pred_t lessthan);
+list_t place_list(void *addr, size_t max_size, lessthan_pred_t lessthan);
 
 /**
   * Destroy the ordered array.
@@ -45,11 +45,11 @@ void insert_list(type_t item, list_t *array);
 /**
   * Look up at index 'i' for item.
   */
-type_t lookup_list(uint32_t i, list_t *array);
+type_t lookup_list(size_t i, list_t *array);
 
 /**
   * Remove item from array.
   */
-void remove_list(uint32_t i, list_t *array);
+void remove_list(size_t i, list_t *array);
 
 #endif

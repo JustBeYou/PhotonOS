@@ -40,3 +40,28 @@ void system_wait(int ticks)
         ;
     }
 }
+
+void break_point_1()
+{
+    return;
+}
+
+void break_point_2()
+{
+    return;
+}
+
+void break_point_3()
+{
+    return;
+}
+
+void break_point_4()
+{
+    return;
+}
+
+void break_point_5()
+{
+    return;
+}

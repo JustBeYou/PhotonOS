@@ -7,19 +7,25 @@
 #include <i386/handlers.h>
 #include <kernel/io.h>
 
-void *syscalls[] = {
-	&vga_write,
-    &kb_read
-};
-int num_syscalls = 2;
-
-void syscall_handler(registers_t *regs)
+int useless(void)
 {
-	/*if (regs->eax > (uint32_t) num_syscalls)
-		return;
-
-	void *location = syscalls[regs->eax - 1];
-
-    int ret;*/
-    // TODO: rewrite this function in asm
+    return 123456789;
 }
+
+int not_implemented_syscall(void)
+{
+    return 0xDEADBEEF;
+}
+
+void *syscalls[] = {
+    &useless,                   // USELESS
+    &not_implemented_syscall,   // exit
+    &not_implemented_syscall,   // fork
+    &read,                      // read
+    &write,                     // write (not implemented)
+    &open,                      // open
+    &close,                     // close
+    &not_implemented_syscall    // getpid
+};
+
+int num_syscalls = 8;

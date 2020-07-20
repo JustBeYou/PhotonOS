@@ -1,7 +1,7 @@
 .PHONY: all clean install
 
 CFLAGS= -O0 -g -ffreestanding -Wall -Wextra -fstack-protector-all
-CPPFLAGS= -DBITMAP_FRAME_ALLOCATOR -D__is_photon_kernel -D_TEXTMODE
+CPPFLAGS= -DBITMAP_FRAME_ALLOCATOR -D__is_photon_kernel -D_SERIALMODE #-D_TEXTMODE
 LDFLAGS=
 LIBS= -nostdlib -lgcc
 INCLUDE= -I./ -I../include -I../libc/include
@@ -35,3 +35,4 @@ install:
 	cp libkernel.a ../sysroot/usr/lib
 	mkdir -p ../sysroot/usr/include/kernel
 	cp ../include/kernel/*.* ../sysroot/usr/include/kernel
+	cp ./*.h ../sysroot/usr/include
