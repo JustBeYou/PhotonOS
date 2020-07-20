@@ -2,7 +2,8 @@
 Small *nix-like kernel, written in C and a grain of x86 Assembly. It served me in the journey of understanding low level concepts about how computers work under the hood.
 Credits to [Osdev Wiki](https://wiki.osdev.org/Expanded_Main_Page) for the best resources out there.
 
-![](./1photon.png)  ![](./2photon.png)
+![](./2photon.png)
+![](./1photon.png)
 
 # Motivation
 * Tried to join [The Edyptula Challenge](http://eudyptula-challenge.org/) and failed
