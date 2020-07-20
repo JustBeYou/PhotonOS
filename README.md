@@ -1,7 +1,9 @@
 # PhotonOS
 Small *nix-like kernel, written in C and a grain of x86 Assembly. It served me in the journey of understanding low level concepts about how computers work under the hood.
 Credits to [Osdev Wiki](https://wiki.osdev.org/Expanded_Main_Page) for the best resources out there.
-![](./Screenshot from 2020-07-20 13-58-06.png) ![](./Screenshot from 2020-07-20 13-58-39.png)
+
+![](./Screenshot from 2020-07-20 13-58-06.png) 
+![](./Screenshot from 2020-07-20 13-58-39.png)
 
 # Motivation
 * Tried to join [The Edyptula Challenge](http://eudyptula-challenge.org/) and failed
