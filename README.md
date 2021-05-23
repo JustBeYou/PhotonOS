@@ -9,7 +9,7 @@ Credits to [Osdev Wiki](https://wiki.osdev.org/Expanded_Main_Page) for the best 
 * Tried to join [The Edyptula Challenge](http://eudyptula-challenge.org/) and failed
 * Could not understand what CPUs actually do, so I've decided to get closer with them :wink:
 * C pointers were intimidating monsters to me... Until PhotonOS was born
-* To roll your own Linux Distro was to mainstream :sunglasses:
+* To roll your own Linux Distro was too mainstream :sunglasses:
 
 # Features
 * Text-mode video driver
